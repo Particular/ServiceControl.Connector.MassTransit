@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ServiceControl.Adapter.MassTransit.AmazonSQS</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MassTransit" Version="8.2.3" />
+<!--    <PackageReference Include="NServiceBus.AmazonSQS" Version="7.0.0"/>-->
+    <ProjectReference Include="..\..\..\..\..\..\NServiceBus.AmazonSQS\src\NServiceBus.Transport.SQS\NServiceBus.Transport.SQS.csproj" />
+    <ProjectReference Include="..\ServiceControl.Connector.MassTransit\ServiceControl.Connector.MassTransit.csproj" />
+  </ItemGroup>
+
+</Project>
