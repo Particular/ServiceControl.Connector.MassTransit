@@ -1,8 +1,8 @@
 using Azure.Messaging.ServiceBus.Administration;
 
-class AzureServiceBusHelper(string connectionString) : IQueueInformationProvider
+class AzureServiceBusHelper(string connectionstring) : IQueueInformationProvider
 {
-  private readonly ServiceBusAdministrationClient client = new(connectionString);
+  private readonly ServiceBusAdministrationClient client = new(connectionstring);
 
   public async Task<IEnumerable<string>> GetQueues()
   {

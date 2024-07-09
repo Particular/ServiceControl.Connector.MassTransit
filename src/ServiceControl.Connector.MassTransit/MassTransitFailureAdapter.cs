@@ -4,13 +4,13 @@ using NServiceBus.Faults;
 using NServiceBus.Routing;
 using NServiceBus.Transport;
 
-class MassTransitFailureAdapter(
+public class MassTransitFailureAdapter(
   ILogger<MassTransitFailureAdapter> logger,
   MassTransitConverter mtConverter,
   Configuration configuration
 )
 {
-  public TransportOperation ForwardMassTransitErrorToServiceControl(
+  public virtual TransportOperation ForwardMassTransitErrorToServiceControl(
     MessageContext messageContext,
     IMessageDispatcher messageDispatcher,
     CancellationToken cancellationToken
@@ -21,7 +21,7 @@ class MassTransitFailureAdapter(
     logger.LogInformation("Forwarding failure: {NativeMessageId}, md5: {MD5}, length: {PayloadLength:N0}b", messageContext.NativeMessageId, md5, messageContext.Body.Length);
     mtConverter.From(messageContext);
 
-    messageContext.Headers[FaultsHeaderKeys.FailedQ] = configuration.returnQueue;
+    messageContext.Headers[FaultsHeaderKeys.FailedQ] = configuration.ReturnQueue;
 
     if (!messageContext.Headers.TryGetValue(Headers.MessageId, out var messageId))
     {
@@ -33,11 +33,11 @@ class MassTransitFailureAdapter(
       headers: messageContext.Headers,
       body: messageContext.Body
     );
-    var operation = new TransportOperation(request, new UnicastAddressTag(configuration.serviceControlErrorQueue));
+    var operation = new TransportOperation(request, new UnicastAddressTag(configuration.ErrorQueue));
     return operation;
   }
 
-  public TransportOperation ReturnMassTransitFailure(
+  public virtual TransportOperation ReturnMassTransitFailure(
     MessageContext messageContext,
     IMessageDispatcher messageDispatcher,
     CancellationToken cancellationToken
@@ -62,10 +62,6 @@ class MassTransitFailureAdapter(
 
     var request = new OutgoingMessage(messageId: messageId, headers: messageContext.Headers, body: messageContext.Body);
     var operation = new TransportOperation(request, new UnicastAddressTag(originalQueue));
-
-    // AmazonSQS
-    // TODO: operation.UseFlatHeaders();
-    // Set content type on transport properties so it gets set on the native type
 
     // RabbitMQ and AzureServiceBus
     if (contentType != null)

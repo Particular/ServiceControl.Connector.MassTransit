@@ -1,13 +1,15 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.Transport;
 
-class Service(
+public class Service(
   ILogger<Service> logger,
   TransportDefinition transportDefinition,
   IQueueInformationProvider queueInformationProvider,
   MassTransitFailureAdapter adapter,
-  Configuration configuration
+  Configuration configuration,
+  ReceiverFactory receiverFactory
   ) : BackgroundService
 {
   TransportInfrastructure? infrastructure;
@@ -55,39 +57,35 @@ class Service(
   async Task Setup(CancellationToken cancellationToken)
   {
     var hostSettings = new HostSettings(
-      name: configuration.returnQueue,
-      hostDisplayName: configuration.returnQueue,
+      name: configuration.ReturnQueue,
+      hostDisplayName: configuration.ReturnQueue,
       startupDiagnostic: new StartupDiagnosticEntries(),
       criticalErrorAction: (_, exception, _) => { logger.LogCritical(exception, "Critical error"); },
-      setupInfrastructure: configuration.setupInfrastructure
+      setupInfrastructure: configuration.SetupInfrastructure
     );
 
     var receiveSettings = new List<ReceiveSettings>
     {
       new (
         id: "Return",
-        receiveAddress: new QueueAddress(configuration.returnQueue),
+        receiveAddress: new QueueAddress(configuration.ReturnQueue),
         usePublishSubscribe: false,
         purgeOnStartup: false,
-        errorQueue: configuration.returnQueue + ".error"
+        errorQueue: configuration.ReturnQueue + ".error"
       )
     };
 
-    if (!configuration.setupInfrastructure)
+    if (!configuration.SetupInfrastructure)
     {
-      Console.WriteLine("Listening to the following error queues:");
       foreach (var massTransitErrorQueue in massTransitErrorQueues!)
       {
-        Console.WriteLine($" - {massTransitErrorQueue}");
-        receiveSettings.Add(
-          new ReceiveSettings(
-            id: massTransitErrorQueue,
-            receiveAddress: new QueueAddress(massTransitErrorQueue),
-            usePublishSubscribe: false,
-            purgeOnStartup: false,
-            errorQueue: massTransitErrorQueue + ".error"
-          )
-        );
+        logger.LogInformation("listening to: {InputQueue}", massTransitErrorQueue);
+        receiveSettings.Add(receiverFactory.Create(massTransitErrorQueue));
+      }
+
+      if (!receiveSettings.Any())
+      {
+        throw new InvalidOperationException("No input queues discovered");
       }
     }
 

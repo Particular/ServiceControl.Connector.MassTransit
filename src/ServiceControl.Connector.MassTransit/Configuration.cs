@@ -1,6 +1,6 @@
-record Configuration
+public record Configuration
 {
-  public required string serviceControlErrorQueue;
-  public required string returnQueue;
-  public required bool setupInfrastructure;
+  public required string ErrorQueue { get; init; }
+  public required string ReturnQueue { get; init; }
+  public required bool SetupInfrastructure { get; init; }
 }

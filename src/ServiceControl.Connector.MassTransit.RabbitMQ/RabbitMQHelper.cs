@@ -7,12 +7,12 @@ class RabbitMQHelper : IQueueInformationProvider
   private readonly HttpClient _httpClient;
   private readonly string _vhost;
 
-  public RabbitMQHelper(string username, string password, string vhost, string apiBaseUrl)
+  public RabbitMQHelper(string vhost, Uri apiBaseUrl)
   {
     _vhost = vhost;
-    _url = apiBaseUrl + "/api/queues";
-
-    var auth = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{username}:{password}"));
+    _url = apiBaseUrl + "api/queues";
+   
+    var auth = Convert.ToBase64String(Encoding.ASCII.GetBytes(apiBaseUrl.UserInfo));
 
     _httpClient  = new HttpClient();
     _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", auth);
@@ -21,6 +21,9 @@ class RabbitMQHelper : IQueueInformationProvider
   public async Task<IEnumerable<string>> GetQueues()
   {
     var response = await _httpClient.GetAsync(_url);
+
+    response.EnsureSuccessStatusCode();
+
     var jsonText = await response.Content.ReadAsStringAsync();
     var jsonDoc = JsonDocument.Parse(jsonText);
 

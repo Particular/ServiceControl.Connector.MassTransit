@@ -9,7 +9,7 @@ using NServiceBus.Faults;
 using NsbHeaders = NServiceBus.Headers;
 using MessageContext = NServiceBus.Transport.MessageContext;
 
-class MassTransitConverter
+public class MassTransitConverter
 {
   public void To(MessageContext messageContext)
   {

@@ -1,0 +1,67 @@
+{
+  "profiles": {
+    "Host": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "Host - RabbitMQ.QuorumConventionalRouting - SETUP": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "commandLineArgs": "--TransportType=RabbitMQ.QuorumConventionalRouting --ConnectionString=host=localhost --ManagementAPI=http://guest:guest@localhost:15672 --setup"
+    },
+    "Host - RabbitMQ.QuorumConventionalRouting": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "commandLineArgs": "--TransportType=RabbitMQ.QuorumConventionalRouting --ConnectionString=host=localhost --ManagementAPI=http://guest:guest@localhost:15672"
+    },
+    "Host - AmazonSQS": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "commandLineArgs": "--TransportType=AmazonSQS"
+    },
+    "Host - AmazonSQS - SETUP": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "commandLineArgs": "--TransportType=AmazonSQS --setup"
+    },
+    "Host - NetStandardAzureServiceBus": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "commandLineArgs": "--TransportType=NetStandardAzureServiceBus --ConnectionString=%CONNECTIONSTRING_AZURESERVICEBUS%"
+    },
+    "Host - NetStandardAzureServiceBus - SETUP": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "commandLineArgs": "--TransportType=NetStandardAzureServiceBus --ConnectionString=%CONNECTIONSTRING_AZURESERVICEBUS% --setup"
+    },
+    "Host - NetStandardAzureServiceBus Dead-letter queues": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "commandLineArgs": "--TransportType=NetStandardAzureServiceBus --ConnectionString=%CONNECTIONSTRING_AZURESERVICEBUS% --ReceiveMode=DeadLetterQueue "
+    }
+  }
+}

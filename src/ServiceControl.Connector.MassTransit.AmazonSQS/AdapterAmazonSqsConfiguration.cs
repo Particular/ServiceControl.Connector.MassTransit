@@ -7,5 +7,6 @@ public static class AdapterAmazonSqsConfiguration
   {
     services.AddSingleton<IQueueInformationProvider>(new AmazonSqsHelper(string.Empty));
     services.AddSingleton<TransportDefinition>(new SqsTransport { DoNotWrapOutgoingMessages = true });
+    services.AddSingleton<MassTransitFailureAdapter,AmazonSqsMassTransitFailureAdapter>();
   }
 }
