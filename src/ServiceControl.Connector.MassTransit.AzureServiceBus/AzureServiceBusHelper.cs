@@ -1,8 +1,9 @@
 using Azure.Messaging.ServiceBus.Administration;
+using Microsoft.Extensions.Logging;
 
-class AzureServiceBusHelper(string connectionstring) : IQueueInformationProvider
+class AzureServiceBusHelper(ILogger<AzureServiceBusHelper> logger, string connectionstring) : IQueueInformationProvider
 {
-  private readonly ServiceBusAdministrationClient client = new(connectionstring);
+  readonly ServiceBusAdministrationClient client = new(connectionstring);
 
   public async Task<IEnumerable<string>> GetQueues()
   {
@@ -13,7 +14,7 @@ class AzureServiceBusHelper(string connectionstring) : IQueueInformationProvider
     {
       if (queueProperties.RequiresSession)
       {
-        Console.WriteLine("Skipping '{0}', Queues that require sessions are currently unsupported", queueProperties.Name);
+        logger.LogDebug("Skipping '{QueueName}', Queues that require sessions are currently unsupported", queueProperties.Name);
         continue;
       }
 
