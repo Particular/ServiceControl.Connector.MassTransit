@@ -11,6 +11,7 @@ public class MassTransitFailureAdapter(
 )
 {
   // https://github.com/Particular/ServiceControl/blob/5.4.0/src/ServiceControl/Recoverability/Retrying/Infrastructure/ReturnToSender.cs#L40-L57
+  const string TargetEndpointAddress = "ServiceControl.TargetEndpointAddress";
   const string RetryTo = "ServiceControl.RetryTo";
 
   public virtual TransportOperation ForwardMassTransitErrorToServiceControl(
@@ -54,15 +55,20 @@ public class MassTransitFailureAdapter(
       messageId = messageContext.NativeMessageId;
     }
 
-    messageContext.Headers.TryGetValue(Headers.ContentType, out var contentType);
-
-    mtConverter.To(messageContext); // Should remove any NServiceBus added header
-
     var faultInputAddress = new Uri(messageContext.Headers[MassTransit.MessageHeaders.FaultInputAddress]);
-
     var originalQueue = faultInputAddress.LocalPath;
     originalQueue = originalQueue.Substring(originalQueue.LastIndexOf('/') + 1);
 
+    if (messageContext.Headers.TryGetValue(TargetEndpointAddress, out var targetEndpointAddress))
+    {
+      // This header is set when ServiceControl has a queue redirect
+      originalQueue = targetEndpointAddress;
+    }
+    
+    messageContext.Headers.TryGetValue(Headers.ContentType, out var contentType);
+
+    mtConverter.To(messageContext); // Should remove any NServiceBus added header
+    
     logger.LogInformation("{FaultInputAddress} => {Queue}", faultInputAddress, originalQueue);
 
     var request = new OutgoingMessage(messageId: messageId, headers: messageContext.Headers, body: messageContext.Body);
