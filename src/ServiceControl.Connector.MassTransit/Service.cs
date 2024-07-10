@@ -9,7 +9,8 @@ public class Service(
     IQueueFilter queueFilter,
     MassTransitFailureAdapter adapter,
     Configuration configuration,
-    ReceiverFactory receiverFactory
+    ReceiverFactory receiverFactory,
+    IHostApplicationLifetime hostApplicationLifetime
 ) : BackgroundService
 {
     TransportInfrastructure? infrastructure;
@@ -59,7 +60,11 @@ public class Service(
             name: configuration.ReturnQueue,
             hostDisplayName: configuration.ReturnQueue,
             startupDiagnostic: new StartupDiagnosticEntries(),
-            criticalErrorAction: (_, exception, _) => { logger.LogCritical(exception, "Critical error"); },
+            criticalErrorAction: (_, exception, _) =>
+            {
+                logger.LogCritical(exception, "Critical error, signaling to stop host");
+                hostApplicationLifetime.StopApplication();
+            },
             setupInfrastructure: configuration.SetupInfrastructure
         );
 
