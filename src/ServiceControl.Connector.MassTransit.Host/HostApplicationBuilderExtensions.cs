@@ -45,5 +45,13 @@ static class HostApplicationBuilderExtensions
             default:
                 throw new NotSupportedException($"Transport type {transporttype} is not supported");
         }
+        
+        // Override any transport specific implementation
+        var staticQueueList = configuration.GetValue<string?>("QUEUES_FILE");
+
+        if (staticQueueList != null)
+        {
+            services.AddSingleton<IQueueInformationProvider>(new FileBasedQueueInformationProvider(staticQueueList));
+        }
     }
 }
