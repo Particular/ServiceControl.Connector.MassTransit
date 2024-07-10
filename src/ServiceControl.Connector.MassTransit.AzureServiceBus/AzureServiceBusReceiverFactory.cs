@@ -2,16 +2,8 @@ using Microsoft.Extensions.Configuration;
 using NServiceBus.Transport;
 using NServiceBus.Transport.AzureServiceBus;
 
-class AzureServiceBusReceiverFactory(IConfiguration configuration) : ReceiverFactory
+class AzureServiceBusReceiverFactory(ReceiveMode receiveMode) : ReceiverFactory
 {
-    enum ReceiveMode
-    {
-        Queue,
-        DeadLetterQueue
-    }
-
-    readonly ReceiveMode mode = configuration.GetValue<ReceiveMode?>("ReceiveMode") ?? ReceiveMode.Queue;
-
     public override ReceiveSettings Create(string errorInputQueue)
     {
         return new AzureServiceBusReceiveSettings(
@@ -22,7 +14,7 @@ class AzureServiceBusReceiverFactory(IConfiguration configuration) : ReceiverFac
             errorQueue: errorInputQueue + ".error"
         )
         {
-            DeadLetterQueue = mode == ReceiveMode.DeadLetterQueue
+            DeadLetterQueue = receiveMode == ReceiveMode.DeadLetterQueue
         };
     }
 }

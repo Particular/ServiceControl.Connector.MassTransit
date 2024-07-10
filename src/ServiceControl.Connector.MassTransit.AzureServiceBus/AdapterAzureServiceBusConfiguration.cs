@@ -1,17 +1,25 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NServiceBus.Transport;
 
 public static class AdapterAzureServiceBusConfiguration
 {
-    public static void UsingAzureServiceBus(this IServiceCollection services, string connectionString)
+    public static void UsingAzureServiceBus(this IServiceCollection services, IConfiguration configuration, string connectionString)
     {
+        var receiveMode = configuration.GetValue<ReceiveMode?>("ReceiveMode") ?? ReceiveMode.Queue;
+
+        if (receiveMode == ReceiveMode.DeadLetterQueue)
+        {
+            services.AddSingleton<IQueueFilter, AllQueueFilter>();
+        }
+
         services.AddSingleton<IQueueInformationProvider>(new AzureServiceBusHelper(connectionString));
         services.AddSingleton<TransportDefinition>(
             new AzureServiceBusTransport(connectionString)
             {
                 TransportTransactionMode = TransportTransactionMode.ReceiveOnly
             });
-        services.AddSingleton<ReceiverFactory, AzureServiceBusReceiverFactory>();
+        services.AddSingleton<ReceiverFactory>(new AzureServiceBusReceiverFactory(receiveMode));
         services.AddSingleton<MassTransitFailureAdapter, AzureServiceBusMassTransitFailureAdapter>();
     }
 }

@@ -16,14 +16,17 @@ static class HostApplicationBuilderExtensions
                 ErrorQueue = errorQueue,
                 SetupInfrastructure = setupInfrastructure
             })
+            .AddSingleton<IQueueFilter, ErrorAndSkippedQueueFilter>()
             .AddSingleton<Service>()
             .AddSingleton<MassTransitConverter>()
             .AddSingleton<MassTransitFailureAdapter>()
             .AddSingleton<ReceiverFactory>()
             .AddHostedService<Service>(p => p.GetRequiredService<Service>());
 
-        var transporttype = builder.Configuration.GetValue<string>("TRANSPORTTYPE");
-        var connectionstring = builder.Configuration.GetValue<string>("CONNECTIONSTRING");
+        var configuration = builder.Configuration;
+        
+        var transporttype = configuration.GetValue<string>("TRANSPORTTYPE");
+        var connectionstring = configuration.GetValue<string>("CONNECTIONSTRING");
 
         switch (transporttype)
         {
@@ -31,7 +34,7 @@ static class HostApplicationBuilderExtensions
                 builder.Services.UsingAmazonSqs();
                 break;
             case "NetStandardAzureServiceBus":
-                builder.Services.UsingAzureServiceBus(connectionstring ?? throw new Exception("CONNECTIONSTRING not specified"));
+                builder.Services.UsingAzureServiceBus(configuration, connectionstring ?? throw new Exception("CONNECTIONSTRING not specified"));
                 break;
             case "RabbitMQ.QuorumConventionalRouting":
                 var managementApi = builder.Configuration.GetValue<Uri>("MANAGEMENTAPI") ?? throw new Exception("MANAGEMENTAPI not specified");
