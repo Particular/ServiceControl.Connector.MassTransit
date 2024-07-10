@@ -10,6 +10,9 @@ public class MassTransitFailureAdapter(
   Configuration configuration
 )
 {
+  // https://github.com/Particular/ServiceControl/blob/5.4.0/src/ServiceControl/Recoverability/Retrying/Infrastructure/ReturnToSender.cs#L40-L57
+  const string RetryTo = "ServiceControl.RetryTo";
+
   public virtual TransportOperation ForwardMassTransitErrorToServiceControl(
     MessageContext messageContext,
     IMessageDispatcher messageDispatcher,
@@ -21,7 +24,7 @@ public class MassTransitFailureAdapter(
     logger.LogInformation("Forwarding failure: {NativeMessageId}, md5: {MD5}, length: {PayloadLength:N0}b", messageContext.NativeMessageId, md5, messageContext.Body.Length);
     mtConverter.From(messageContext);
 
-    messageContext.Headers[FaultsHeaderKeys.FailedQ] = configuration.ReturnQueue;
+    messageContext.Headers[RetryTo] = configuration.ReturnQueue;
 
     if (!messageContext.Headers.TryGetValue(Headers.MessageId, out var messageId))
     {
