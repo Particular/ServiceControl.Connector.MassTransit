@@ -109,7 +109,7 @@ public class Service(
         OnMessage returnMessage = (context, token) =>
         {
             using var scope = logger.BeginScope("RETURN {ReceiveAddress} {NativeMessageId}", context.ReceiveAddress, context.NativeMessageId);
-            var operation = adapter.ForwardMassTransitErrorToServiceControl(context, messageDispatcher, token);
+            var operation = adapter.ReturnMassTransitFailure(context, messageDispatcher, token);
             return messageDispatcher.Dispatch(new TransportOperations(operation), context.TransportTransaction, token);
         };
 
