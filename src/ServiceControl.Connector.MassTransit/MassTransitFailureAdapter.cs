@@ -55,8 +55,10 @@ public class MassTransitFailureAdapter(
 
     mtConverter.To(messageContext); // Should remove any NServiceBus added header
 
-    var faultInputAddress = messageContext.Headers[MassTransit.MessageHeaders.FaultInputAddress];
-    var originalQueue = faultInputAddress.Substring(faultInputAddress.LastIndexOf('/') + 1);
+    var faultInputAddress = new Uri(messageContext.Headers[MassTransit.MessageHeaders.FaultInputAddress]);
+
+    var originalQueue = faultInputAddress.LocalPath;
+    originalQueue = originalQueue.Substring(originalQueue.LastIndexOf('/') + 1);
 
     logger.LogInformation("{FaultInputAddress} => {Queue}", faultInputAddress, originalQueue);
 

@@ -136,6 +136,7 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
             logger.LogWarning($"Using `messageContext.ReceiveAddress` for {NsbHeaders.ProcessingEndpoint} as fallback for missing {MessageHeaders.FaultInputAddress}");
             headers[NsbHeaders.ProcessingEndpoint] = faultInputAddress;
             logger.LogWarning($"Using `messageContext.ReceiveAddress` for {FaultsHeaderKeys.FailedQ} as fallback for missing {MessageHeaders.FaultInputAddress}");
+            headers[MessageHeaders.FaultInputAddress] = "queue:" + faultInputAddress;
             headers[FaultsHeaderKeys.FailedQ] = faultInputAddress;
         }
 
