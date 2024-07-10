@@ -10,7 +10,9 @@ static class HostApplicationBuilderExtensions
         var returnQueue = builder.Configuration.GetValue<string?>("ReturnQueue") ?? "FailWhenReceivingMyMessage_adapter";
         var errorQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "error";
 
-        builder.Services.AddSingleton<Configuration>(new Configuration
+        var services = builder.Services;
+        
+        services.AddSingleton<Configuration>(new Configuration
             {
                 ReturnQueue = returnQueue,
                 ErrorQueue = errorQueue,
@@ -31,14 +33,14 @@ static class HostApplicationBuilderExtensions
         switch (transporttype)
         {
             case "AmazonSQS":
-                builder.Services.UsingAmazonSqs();
+                services.UsingAmazonSqs();
                 break;
             case "NetStandardAzureServiceBus":
-                builder.Services.UsingAzureServiceBus(configuration, connectionstring ?? throw new Exception("CONNECTIONSTRING not specified"));
+                services.UsingAzureServiceBus(configuration, connectionstring ?? throw new Exception("CONNECTIONSTRING not specified"));
                 break;
             case "RabbitMQ.QuorumConventionalRouting":
-                var managementApi = builder.Configuration.GetValue<Uri>("MANAGEMENTAPI") ?? throw new Exception("MANAGEMENTAPI not specified");
-                builder.Services.UsingRabbitMQ(managementApi);
+                var managementApi = configuration.GetValue<Uri>("MANAGEMENTAPI") ?? throw new Exception("MANAGEMENTAPI not specified");
+                services.UsingRabbitMQ(managementApi);
                 break;
             default:
                 throw new NotSupportedException($"Transport type {transporttype} is not supported");
