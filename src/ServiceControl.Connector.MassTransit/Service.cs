@@ -104,6 +104,8 @@ public class Service(
             using var scope = logger.BeginScope("FORWARD {ReceiveAddress} {NativeMessageId}", context.ReceiveAddress, context.NativeMessageId);
             var operation = adapter.ForwardMassTransitErrorToServiceControl(context, messageDispatcher, token);
             return messageDispatcher.Dispatch(new TransportOperations(operation), context.TransportTransaction, token);
+            
+            // TODO: Add error handling to forward message to an error/poison queue, maybe even put it back in the same queue "at the end"? 
         };
 
         OnMessage returnMessage = (context, token) =>
@@ -111,6 +113,8 @@ public class Service(
             using var scope = logger.BeginScope("RETURN {ReceiveAddress} {NativeMessageId}", context.ReceiveAddress, context.NativeMessageId);
             var operation = adapter.ReturnMassTransitFailure(context, messageDispatcher, token);
             return messageDispatcher.Dispatch(new TransportOperations(operation), context.TransportTransaction, token);
+
+            // TODO: Add error handling to forward message to an error/poison queue, maybe even put it back in the same queue "at the end" or maybe just have a circuit breaker and delay 
         };
 
         foreach (var receiverSetting in receiverSettings)
