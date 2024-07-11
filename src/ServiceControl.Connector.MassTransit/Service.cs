@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NServiceBus.Routing;
 using NServiceBus.Transport;
 
 public class Service(
@@ -131,13 +132,11 @@ public class Service(
             await messageDispatcher.Dispatch(new TransportOperations(operation), messageContext.TransportTransaction, token);
         };
 
-        OnMessage returnMessage = async (context, token) =>
+        OnMessage returnMessage = async (messageContext, token) =>
         {
-            using var scope = logger.BeginScope("RETURN {ReceiveAddress} {NativeMessageId}", context.ReceiveAddress, context.NativeMessageId);
-            var operation = adapter.ReturnMassTransitFailure(context);
-            await messageDispatcher.Dispatch(new TransportOperations(operation), context.TransportTransaction, token);
-
-            // TODO: Add error handling to forward message to an error/poison queue, maybe even put it back in the same queue "at the end" or maybe just have a circuit breaker and delay 
+            using var scope = logger.BeginScope("RETURN {ReceiveAddress} {NativeMessageId}", messageContext.ReceiveAddress, messageContext.NativeMessageId);
+            var operation = adapter.ReturnMassTransitFailure(messageContext);
+            await messageDispatcher.Dispatch(new TransportOperations(operation), messageContext.TransportTransaction, token);
         };
 
         if (configuration.SetupInfrastructure)
@@ -155,12 +154,21 @@ public class Service(
             var receiver = infrastructure.Receivers[receiverSetting.Id];
             await receiver.Initialize(new PushRuntimeSettings(1),
                 onMessage: (context, token) => onMessage(context, token),
-                onError: (context, _) =>
+                onError: async (context, token) =>
                 {
+                    // Maybe instead can we use some native delivery counting or is that already used?
                     logger.LogError(context.Exception, "Discarding due to failure: {ExceptionMessage}",
                         context.Exception.Message);
-                    // TODO: Smarter handling
-                    return Task.FromResult(ErrorHandleResult.RetryRequired);
+
+                    var poisonMessage = new OutgoingMessage(context.Message.MessageId, context.Message.Headers,
+                        context.Message.Body);
+                    var operation =
+                        new TransportOperation(poisonMessage, new UnicastAddressTag(configuration.ErrorQueue));
+                    var operations = new TransportOperations(operation);
+
+                    await messageDispatcher.Dispatch(operations, context.TransportTransaction, token);
+
+                    return ErrorHandleResult.Handled;
                 }, cancellationToken: cancellationToken);
 
             await receiver.StartReceive(cancellationToken);
