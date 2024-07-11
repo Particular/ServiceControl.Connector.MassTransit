@@ -14,11 +14,7 @@ public class MassTransitFailureAdapter(
   const string TargetEndpointAddress = "ServiceControl.TargetEndpointAddress";
   const string RetryTo = "ServiceControl.RetryTo";
 
-  public virtual TransportOperation ForwardMassTransitErrorToServiceControl(
-    MessageContext messageContext,
-    IMessageDispatcher messageDispatcher,
-    CancellationToken cancellationToken
-  )
+  public virtual TransportOperation ForwardMassTransitErrorToServiceControl(MessageContext messageContext)
   {
     var md5 = Convert.ToHexString(MD5.HashData(messageContext.Body.Span));
 
@@ -41,11 +37,7 @@ public class MassTransitFailureAdapter(
     return operation;
   }
 
-  public virtual TransportOperation ReturnMassTransitFailure(
-    MessageContext messageContext,
-    IMessageDispatcher messageDispatcher,
-    CancellationToken cancellationToken
-  )
+  public virtual TransportOperation ReturnMassTransitFailure(MessageContext messageContext)
   {
     var md5 = Convert.ToHexString(MD5.HashData(messageContext.Body.Span));
     logger.LogInformation("Forward back to original MT queue {NativeMessageId}, md5: {MD5}, length: {PayloadLength:N0}b", messageContext.NativeMessageId, md5, messageContext.Body.Length);

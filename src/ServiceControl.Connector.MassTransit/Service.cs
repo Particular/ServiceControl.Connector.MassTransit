@@ -99,20 +99,18 @@ public class Service(
 
         var messageDispatcher = infrastructure.Dispatcher;
 
-        OnMessage forwardMessage = (context, token) =>
+        OnMessage forwardMessage = async (messageContext, token) =>
         {
-            using var scope = logger.BeginScope("FORWARD {ReceiveAddress} {NativeMessageId}", context.ReceiveAddress, context.NativeMessageId);
-            var operation = adapter.ForwardMassTransitErrorToServiceControl(context, messageDispatcher, token);
-            return messageDispatcher.Dispatch(new TransportOperations(operation), context.TransportTransaction, token);
-            
-            // TODO: Add error handling to forward message to an error/poison queue, maybe even put it back in the same queue "at the end"? 
+            using var scope = logger.BeginScope("FORWARD {ReceiveAddress} {NativeMessageId}", messageContext.ReceiveAddress, messageContext.NativeMessageId);
+            var operation = adapter.ForwardMassTransitErrorToServiceControl(messageContext);
+            await messageDispatcher.Dispatch(new TransportOperations(operation), messageContext.TransportTransaction, token);
         };
 
-        OnMessage returnMessage = (context, token) =>
+        OnMessage returnMessage = async (context, token) =>
         {
             using var scope = logger.BeginScope("RETURN {ReceiveAddress} {NativeMessageId}", context.ReceiveAddress, context.NativeMessageId);
-            var operation = adapter.ReturnMassTransitFailure(context, messageDispatcher, token);
-            return messageDispatcher.Dispatch(new TransportOperations(operation), context.TransportTransaction, token);
+            var operation = adapter.ReturnMassTransitFailure(context);
+            await messageDispatcher.Dispatch(new TransportOperations(operation), context.TransportTransaction, token);
 
             // TODO: Add error handling to forward message to an error/poison queue, maybe even put it back in the same queue "at the end" or maybe just have a circuit breaker and delay 
         };
