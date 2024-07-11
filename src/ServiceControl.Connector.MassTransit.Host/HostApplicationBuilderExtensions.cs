@@ -40,11 +40,7 @@ static class HostApplicationBuilderExtensions
                 break;
             case "RabbitMQ.QuorumConventionalRouting":
                 var managementApi = configuration.GetValue<Uri>("MANAGEMENTAPI") ?? throw new Exception("MANAGEMENTAPI not specified");
-<<<<<<< Updated upstream
                 services.UsingRabbitMQ(managementApi);
-=======
-                builder.Services.UsingRabbitMQ(managementApi);
->>>>>>> Stashed changes
                 break;
             default:
                 throw new NotSupportedException($"Transport type {transporttype} is not supported");
