@@ -19,18 +19,21 @@ public class MassTransitFailureAdapter(
     var md5 = Convert.ToHexString(MD5.HashData(messageContext.Body.Span));
 
     logger.LogInformation("Forwarding failure: {NativeMessageId}, md5: {MD5}, length: {PayloadLength:N0}b", messageContext.NativeMessageId, md5, messageContext.Body.Length);
+
     mtConverter.From(messageContext);
 
-    messageContext.Headers[RetryTo] = configuration.ReturnQueue;
+    var headers = messageContext.Headers;
+    
+    headers[RetryTo] = configuration.ReturnQueue;
 
-    if (!messageContext.Headers.TryGetValue(Headers.MessageId, out var messageId))
+    if (!headers.TryGetValue(Headers.MessageId, out var messageId))
     {
       messageId = messageContext.NativeMessageId;
     }
 
     var request = new OutgoingMessage(
       messageId: messageId,
-      headers: messageContext.Headers,
+      headers: headers,
       body: messageContext.Body
     );
     var operation = new TransportOperation(request, new UnicastAddressTag(configuration.ErrorQueue));
