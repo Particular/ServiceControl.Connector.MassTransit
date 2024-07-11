@@ -75,7 +75,7 @@ public class Service(
                 receiveAddress: new QueueAddress(configuration.ReturnQueue),
                 usePublishSubscribe: false,
                 purgeOnStartup: false,
-                errorQueue: configuration.ReturnQueue + ".error"
+                errorQueue: configuration.PoisonQueue
             )
         };
 
@@ -84,7 +84,7 @@ public class Service(
             foreach (var massTransitErrorQueue in massTransitErrorQueues!)
             {
                 logger.LogInformation("listening to: {InputQueue}", massTransitErrorQueue);
-                receiveSettings.Add(receiverFactory.Create(massTransitErrorQueue));
+                receiveSettings.Add(receiverFactory.Create(massTransitErrorQueue, configuration.ErrorQueue));
             }
 
             if (!receiveSettings.Any())

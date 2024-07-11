@@ -2,14 +2,14 @@ using NServiceBus.Transport;
 
 public class ReceiverFactory
 {
-    public virtual ReceiveSettings Create(string errorInputQueue)
+    public virtual ReceiveSettings Create(string inputQueue, string errorQueue)
     {
         return new ReceiveSettings(
-            id: errorInputQueue,
-            receiveAddress: new QueueAddress(errorInputQueue),
+            id: inputQueue,
+            receiveAddress: new QueueAddress(inputQueue),
             usePublishSubscribe: false,
             purgeOnStartup: false,
-            errorQueue: errorInputQueue + ".error"
+            errorQueue: errorQueue
         );
     }
 }
