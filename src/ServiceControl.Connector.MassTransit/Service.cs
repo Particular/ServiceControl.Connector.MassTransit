@@ -27,6 +27,13 @@ public class Service(
         massTransitErrorQueues = await GetReceiveQueues();
         await Setup(shutdownToken);
 
+        if (configuration.SetupInfrastructure)
+        {
+            logger.LogInformation("Signalling stop as only run in setup mode");
+            hostApplicationLifetime.StopApplication();
+            return;
+        }
+
         try
         {
             while (!shutdownToken.IsCancellationRequested)
@@ -114,6 +121,12 @@ public class Service(
 
             // TODO: Add error handling to forward message to an error/poison queue, maybe even put it back in the same queue "at the end" or maybe just have a circuit breaker and delay 
         };
+
+        if (configuration.SetupInfrastructure)
+        {
+            logger.LogInformation("Not starting receivers as in setup mode");
+            return;
+        }
 
         foreach (var receiverSetting in receiverSettings)
         {
