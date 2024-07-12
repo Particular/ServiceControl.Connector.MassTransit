@@ -145,7 +145,7 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
 
         if (headers.TryGetValue(MassTransit.MessageHeaders.FaultExceptionType, out var faultExceptionType))
         {
-            headers[FaultsHeaderKeys.ExceptionType] = headers[faultExceptionType];
+            headers[FaultsHeaderKeys.ExceptionType] = faultExceptionType;
         }
         else
         {
