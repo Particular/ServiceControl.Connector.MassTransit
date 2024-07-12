@@ -52,21 +52,31 @@ public class MassTransitFailureAdapter(
       messageId = messageContext.NativeMessageId;
     }
 
-    var faultInputAddress = new Uri(messageContext.Headers[MassTransit.MessageHeaders.FaultInputAddress]);
-    var originalQueue = faultInputAddress.LocalPath;
-    originalQueue = originalQueue.Substring(originalQueue.LastIndexOf('/') + 1);
-
-    if (messageContext.Headers.TryGetValue(TargetEndpointAddress, out var targetEndpointAddress))
+    if (!headers.TryGetValue(TargetEndpointAddress, out var targetEndpointAddress))
     {
-      // This header is set when ServiceControl has a queue redirect
-      originalQueue = targetEndpointAddress;
+      throw new InvalidOperationException($"Header {TargetEndpointAddress} is not set");
+    }
+
+    string originalQueue;
+    
+    // If not Uri, assuming plain queue name due to queue redirect
+    if (Uri.IsWellFormedUriString(targetEndpointAddress, UriKind.Absolute))
+    {
+      var faultInputAddress = new Uri(targetEndpointAddress);
+      originalQueue = faultInputAddress.LocalPath;
+      originalQueue = originalQueue.Substring(originalQueue.LastIndexOf('/') + 1);
+    }
+    else
+    {
+      originalQueue = targetEndpointAddress; 
     }
     
+    logger.LogInformation("{FaultInputAddress} => {Queue}", targetEndpointAddress, originalQueue);
+
     messageContext.Headers.TryGetValue(Headers.ContentType, out var contentType);
 
     mtConverter.To(messageContext); // Should remove any NServiceBus added header
     
-    logger.LogInformation("{FaultInputAddress} => {Queue}", faultInputAddress, originalQueue);
 
     var request = new OutgoingMessage(messageId: messageId, headers: messageContext.Headers, body: messageContext.Body);
     var operation = new TransportOperation(request, new UnicastAddressTag(originalQueue));
