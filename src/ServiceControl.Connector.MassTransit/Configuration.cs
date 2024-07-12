@@ -5,4 +5,5 @@ public record Configuration
     public required bool SetupInfrastructure { get; init; }
     public string PoisonQueue => ReturnQueue + ".poison";
     public TimeSpan QueueScanInterval { get; set; } = TimeSpan.FromSeconds(60);
+    public int MaxRetries => 15;
 }
