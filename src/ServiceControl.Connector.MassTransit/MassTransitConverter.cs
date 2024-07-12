@@ -77,7 +77,10 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
             }
 
             headers[NsbHeaders.OriginatingEndpoint] = messageEnvelope.SourceAddress;
-            headers[NsbHeaders.OriginatingMachine] = messageEnvelope.Host!.MachineName;
+            if (messageEnvelope.Host?.MachineName != null)
+            {
+                headers[NsbHeaders.OriginatingMachine] = messageEnvelope.Host?.MachineName;
+            }
         }
         else // Get data from headers
         {
@@ -140,9 +143,25 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
             headers[FaultsHeaderKeys.FailedQ] = faultInputAddress;
         }
 
-        headers[FaultsHeaderKeys.ExceptionType] = headers[MassTransit.MessageHeaders.FaultExceptionType];
+        if (headers.TryGetValue(MassTransit.MessageHeaders.FaultExceptionType, out var faultExceptionType))
+        {
+            headers[FaultsHeaderKeys.ExceptionType] = headers[faultExceptionType];
+        }
+        else
+        {
+            //TODO: ServiceControl shows ": 0" when ExceptionType and ExceptionStackTrace
+        }
+        
         headers[FaultsHeaderKeys.Message] = headers[MassTransit.MessageHeaders.FaultMessage];
-        headers[FaultsHeaderKeys.StackTrace] = headers[MassTransit.MessageHeaders.FaultStackTrace];
+        
+        if (headers.TryGetValue(MassTransit.MessageHeaders.FaultStackTrace, out var faultStackTrace))
+        {
+            headers[FaultsHeaderKeys.StackTrace] = faultStackTrace;
+        }
+        else
+        {
+            logger.LogInformation("Message does not have {HeaderKey}", MessageHeaders.FaultStackTrace);
+        }
 
         if (headers.TryGetValue(MassTransit.MessageHeaders.FaultTimestamp, out var faultTimestamp))
         {
