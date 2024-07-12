@@ -45,7 +45,9 @@ public class MassTransitFailureAdapter(
     var md5 = Convert.ToHexString(MD5.HashData(messageContext.Body.Span));
     logger.LogInformation("Forward back to original MT queue {NativeMessageId}, md5: {MD5}, length: {PayloadLength:N0}b", messageContext.NativeMessageId, md5, messageContext.Body.Length);
 
-    if (!messageContext.Headers.TryGetValue(Headers.MessageId, out var messageId))
+    var headers = messageContext.Headers;
+    
+    if (!headers.TryGetValue(Headers.MessageId, out var messageId))
     {
       messageId = messageContext.NativeMessageId;
     }
