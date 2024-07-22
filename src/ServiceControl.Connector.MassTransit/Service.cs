@@ -86,7 +86,7 @@ public class Service(
             )
         };
 
-        if (!configuration.SetupInfrastructure)
+        foreach (var massTransitErrorQueue in massTransitErrorQueues!)
         {
             foreach (var massTransitErrorQueue in massTransitErrorQueues!)
             {
@@ -94,10 +94,9 @@ public class Service(
                 receiveSettings.Add(receiverFactory.Create(massTransitErrorQueue, configuration.ErrorQueue));
             }
 
-            if (!receiveSettings.Any())
-            {
-                throw new InvalidOperationException("No input queues discovered");
-            }
+        if (!receiveSettings.Any())
+        {
+            throw new InvalidOperationException("No input queues discovered");
         }
 
         var receiverSettings = receiveSettings.ToArray();

@@ -6,15 +6,8 @@ services:
       - "8080:8080"
     volumes:
       - C:\servicecontrol\db:/opt/RavenDB/Server/RavenData
-  rabbitmq:
-    container_name: "rabbitmq"
-    image: "rabbitmq:3-management"
-    ports:
-      - "5672:5672"
-      - "15672:15672"
   servicecontrol-setup:
     depends_on:
-      - rabbitmq
       - service-control-db
     container_name: "servicecontrol-setup"
     image: "particular/servicecontrol:latest"
@@ -24,8 +17,6 @@ services:
     env_file: "rabbit.env"
   service-control:
     depends_on:
-      rabbitmq:
-        condition: service_started
       service-control-db:
         condition: service_started
       servicecontrol-setup:
@@ -40,6 +31,5 @@ services:
       - service-control
     container_name: "masstransit-connector"
     image: "servicecontrol-connector-masstransit:latest"
-    command: "--setup"
     pull_policy: if_not_present
     env_file: "rabbit.env"
