@@ -1,4 +1,4 @@
 public interface IQueueInformationProvider
 {
-  Task<IEnumerable<string>> GetQueues();
+    Task<IEnumerable<string>> GetQueues();
 }

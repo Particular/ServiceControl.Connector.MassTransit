@@ -3,12 +3,12 @@ using System.Text.Json;
 
 class RabbitMQHelper : IQueueInformationProvider
 {
-  readonly string _url;
-  private readonly HttpClient _httpClient;
-  private readonly string _vhost;
+    readonly string _url;
+    private readonly HttpClient _httpClient;
+    private readonly string _vhost;
 
-  public RabbitMQHelper(string vhost, Uri apiBaseUrl)
-  {
+    public RabbitMQHelper(string vhost, Uri apiBaseUrl)
+    {
     _vhost = vhost;
     _url = apiBaseUrl + "api/queues";
    
@@ -16,10 +16,10 @@ class RabbitMQHelper : IQueueInformationProvider
 
     _httpClient  = new HttpClient();
     _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", auth);
-  }
+    }
 
-  public async Task<IEnumerable<string>> GetQueues()
-  {
+    public async Task<IEnumerable<string>> GetQueues()
+    {
     var response = await _httpClient.GetAsync(_url);
 
     response.EnsureSuccessStatusCode();
@@ -31,14 +31,14 @@ class RabbitMQHelper : IQueueInformationProvider
 
     foreach (var x in jsonDoc.RootElement.EnumerateArray())
     {
-      var queueName = x.GetProperty("name").GetString() ?? throw new ("no name");
-      var queueVHost = x.GetProperty("vhost").GetString() ?? throw new ("no vhost");
+        var queueName = x.GetProperty("name").GetString() ?? throw new ("no name");
+        var queueVHost = x.GetProperty("vhost").GetString() ?? throw new ("no vhost");
 
-      if (_vhost == queueVHost)
-      {
+        if (_vhost == queueVHost)
+        {
         list.Add(queueName);
-      }
+        }
     }
     return list;
-  }
+    }
 }
