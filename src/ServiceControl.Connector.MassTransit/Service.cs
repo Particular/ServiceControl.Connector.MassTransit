@@ -72,7 +72,7 @@ public class Service(
                 logger.LogCritical(exception, "Critical error, signaling to stop host");
                 hostApplicationLifetime.StopApplication();
             },
-            setupInfrastructure: configuration.SetupInfrastructure
+            true
         );
 
         var receiveSettings = new List<ReceiveSettings>
