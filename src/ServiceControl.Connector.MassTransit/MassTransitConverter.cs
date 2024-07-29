@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Net.Http.Headers;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
@@ -42,13 +40,13 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
 
         // https://masstransit.io/documentation/configuration/serialization
 
-        if (!headers.TryGetValue(MassTransit.MessageHeaders.Reason, out var reason) || reason != "fault")
+        if (!headers.TryGetValue(MessageHeaders.Reason, out var reason) || reason != "fault")
         {
             throw new InvalidOperationException("Can only forward MassTransit failures");
         }
 
         // Because transport native content type value isn't provided by transport we probe the headers instead....
-        var hasEnvelop = !headers.ContainsKey(MassTransit.MessageHeaders.MessageId);
+        var hasEnvelop = !headers.ContainsKey(MessageHeaders.MessageId);
 
         var contentType = hasEnvelop
             ? SystemTextJsonMessageSerializer.JsonContentType.ToString() //"application/vnd.masstransit+json"
@@ -85,22 +83,22 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
         else // Get data from headers
         {
             // MessageEnvelope
-            headers[NsbHeaders.MessageId] = headers[MassTransit.MessageHeaders.MessageId];
-            headers[NsbHeaders.EnclosedMessageTypes] = headers[MassTransit.MessageHeaders.MessageType];
-            if (headers.TryGetValue(MassTransit.MessageHeaders.TransportSentTime, out var sent))
+            headers[NsbHeaders.MessageId] = headers[MessageHeaders.MessageId];
+            headers[NsbHeaders.EnclosedMessageTypes] = headers[MessageHeaders.MessageType];
+            if (headers.TryGetValue(MessageHeaders.TransportSentTime, out var sent))
             {
                 headers[NsbHeaders.TimeSent] = DateTimeOffsetHelper.ToWireFormattedString(DateTime.Parse(sent));
             }
             else
             {
-                logger.LogWarning($"Using {MassTransit.MessageHeaders.FaultTimestamp} as fallback for missing {MessageHeaders.TransportSentTime}");
+                logger.LogWarning($"Using {MessageHeaders.FaultTimestamp} as fallback for missing {MessageHeaders.TransportSentTime}");
                 // Using time of failure as fallback
-                var faultTimestampFallback = headers[MassTransit.MessageHeaders.FaultTimestamp];
+                var faultTimestampFallback = headers[MessageHeaders.FaultTimestamp];
                 headers[NsbHeaders.TimeSent] = DateTimeOffsetHelper.ToWireFormattedString(DateTime.Parse(faultTimestampFallback));
             }
 
-            headers[NsbHeaders.ConversationId] = headers[MassTransit.MessageHeaders.ConversationId];
-            if (headers.TryGetValue(MassTransit.MessageHeaders.CorrelationId, out var correlationId))
+            headers[NsbHeaders.ConversationId] = headers[MessageHeaders.ConversationId];
+            if (headers.TryGetValue(MessageHeaders.CorrelationId, out var correlationId))
             {
                 headers[NsbHeaders.CorrelationId] = correlationId;
             }
@@ -110,10 +108,10 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
             //   headers[NsbHeaders.TimeToBeReceived] = DateTimeOffsetHelper.ToWireFormattedString(DateTime.Parse(ttl));
             // }
 
-            headers[NsbHeaders.OriginatingEndpoint] = headers[MassTransit.MessageHeaders.SourceAddress];
+            headers[NsbHeaders.OriginatingEndpoint] = headers[MessageHeaders.SourceAddress];
 
 
-            var hostInfo = headers[MassTransit.MessageHeaders.Host.Info];
+            var hostInfo = headers[MessageHeaders.Host.Info];
 
             var busHostInfo = JsonSerializer.Deserialize<BusHostInfo>(hostInfo) ??
                               throw new InvalidOperationException();
@@ -121,12 +119,12 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
         }
 
         // MT-Fault-***
-        if (headers.TryGetValue(MassTransit.MessageHeaders.FaultRetryCount, out var faultRetryCount))
+        if (headers.TryGetValue(MessageHeaders.FaultRetryCount, out var faultRetryCount))
         {
             headers[NsbHeaders.DelayedRetries] = faultRetryCount;
         }
 
-        if(headers.TryGetValue(MassTransit.MessageHeaders.FaultInputAddress, out var faultInputAddress))
+        if (headers.TryGetValue(MessageHeaders.FaultInputAddress, out var faultInputAddress))
         {
             headers[NsbHeaders.ProcessingEndpoint] = faultInputAddress;
             headers[FaultsHeaderKeys.FailedQ] = faultInputAddress;
@@ -143,7 +141,7 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
             headers[FaultsHeaderKeys.FailedQ] = faultInputAddress;
         }
 
-        if (headers.TryGetValue(MassTransit.MessageHeaders.FaultExceptionType, out var faultExceptionType))
+        if (headers.TryGetValue(MessageHeaders.FaultExceptionType, out var faultExceptionType))
         {
             headers[FaultsHeaderKeys.ExceptionType] = faultExceptionType;
         }
@@ -151,10 +149,10 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
         {
             //TODO: ServiceControl shows ": 0" when ExceptionType and ExceptionStackTrace
         }
-        
-        headers[FaultsHeaderKeys.Message] = headers[MassTransit.MessageHeaders.FaultMessage];
-        
-        if (headers.TryGetValue(MassTransit.MessageHeaders.FaultStackTrace, out var faultStackTrace))
+
+        headers[FaultsHeaderKeys.Message] = headers[MessageHeaders.FaultMessage];
+
+        if (headers.TryGetValue(MessageHeaders.FaultStackTrace, out var faultStackTrace))
         {
             headers[FaultsHeaderKeys.StackTrace] = faultStackTrace;
         }
@@ -163,9 +161,9 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
             logger.LogInformation("Message does not have {HeaderKey}", MessageHeaders.FaultStackTrace);
         }
 
-        if (headers.TryGetValue(MassTransit.MessageHeaders.FaultTimestamp, out var faultTimestamp))
+        if (headers.TryGetValue(MessageHeaders.FaultTimestamp, out var faultTimestamp))
         {
-            headers[FaultsHeaderKeys.TimeOfFailure] = DateTimeOffsetHelper.ToWireFormattedString(DateTime.Parse(faultTimestamp));;
+            headers[FaultsHeaderKeys.TimeOfFailure] = DateTimeOffsetHelper.ToWireFormattedString(DateTime.Parse(faultTimestamp));
         }
         else
         {
@@ -175,7 +173,7 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
         }
 
         // TODO: Currently using FaultConsumerType as fallback as MT does not have a processing machine equivalent
-        headers[NsbHeaders.ProcessingMachine] = headers.GetValueOrDefault(MassTransit.MessageHeaders.Host.MachineName, "❌");
+        headers[NsbHeaders.ProcessingMachine] = headers.GetValueOrDefault(MessageHeaders.Host.MachineName, "❌");
     }
 
     static MessageEnvelope DeserializeEnvelope(MessageContext messageContext)

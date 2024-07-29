@@ -3,23 +3,23 @@ using Microsoft.Extensions.Logging;
 
 class AzureServiceBusHelper(ILogger<AzureServiceBusHelper> logger, string connectionstring) : IQueueInformationProvider
 {
-  readonly ServiceBusAdministrationClient client = new(connectionstring);
+    readonly ServiceBusAdministrationClient client = new(connectionstring);
 
-  public async Task<IEnumerable<string>> GetQueues()
-  {
-    var list = new List<string>();
-    var result = client.GetQueuesAsync();
-
-    await foreach (var queueProperties in result)
+    public async Task<IEnumerable<string>> GetQueues()
     {
-      if (queueProperties.RequiresSession)
-      {
-        logger.LogDebug("Skipping '{QueueName}', Queues that require sessions are currently unsupported", queueProperties.Name);
-        continue;
-      }
+        var list = new List<string>();
+        var result = client.GetQueuesAsync();
 
-      list.Add(queueProperties.Name);
+        await foreach (var queueProperties in result)
+        {
+            if (queueProperties.RequiresSession)
+            {
+                logger.LogDebug("Skipping '{QueueName}', Queues that require sessions are currently unsupported", queueProperties.Name);
+                continue;
+            }
+
+            list.Add(queueProperties.Name);
+        }
+        return list;
     }
-    return list;
-  }
 }
