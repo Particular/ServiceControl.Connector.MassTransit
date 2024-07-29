@@ -4,41 +4,43 @@ using System.Text.Json;
 class RabbitMQHelper : IQueueInformationProvider
 {
     readonly string _url;
-    private readonly HttpClient _httpClient;
-    private readonly string _vhost;
+    readonly HttpClient _httpClient;
+    readonly string _vhost;
 
     public RabbitMQHelper(string vhost, Uri apiBaseUrl)
     {
-    _vhost = vhost;
-    _url = apiBaseUrl + "api/queues";
-   
-    var auth = Convert.ToBase64String(Encoding.ASCII.GetBytes(apiBaseUrl.UserInfo));
+        _vhost = vhost;
+        _url = apiBaseUrl + "api/queues";
 
-    _httpClient  = new HttpClient();
-    _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", auth);
+        var auth = Convert.ToBase64String(Encoding.ASCII.GetBytes(apiBaseUrl.UserInfo));
+
+        _httpClient = new HttpClient();
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", auth);
     }
 
     public async Task<IEnumerable<string>> GetQueues()
     {
-    var response = await _httpClient.GetAsync(_url);
+        var response = await _httpClient.GetAsync(_url);
 
-    response.EnsureSuccessStatusCode();
+        response.EnsureSuccessStatusCode();
 
-    var jsonText = await response.Content.ReadAsStringAsync();
-    var jsonDoc = JsonDocument.Parse(jsonText);
+        var jsonText = await response.Content.ReadAsStringAsync();
+        var jsonDoc = JsonDocument.Parse(jsonText);
 
-    var list = new List<string>();
+        var list = new List<string>();
 
-    foreach (var x in jsonDoc.RootElement.EnumerateArray())
-    {
-        var queueName = x.GetProperty("name").GetString() ?? throw new ("no name");
-        var queueVHost = x.GetProperty("vhost").GetString() ?? throw new ("no vhost");
-
-        if (_vhost == queueVHost)
+        foreach (var x in jsonDoc.RootElement.EnumerateArray())
         {
-        list.Add(queueName);
+            var queueName = x.GetProperty("name").GetString() ?? throw new("no name");
+            var queueVHost = x.GetProperty("vhost").GetString() ?? throw new("no vhost");
+
+            if (_vhost == queueVHost)
+            {
+                list.Add(queueName);
+            }
         }
-    }
-    return list;
+
+        return list;
     }
 }
