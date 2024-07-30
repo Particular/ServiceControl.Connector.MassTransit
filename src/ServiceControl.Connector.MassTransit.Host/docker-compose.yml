@@ -1,3 +1,6 @@
+x-transport: &transport-env
+  env_file: "sqs.env" #"rabbit.env"
+   
 services:
   service-control-db:
     container_name: "servicecontrol-db"
@@ -14,7 +17,7 @@ services:
     command: "--setup"
     ports:
       - "33333:33333"
-    env_file: "rabbit.env"
+    << : [*transport-env]
   service-control:
     depends_on:
       service-control-db:
@@ -25,11 +28,11 @@ services:
     image: "particular/servicecontrol:latest"
     ports:
       - "33333:33333"
-    env_file: "rabbit.env"
+    << : [*transport-env]
   masstransit-connector:
     depends_on:
       - service-control
     container_name: "masstransit-connector"
     image: "servicecontrol-connector-masstransit:latest"
     pull_policy: if_not_present
-    env_file: "rabbit.env"
+    << : [*transport-env]
