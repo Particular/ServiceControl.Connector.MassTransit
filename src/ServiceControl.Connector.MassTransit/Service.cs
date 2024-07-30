@@ -16,13 +16,19 @@ public class Service(
     TransportInfrastructure? infrastructure;
     HashSet<string>? massTransitErrorQueues;
 
+#pragma warning disable PS0018
     async Task<HashSet<string>> GetReceiveQueues()
+#pragma warning restore PS0018
     {
         var queues = await queueInformationProvider.GetQueues();
         return queues.Where(queueFilter.IsMatch).ToHashSet();
     }
 
-    protected override async Task ExecuteAsync(CancellationToken shutdownToken)
+#pragma warning disable PS0018
+#pragma warning disable PS0017
+    protected override async Task ExecuteAsync(CancellationToken shutdownToken = default)
+#pragma warning restore PS0018
+#pragma warning restore PS0017
     {
         massTransitErrorQueues = await GetReceiveQueues();
         await Setup(shutdownToken);
@@ -88,11 +94,9 @@ public class Service(
 
         foreach (var massTransitErrorQueue in massTransitErrorQueues!)
         {
-            foreach (var massTransitErrorQueue in massTransitErrorQueues!)
-            {
-                logger.LogInformation("listening to: {InputQueue}", massTransitErrorQueue);
-                receiveSettings.Add(receiverFactory.Create(massTransitErrorQueue, configuration.ErrorQueue));
-            }
+            logger.LogInformation("listening to: {InputQueue}", massTransitErrorQueue);
+            receiveSettings.Add(receiverFactory.Create(massTransitErrorQueue, configuration.ErrorQueue));
+        }
 
         if (!receiveSettings.Any())
         {

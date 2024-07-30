@@ -5,7 +5,9 @@ class AzureServiceBusHelper(ILogger<AzureServiceBusHelper> logger, string connec
 {
     readonly ServiceBusAdministrationClient client = new(connectionstring);
 
+#pragma warning disable PS0018
     public async Task<IEnumerable<string>> GetQueues()
+#pragma warning restore PS0018
     {
         var list = new List<string>();
         var result = client.GetQueuesAsync();
