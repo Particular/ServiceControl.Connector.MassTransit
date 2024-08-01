@@ -24,10 +24,8 @@ public class Service(
         return queues.Where(queueFilter.IsMatch).ToHashSet();
     }
 
-#pragma warning disable PS0018
 #pragma warning disable PS0017
     protected override async Task ExecuteAsync(CancellationToken shutdownToken = default)
-#pragma warning restore PS0018
 #pragma warning restore PS0017
     {
         massTransitErrorQueues = await GetReceiveQueues();
