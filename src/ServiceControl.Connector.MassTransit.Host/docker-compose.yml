@@ -1,5 +1,5 @@
 x-transport: &transport-env
-  env_file: "sqs.env" #"rabbit.env"
+  env_file: "rabbit.env"
    
 services:
   service-control-db:
@@ -36,3 +36,12 @@ services:
     image: "servicecontrol-connector-masstransit:latest"
     pull_policy: if_not_present
     << : [*transport-env]
+  service-pulse:
+    depends_on:
+      - service-control
+    container_name: "servicepulse"
+    image: "particular/servicepulse:latest"
+    ports:
+        - 9090:90
+    environment:
+        - SERVICECONTROL_URL=http://servicecontrol:33333/api/
