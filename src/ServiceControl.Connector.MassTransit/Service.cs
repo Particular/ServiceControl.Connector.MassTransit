@@ -16,13 +16,17 @@ public class Service(
     TransportInfrastructure? infrastructure;
     HashSet<string>? massTransitErrorQueues;
 
+#pragma warning disable PS0018
     async Task<HashSet<string>> GetReceiveQueues()
+#pragma warning restore PS0018
     {
         var queues = await queueInformationProvider.GetQueues();
         return queues.Where(queueFilter.IsMatch).ToHashSet();
     }
 
-    protected override async Task ExecuteAsync(CancellationToken shutdownToken)
+#pragma warning disable PS0017
+    protected override async Task ExecuteAsync(CancellationToken shutdownToken = default)
+#pragma warning restore PS0017
     {
         massTransitErrorQueues = await GetReceiveQueues();
         await Setup(shutdownToken);
@@ -72,7 +76,7 @@ public class Service(
                 logger.LogCritical(exception, "Critical error, signaling to stop host");
                 hostApplicationLifetime.StopApplication();
             },
-            setupInfrastructure: configuration.SetupInfrastructure
+            true
         );
 
         var receiveSettings = new List<ReceiveSettings>
@@ -86,18 +90,15 @@ public class Service(
             )
         };
 
-        if (!configuration.SetupInfrastructure)
+        foreach (var massTransitErrorQueue in massTransitErrorQueues!)
         {
-            foreach (var massTransitErrorQueue in massTransitErrorQueues!)
-            {
-                logger.LogInformation("listening to: {InputQueue}", massTransitErrorQueue);
-                receiveSettings.Add(receiverFactory.Create(massTransitErrorQueue, configuration.ErrorQueue));
-            }
+            logger.LogInformation("listening to: {InputQueue}", massTransitErrorQueue);
+            receiveSettings.Add(receiverFactory.Create(massTransitErrorQueue, configuration.ErrorQueue));
+        }
 
-            if (!receiveSettings.Any())
-            {
-                throw new InvalidOperationException("No input queues discovered");
-            }
+        if (!receiveSettings.Any())
+        {
+            throw new InvalidOperationException("No input queues discovered");
         }
 
         var receiverSettings = receiveSettings.ToArray();

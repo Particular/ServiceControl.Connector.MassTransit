@@ -41,9 +41,8 @@ static class HostApplicationBuilderExtensions
                     connectionstring ?? throw new Exception("CONNECTIONSTRING not specified"));
                 break;
             case "RabbitMQ.QuorumConventionalRouting":
-                var managementApi = configuration.GetValue<Uri>("MANAGEMENTAPI") ??
-                                    throw new Exception("MANAGEMENTAPI not specified");
-                services.UsingRabbitMQ(managementApi);
+                var managementApi = configuration.GetValue<Uri>("MANAGEMENTAPI") ?? throw new Exception("MANAGEMENTAPI not specified");
+                services.UsingRabbitMQ(connectionstring ?? throw new Exception("CONNECTIONSTRING not specified"), managementApi);
                 break;
             default:
                 throw new NotSupportedException($"Transport type {transporttype} is not supported");
