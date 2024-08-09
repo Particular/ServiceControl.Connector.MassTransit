@@ -6,11 +6,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Connector.Ma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Connector.MassTransit.AmazonSQS", "ServiceControl.Connector.MassTransit.AmazonSQS\ServiceControl.Connector.MassTransit.AmazonSQS.csproj", "{56857E95-4898-4030-B6A1-835C4AD995DA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Transport.SQS", "..\..\NServiceBus.AmazonSQS\src\NServiceBus.Transport.SQS\NServiceBus.Transport.SQS.csproj", "{FD97CFC2-FF31-445C-9769-5080F24B530B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Transport.SQS", "..\NServiceBus.AmazonSQS\src\NServiceBus.Transport.SQS\NServiceBus.Transport.SQS.csproj", "{FD97CFC2-FF31-445C-9769-5080F24B530B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Transport.RabbitMQ", "..\..\NServiceBus.RabbitMQ\src\NServiceBus.Transport.RabbitMQ\NServiceBus.Transport.RabbitMQ.csproj", "{314B4AA5-24E1-4A5E-95E8-451B20B6808D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Transport.RabbitMQ", "..\NServiceBus.RabbitMQ\src\NServiceBus.Transport.RabbitMQ\NServiceBus.Transport.RabbitMQ.csproj", "{314B4AA5-24E1-4A5E-95E8-451B20B6808D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Transport.AzureServiceBus", "..\..\NServiceBus.Transport.AzureServiceBus\src\Transport\NServiceBus.Transport.AzureServiceBus.csproj", "{B050ACA3-C0DF-4F7B-B9C9-1F255F2773C3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NServiceBus.Transport.AzureServiceBus", "..\NServiceBus.Transport.AzureServiceBus\src\Transport\NServiceBus.Transport.AzureServiceBus.csproj", "{B050ACA3-C0DF-4F7B-B9C9-1F255F2773C3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AzureServiceBus", "AzureServiceBus", "{0BAC58A0-FD2D-41D6-B800-5BFD4CD8F3D5}"
 EndProject

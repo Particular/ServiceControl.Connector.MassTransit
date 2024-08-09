@@ -1,0 +1,12 @@
+[submodule "NServiceBus.RabbitMQ"]
+	path = NServiceBus.RabbitMQ
+	url = https://github.com/Particular/NServiceBus.RabbitMQ
+	branch = tf527
+[submodule "NServiceBus.Transport.AzureServiceBus"]
+	path = NServiceBus.Transport.AzureServiceBus
+	url = https://github.com/Particular/NServiceBus.Transport.AzureServiceBus
+	branch = tf527
+[submodule "NServiceBus.AmazonSQS"]
+	path = NServiceBus.AmazonSQS
+	url = https://github.com/Particular/NServiceBus.AmazonSQS
+	branch = tf527
