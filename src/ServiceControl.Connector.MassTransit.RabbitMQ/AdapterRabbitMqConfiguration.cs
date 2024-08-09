@@ -9,8 +9,7 @@ public static class AdapterRabbitMqConfiguration
         services.AddSingleton<TransportDefinition>(new RabbitMQTransport(
             RoutingTopology.Conventional(QueueType.Quorum),
             connectionString,
-            enableDelayedDelivery: false, // TODO: Requires https://github.com/Particular/NServiceBus.RabbitMQ/tree/tf527
-            enablePublishSubscribe: false // TODO: Requires https://github.com/Particular/NServiceBus.RabbitMQ/tree/tf527
+            enableDelayedDelivery: false
         ));
     }
 }
