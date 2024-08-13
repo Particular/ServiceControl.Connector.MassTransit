@@ -8,7 +8,7 @@ static class HostApplicationBuilderExtensions
     {
         var setupInfrastructure = Environment.GetCommandLineArgs().Contains("--setup");
         var returnQueue = builder.Configuration.GetValue<string?>("ReturnQueue") ??
-                          "FailWhenReceivingMyMessage_adapter";
+                          "Particular.ServiceControl.Connector.MassTransit_return";
         var errorQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "error";
 
         var services = builder.Services;
