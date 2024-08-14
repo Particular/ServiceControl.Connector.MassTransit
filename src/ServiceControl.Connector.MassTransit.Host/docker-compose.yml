@@ -42,6 +42,6 @@ services:
     container_name: "servicepulse"
     image: "particular/servicepulse:latest"
     ports:
-        - 9090:90
+        - 9090:9090
     environment:
         - SERVICECONTROL_URL=http://servicecontrol:33333/api/
