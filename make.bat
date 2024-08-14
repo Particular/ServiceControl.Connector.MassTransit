@@ -1,3 +1,4 @@
 git submodule init
 git submodule update
-dotnet publish --os linux --arch x64 /t:PublishContainer .\src\ServiceControl.Connector.MassTransit.Host\ServiceControl.Connector.MassTransit.Host.csproj
+
+docker buildx build --file src/ServiceControl.Connector.MassTransit.Host/Dockerfile --platform linux/arm64,linux/amd64 --tag particular/servicecontrol-connector-masstransit:latest .

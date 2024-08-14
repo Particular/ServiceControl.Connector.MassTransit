@@ -6,7 +6,7 @@ services:
     container_name: "servicecontrol-db"
     image: "particular/servicecontrol-ravendb:latest"
     ports:
-      - "8080:8080"
+      - 8080:8080
     volumes:
       - C:\servicecontrol\db:/opt/RavenDB/Server/RavenData
   servicecontrol-setup:
@@ -16,7 +16,7 @@ services:
     image: "particular/servicecontrol:latest"
     command: "--setup"
     ports:
-      - "33333:33333"
+      - 33333:33333
     << : [*transport-env]
   service-control:
     depends_on:
@@ -27,13 +27,13 @@ services:
     container_name: "servicecontrol"
     image: "particular/servicecontrol:latest"
     ports:
-      - "33333:33333"
+      - 33333:33333
     << : [*transport-env]
   masstransit-connector:
     depends_on:
       - service-control
     container_name: "masstransit-connector"
-    image: "servicecontrol-connector-masstransit:latest"
+    image: "particular/servicecontrol-connector-masstransit:latest"
     pull_policy: if_not_present
     << : [*transport-env]
   service-pulse:
