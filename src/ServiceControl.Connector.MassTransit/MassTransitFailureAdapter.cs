@@ -13,11 +13,14 @@ public class MassTransitFailureAdapter(
     const string TargetEndpointAddress = "ServiceControl.TargetEndpointAddress";
     const string RetryTo = "ServiceControl.RetryTo";
 
+    long forwardCount;
+    long returnCount;
+
     public virtual TransportOperation ForwardMassTransitErrorToServiceControl(MessageContext messageContext)
     {
         var md5 = Convert.ToHexString(MD5.HashData(messageContext.Body.Span));
 
-        logger.LogInformation("Forwarding failure: {NativeMessageId}, md5: {MD5}, length: {PayloadLength:N0}b", messageContext.NativeMessageId, md5, messageContext.Body.Length);
+        logger.LogInformation("Forwarding failure: {NativeMessageId}, md5: {MD5}, length: {PayloadLength:N0}b (#{ForwardCount:N0})", messageContext.NativeMessageId, md5, messageContext.Body.Length, Interlocked.Increment(ref forwardCount));
 
         mtConverter.From(messageContext);
 
@@ -42,7 +45,7 @@ public class MassTransitFailureAdapter(
     public virtual TransportOperation ReturnMassTransitFailure(MessageContext messageContext)
     {
         var md5 = Convert.ToHexString(MD5.HashData(messageContext.Body.Span));
-        logger.LogInformation("Forward back to original MT queue {NativeMessageId}, md5: {MD5}, length: {PayloadLength:N0}b", messageContext.NativeMessageId, md5, messageContext.Body.Length);
+        logger.LogInformation("Forward back to original MT queue {NativeMessageId}, md5: {MD5}, length: {PayloadLength:N0}b (#{ReturnCount:N0})", messageContext.NativeMessageId, md5, messageContext.Body.Length, Interlocked.Increment(ref returnCount));
 
         var headers = messageContext.Headers;
 
