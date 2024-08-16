@@ -1,0 +1,22 @@
+<Project>
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <ServerGarbageCollection>true</ServerGarbageCollection>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <MinVerMinimumMajorMinor>0.1</MinVerMinimumMajorMinor>
+    <MinVerAutoIncrement>minor</MinVerAutoIncrement>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <WriteMinVerProperties>false</WriteMinVerProperties>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- <RuntimeIdentifier Condition="'$(TargetArch)' == 'amd64'">linux-x64</RuntimeIdentifier> -->
+    <!-- <RuntimeIdentifier Condition="'$(TargetArch)' == 'arm64'">linux-arm64</RuntimeIdentifier> -->
+  </PropertyGroup>
+
+</Project>
