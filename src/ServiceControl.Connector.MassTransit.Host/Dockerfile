@@ -6,7 +6,7 @@ ENV CI=true
 
 COPY . .
 
-RUN dotnet publish --os linux --arch $TARGETARCH src/ServiceControl.Connector.MassTransit.Host/ServiceControl.Connector.MassTransit.Host.csproj --configuration Release -graph --property:TargetArch=$TARGETARCH --output ./build
+RUN dotnet publish --os linux --arch $TARGETARCH src/ServiceControl.Connector.MassTransit.Host/ServiceControl.Connector.MassTransit.Host.csproj --configuration Release -graph --output ./build
 
 # Runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
