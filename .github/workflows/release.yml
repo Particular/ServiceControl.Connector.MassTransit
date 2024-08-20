@@ -74,13 +74,9 @@ jobs:
               --annotation "index:org.opencontainers.image.base.name=mcr.microsoft.com/dotnet/aspnet:8.0" \
               --platform linux/arm64,linux/amd64 .
           docker buildx imagetools inspect ghcr.io/particular/servicecontrol-connector-masstransit:${{ env.TAG_NAME }}
-      - name: Create Octopus Deploy release
-        uses: OctopusDeploy/create-release-action@v3.2.2
+      - name: Deploy
+        if: ${{ github.event_name == 'push' && github.ref_type == 'tag' }}
+        # Does not follow standard practice of targeting explicit versions because configuration is tightly coupled to Octopus Deploy configuration
+        uses: Particular/push-octopus-package-action@main
         with:
-          server: https://deploy.particular.net
-          api_key: ${{ secrets.OCTOPUS_DEPLOY_API_KEY }}
-          project: ServiceControl.Connector.MassTransit
-          release_number: ${{env.MinVerVersion}}
-          package_version: ${{env.MinVerVersion}}
-          packages: "GitReleaseManager:0.17.0"
-          space: "Default"
+          octopus-deploy-api-key: ${{ secrets.OCTOPUS_DEPLOY_API_KEY }}          
