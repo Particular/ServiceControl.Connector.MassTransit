@@ -33,7 +33,7 @@ public class Service(
 
         if (configuration.SetupInfrastructure)
         {
-            logger.LogInformation("Signalling stop as only run in setup mode");
+            logger.LogInformation("Signaling stop as only run in setup mode");
             hostApplicationLifetime.StopApplication();
             return;
         }
