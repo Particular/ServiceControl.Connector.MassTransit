@@ -74,13 +74,13 @@ jobs:
               --annotation "index:org.opencontainers.image.base.name=mcr.microsoft.com/dotnet/aspnet:8.0" \
               --platform linux/arm64,linux/amd64 .
           docker buildx imagetools inspect ghcr.io/particular/servicecontrol-connector-masstransit:${{ env.TAG_NAME }}
-      - name: Install Octopus CLI 🐙
-        uses: OctopusDeploy/install-octopus-cli-action@v3
+      - name: Create Octopus Deploy release
+        uses: OctopusDeploy/create-release-action@v3.2.2
         with:
-          version: latest
-      - name: Octopus Create Release 
-        env:
-          OCTOPUS_API_KEY: ${{ secrets.OCTOPUS_DEPLOY_API_KEY }}
-          OCTOPUS_URL: https://deploy.particular.net
-        run: >
-          octopus release create --project ServiceControl.Connector.MassTransit --version ${{ env.TAG_NAME }}
+          server: https://deploy.particular.net
+          api_key: ${{ inputs.octopus-deploy-api-key }}
+          project: ServiceControl.Connector.MassTransit
+          release_number: ${{env.MinVerVersion}}
+          package_version: ${{env.MinVerVersion}}
+          packages: "GitReleaseManager:0.17.0"
+          space: "Default"
