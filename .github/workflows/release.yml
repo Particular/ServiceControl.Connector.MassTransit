@@ -68,7 +68,7 @@ jobs:
               --annotation "index:org.opencontainers.image.authors=Particular Software" \
               --annotation "index:org.opencontainers.image.vendor=Particular Software" \
               --annotation "index:org.opencontainers.image.version=${{ env.MinVerVersion }}" \
-              --annotation "index:org.opencontainers.image.source=hhttps://github.com/Particular/ServiceControl.Connector.MassTransit/tree/${{ github.sha }}" \
+              --annotation "index:org.opencontainers.image.source=https://github.com/Particular/ServiceControl.Connector.MassTransit/tree/${{ github.sha }}" \
               --annotation "index:org.opencontainers.image.url=https://hub.docker.com/r/particular/servicecontrol-connector-masstransit" \
               --annotation "index:org.opencontainers.image.documentation=https://docs.particular.net/servicecontrol/" \
               --annotation "index:org.opencontainers.image.base.name=mcr.microsoft.com/dotnet/aspnet:8.0" \
