@@ -28,6 +28,9 @@ public class Service(
     protected override async Task ExecuteAsync(CancellationToken shutdownToken = default)
 #pragma warning restore PS0017
     {
+        var version = System.Diagnostics.FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly()!.Location).ProductVersion!;
+        logger.LogInformation("ServiceControl.Connector.MassTransit {Version}", version);
+
         massTransitErrorQueues = await GetReceiveQueues();
         await Setup(shutdownToken);
 
