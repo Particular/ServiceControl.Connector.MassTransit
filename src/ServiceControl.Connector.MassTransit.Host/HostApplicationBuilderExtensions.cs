@@ -13,7 +13,7 @@ static class HostApplicationBuilderExtensions
 
         var services = builder.Services;
 
-        services.AddSingleton<Configuration>(new Configuration
+        services.AddSingleton(new Configuration
         {
             ReturnQueue = returnQueue,
             ErrorQueue = errorQueue,
@@ -24,7 +24,7 @@ static class HostApplicationBuilderExtensions
         .AddSingleton<MassTransitConverter>()
         .AddSingleton<MassTransitFailureAdapter>()
         .AddSingleton<ReceiverFactory>()
-        .AddHostedService<Service>(p => p.GetRequiredService<Service>());
+        .AddHostedService(p => p.GetRequiredService<Service>());
 
         var configuration = builder.Configuration;
 
