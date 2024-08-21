@@ -41,7 +41,15 @@ static class HostApplicationBuilderExtensions
                     connectionstring ?? throw new Exception("CONNECTIONSTRING not specified"));
                 break;
             case "RabbitMQ.QuorumConventionalRouting":
-                var managementApi = configuration.GetValue<Uri>("MANAGEMENTAPI") ?? throw new Exception("MANAGEMENTAPI not specified");
+                var managementApiValue = configuration.GetValue<string>("MANAGEMENTAPI") ?? throw new Exception("MANAGEMENTAPI not specified");
+                if (!Uri.TryCreate(managementApiValue, UriKind.Absolute, out var managementApi))
+                {
+                    throw new Exception("MANAGEMENTAPI is invalid. Ensure the value is a valid url without any quotes i.e. http://guest:guest@localhost:15672");
+                }
+                if (string.IsNullOrEmpty(managementApi.UserInfo))
+                {
+                    throw new Exception("MANAGEMENTAPI must contain username and password i.e. http://guest:guest@localhost:15672");
+                }
                 services.UsingRabbitMQ(connectionstring ?? throw new Exception("CONNECTIONSTRING not specified"), managementApi);
                 break;
             default:
