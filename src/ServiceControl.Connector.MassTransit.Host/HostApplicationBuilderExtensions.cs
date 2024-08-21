@@ -32,13 +32,16 @@ static class HostApplicationBuilderExtensions
         var transporttype = configuration.GetValue<string>("TRANSPORTTYPE");
         var connectionstring = configuration.GetValue<string>("CONNECTIONSTRING");
 
-        try
+        if (string.IsNullOrEmpty(connectionstring))
         {
-            new DbConnectionStringBuilder { ConnectionString = connectionstring };
-        }
-        catch (Exception)
-        {
-            throw new Exception("CONNECTIONSTRING contains invalid value");
+            try
+            {
+                new DbConnectionStringBuilder { ConnectionString = connectionstring };
+            }
+            catch (Exception)
+            {
+                throw new Exception("CONNECTIONSTRING contains invalid value");
+            }
         }
 
         switch (transporttype)
