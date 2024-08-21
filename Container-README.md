@@ -39,8 +39,8 @@ Run with setup entry point to create message queues, then exit the container.
 ```shell
 docker run \
 -e TRANSPORTTYPE=RabbitMQ.QuorumConventionalRouting \
--e CONNECTIONSTRING='host=host.docker.internal' \
--e MANAGEMENTAPI='http://host.docker.internal:15672' \
+-e CONNECTIONSTRING=host=host.docker.internal \
+-e MANAGEMENTAPI=http://guest:guest@host.docker.internal:15672 \
 --rm particular/servicecontrol-connector-masstransit:latest \
 --setup
 ```
@@ -52,8 +52,8 @@ Run the connector and bridge MassTransit errors queues with the Particular Platf
 ```shell
 docker run \
 -e TRANSPORTTYPE=RabbitMQ.QuorumConventionalRouting \
--e CONNECTIONSTRING='host=host.docker.internal' \
--e MANAGEMENTAPI='http://host.docker.internal:15672' \
+-e CONNECTIONSTRING=host=host.docker.internal \
+-e MANAGEMENTAPI=http://guest:guest@host.docker.internal:15672 \
 --rm particular/servicecontrol-connector-masstransit:latest \
 ```
 
