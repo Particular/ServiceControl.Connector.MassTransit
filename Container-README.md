@@ -86,6 +86,45 @@ The connection string format used is the same for all ServiceControl components.
 - RabbitMQ: <https://docs.particular.net/servicecontrol/transports#rabbitmq>
 - AmazonSQS: <https://docs.particular.net/servicecontrol/transports#amazon-sqs>
 
+### RETURNQUEUE
+
+Default: `Particular.ServiceControl.Connector.MassTransit_return`
+
+The return queue used by the connector that is passed to ServiceControl as the intermediate queue before returning the message back to the actual queue that MassTransit listens to.
+
+### ERRORQUEUE
+
+Default: `error`
+
+ServiceControl by default listens to the `error` queue but it this value is overriden in ServiceControl this configuration setting must be set to the same value.
+
+### MANAGEMENTAPI
+
+Default: None
+
+> [!NOTE]
+> Only applies to RabbitMQ
+
+Required when using RabbitMQ and error queues need to be dynamically resolved as queue information is queried on the broker to determine which error queues to listen to. The url needs to contain the username and password used to authenticate.
+
+Example:
+
+```txt
+http://guest:guest@localhost:15672
+```
+
+### QUEUES_FILE
+
+Default: None
+
+Path that contains a static list of queues. If no value is specified the connector will run in dynamic mode.
+
+Example:
+
+```txt
+/queues.txt
+```
+
 ## Support
 
 The MassTransit connector is currently in preivew and currently consider a "community extension". If you plan to use this in a production environment we would appreciate it if you let us know at <https://discuss.particular.net/>!
