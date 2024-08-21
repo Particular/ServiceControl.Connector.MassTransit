@@ -1,3 +1,4 @@
+using System.Data.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,6 +31,15 @@ static class HostApplicationBuilderExtensions
 
         var transporttype = configuration.GetValue<string>("TRANSPORTTYPE");
         var connectionstring = configuration.GetValue<string>("CONNECTIONSTRING");
+
+        try
+        {
+            new DbConnectionStringBuilder { ConnectionString = connectionstring };
+        }
+        catch (Exception)
+        {
+            throw new Exception("CONNECTIONSTRING contains invalid value");
+        }
 
         switch (transporttype)
         {
