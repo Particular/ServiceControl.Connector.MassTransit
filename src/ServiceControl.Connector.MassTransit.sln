@@ -25,11 +25,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceControl.Connector.Ma
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceControl.Connector.MassTransit.Host", "ServiceControl.Connector.MassTransit.Host\ServiceControl.Connector.MassTransit.Host.csproj", "{DB7AB22F-93F1-48DD-93DB-92C4727FE198}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Connector.MassTransit.AcceptanceTests", "ServiceControl.Connector.MassTransit.AcceptanceTests\ServiceControl.Connector.MassTransit.AcceptanceTests.csproj", "{5739A403-B999-4F0B-B581-41747EA248F1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceControl.Connector.MassTransit.AcceptanceTests", "ServiceControl.Connector.MassTransit.AcceptanceTests\ServiceControl.Connector.MassTransit.AcceptanceTests.csproj", "{5739A403-B999-4F0B-B581-41747EA248F1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Connector.MassTransit.AcceptanceTests.RabbitMQ", "ServiceControl.Connector.MassTransit.AcceptanceTests.RabbitMQ\ServiceControl.Connector.MassTransit.AcceptanceTests.RabbitMQ.csproj", "{2A84EF27-9F36-4EF3-BCC6-6213C725FC9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceControl.Connector.MassTransit.AcceptanceTests.RabbitMQ", "ServiceControl.Connector.MassTransit.AcceptanceTests.RabbitMQ\ServiceControl.Connector.MassTransit.AcceptanceTests.RabbitMQ.csproj", "{2A84EF27-9F36-4EF3-BCC6-6213C725FC9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Connector.MassTransit.AcceptanceTesting", "ServiceControl.Connector.MassTransit.AcceptanceTesting\ServiceControl.Connector.MassTransit.AcceptanceTesting.csproj", "{AD00DB16-6C71-4E38-B93D-2850D68A79C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceControl.Connector.MassTransit.AcceptanceTesting", "ServiceControl.Connector.MassTransit.AcceptanceTesting\ServiceControl.Connector.MassTransit.AcceptanceTesting.csproj", "{AD00DB16-6C71-4E38-B93D-2850D68A79C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBus", "ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBus\ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBus.csproj", "{9FD1F088-00D2-4FE7-9424-72BF6D38E98A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -81,6 +83,10 @@ Global
 		{AD00DB16-6C71-4E38-B93D-2850D68A79C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD00DB16-6C71-4E38-B93D-2850D68A79C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD00DB16-6C71-4E38-B93D-2850D68A79C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9FD1F088-00D2-4FE7-9424-72BF6D38E98A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9FD1F088-00D2-4FE7-9424-72BF6D38E98A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9FD1F088-00D2-4FE7-9424-72BF6D38E98A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9FD1F088-00D2-4FE7-9424-72BF6D38E98A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

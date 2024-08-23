@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ServiceControl.Connector.MassTransit.AcceptanceTesting\ServiceControl.Connector.MassTransit.AcceptanceTesting.csproj" />
+    <ProjectReference Include="..\ServiceControl.Connector.MassTransit.AzureServiceBus\ServiceControl.Connector.MassTransit.AzureServiceBus.csproj" />
+    <PackageReference Include="NServiceBus.Transport.AzureServiceBus" Version="4.0.1" />
+    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.2.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="GitHubActionsTestLogger" Version="2.4.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
+    <PackageReference Include="NUnit" Version="3.14.0" />
+    <PackageReference Include="NUnit.Analyzers" Version="4.3.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\ServiceControl.Connector.MassTransit.AcceptanceTests\Shared\**\*.cs" LinkBase="Shared" />
+  </ItemGroup>
+
+</Project>
