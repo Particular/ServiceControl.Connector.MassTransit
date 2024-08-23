@@ -1,6 +1,4 @@
-﻿[assembly: RabbitMQTest]
-
-public partial class TestSuiteConfiguration
+﻿public partial class TestSuiteConfiguration
 {
     public IConfigureTransportTestExecution CreateTransportConfiguration() => throw new NotImplementedException();
 }
