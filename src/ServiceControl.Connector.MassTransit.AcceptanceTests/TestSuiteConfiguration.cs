@@ -1,4 +1,4 @@
-﻿using System;
+﻿[assembly: RabbitMQTest]
 
 public partial class TestSuiteConfiguration
 {
