@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using NServiceBus;
-using NServiceBus.AcceptanceTesting.Support;
+﻿using NServiceBus.AcceptanceTesting.Support;
 
 public class DefaultPublisher : IEndpointSetupTemplate
 {

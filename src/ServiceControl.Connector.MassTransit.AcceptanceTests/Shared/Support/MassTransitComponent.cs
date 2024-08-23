@@ -82,7 +82,7 @@ public class MassTransitComponent<TContext> : IComponentBehavior
             }
         }
 
-        IHost host;
+        IHost? host;
 
         readonly Action<IBusRegistrationConfigurator> busConfig;
         readonly Action<HostBuilderContext, IServiceCollection> hostConfig;

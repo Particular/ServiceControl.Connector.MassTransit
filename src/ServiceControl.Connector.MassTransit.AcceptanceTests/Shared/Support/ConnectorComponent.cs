@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.AcceptanceTesting;
@@ -87,7 +84,7 @@ public class ConnectorComponent<TContext> : IComponentBehavior
             }
         }
 
-        IHost host;
+        IHost? host;
 
         readonly string errorQueue;
         readonly string returnQueue;
