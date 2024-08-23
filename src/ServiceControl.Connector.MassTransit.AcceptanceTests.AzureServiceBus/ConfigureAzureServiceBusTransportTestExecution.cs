@@ -5,7 +5,7 @@ using NServiceBus.AcceptanceTesting.Support;
 
 class ConfigureAzureServiceBusTransportTestExecution : IConfigureTransportTestExecution
 {
-    readonly string connectionString = Environment.GetEnvironmentVariable("AzureServiceBus_ConnectionString");
+    readonly string connectionString = Environment.GetEnvironmentVariable("AzureServiceBus_ConnectionString")!;
 
     public Func<CancellationToken, Task> ConfigureTransportForEndpoint(EndpointConfiguration endpointConfiguration, PublisherMetadata publisherMetadata)
     {
