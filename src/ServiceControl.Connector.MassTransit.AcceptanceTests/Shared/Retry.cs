@@ -14,7 +14,6 @@ using NUnit.Framework;
 using RetryTest;
 using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
 
-[TestFixture]
 public class Retry : ConnectorAcceptanceTest
 {
     [Test]
