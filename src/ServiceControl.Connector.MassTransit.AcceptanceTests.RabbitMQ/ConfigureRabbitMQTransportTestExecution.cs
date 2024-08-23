@@ -8,7 +8,7 @@ class ConfigureRabbitMQTransportTestExecution : IConfigureTransportTestExecution
     public Func<CancellationToken, Task> ConfigureTransportForEndpoint(EndpointConfiguration endpointConfiguration, PublisherMetadata publisherMetadata)
     {
         var transport = new RabbitMQTransport(
-            RoutingTopology.Conventional(QueueType.Quorum), "host=localhost");
+            RoutingTopology.Conventional(QueueType.Quorum), "host=localhost", false);
         endpointConfiguration.UseTransport(transport);
         return Cleanup;
     }

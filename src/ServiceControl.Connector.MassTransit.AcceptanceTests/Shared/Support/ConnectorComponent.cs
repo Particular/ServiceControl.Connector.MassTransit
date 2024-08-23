@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -21,7 +20,7 @@ public class ConnectorComponent<TContext> : IComponentBehavior
 
     public Task<ComponentRunner> CreateRunner(RunDescriptor run)
     {
-        return Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, run.ScenarioContext, new AcceptanceTestLoggerFactory(run.ScenarioContext)));
+        return Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, run.ScenarioContext));
     }
 
     readonly string name;
@@ -31,13 +30,11 @@ public class ConnectorComponent<TContext> : IComponentBehavior
     class Runner : ComponentRunner
     {
         public Runner(string name, string errorQueue, string returnQueue,
-            ScenarioContext scenarioContext,
-            ILoggerFactory loggerFactory)
+            ScenarioContext scenarioContext)
         {
             this.errorQueue = errorQueue;
             this.returnQueue = returnQueue;
             this.scenarioContext = scenarioContext;
-            this.loggerFactory = loggerFactory;
             Name = name;
         }
 
@@ -56,6 +53,7 @@ public class ConnectorComponent<TContext> : IComponentBehavior
                     {
                         ReturnQueue = returnQueue,
                         ErrorQueue = errorQueue,
+                        QueueScanInterval = TimeSpan.FromSeconds(5),
                         SetupInfrastructure = false
                     });
                     services.AddSingleton<IQueueFilter, ErrorAndSkippedQueueFilter>();
@@ -91,14 +89,8 @@ public class ConnectorComponent<TContext> : IComponentBehavior
 
         IHost host;
 
-        readonly Action<IBusRegistrationConfigurator> busConfig;
-        readonly Action<HostBuilderContext, IServiceCollection> hostConfig;
         readonly string errorQueue;
         readonly string returnQueue;
         readonly ScenarioContext scenarioContext;
-        //TODO: Figure out how to do logging?
-#pragma warning disable IDE0052
-        readonly ILoggerFactory loggerFactory;
-#pragma warning restore IDE0052
     }
 }

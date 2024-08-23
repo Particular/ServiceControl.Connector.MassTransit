@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using MassTransit;
@@ -16,18 +15,18 @@ using RetryTest;
 using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
 
 [TestFixture]
-public class Error : ConnectorAcceptanceTest
+public class Retry : ConnectorAcceptanceTest
 {
     [Test]
     public async Task Should_forward_error_messages_by_not_modify_message()
     {
         var ctx = await Scenario.Define<Context>()
-            .WithConnector("Connector", Conventions.EndpointNamingConvention(typeof(ErrorSpy)), "Error.Return")
+            .WithConnector("Connector", Conventions.EndpointNamingConvention(typeof(ErrorSpy)), "Retry.Return")
+            .WithMassTransit("Receiver", bus => { bus.AddConsumer<FaultyConsumer>(); })
             .WithMassTransit("Sender", bus => { }, (context, collection) =>
             {
                 collection.AddHostedService<Sender>();
             })
-            .WithMassTransit("Receiver", bus => { bus.AddConsumer<FaultyConsumer>(); })
             .WithEndpoint<ErrorSpy>()
             .Done(c => c.MessageProcessed)
             .Run();
@@ -39,15 +38,22 @@ public class Error : ConnectorAcceptanceTest
     public class Sender : BackgroundService
     {
         readonly IBus bus;
+        readonly Context testContext;
 
-        public Sender(IBus bus)
+        public Sender(IBus bus, Context testContext)
         {
             this.bus = bus;
+            this.testContext = testContext;
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+#pragma warning disable PS0003
+        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+#pragma warning restore PS0003
         {
-            return bus.Publish(new FaultyMessage(), stoppingToken);
+            while (!testContext.FirstMessageReceived && !cancellationToken.IsCancellationRequested)
+            {
+                await bus.Publish(new FaultyMessage(), cancellationToken);
+            }
         }
     }
 
@@ -62,6 +68,7 @@ public class Error : ConnectorAcceptanceTest
 
         public Task Consume(ConsumeContext<FaultyMessage> context)
         {
+            testContext.FirstMessageReceived = true;
             if (!testContext.MessageFailed)
             {
                 throw new Exception("Simulated");
@@ -104,7 +111,7 @@ public class Error : ConnectorAcceptanceTest
 
                 var returnMessage = new OutgoingMessage(context.MessageId, headers, context.Message.Body);
 
-                var transportOperation = new TransportOperation(returnMessage, new UnicastAddressTag("Error.Return"));
+                var transportOperation = new TransportOperation(returnMessage, new UnicastAddressTag("Retry.Return"));
                 return dispatcher.Dispatch(new TransportOperations(transportOperation), new TransportTransaction());
             }
         }
@@ -113,9 +120,8 @@ public class Error : ConnectorAcceptanceTest
     public class Context : ScenarioContext
     {
         public bool MessageFailed { get; set; }
-        public IReadOnlyDictionary<string, string> ReceivedMessageHeaders { get; set; }
-        public IReadOnlyDictionary<string, string> FailedMessageHeaders { get; set; }
         public bool MessageProcessed { get; set; }
+        public bool FirstMessageReceived { get; set; }
     }
 }
 

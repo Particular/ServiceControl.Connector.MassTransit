@@ -45,7 +45,7 @@ public class Service(
         {
             while (!shutdownToken.IsCancellationRequested)
             {
-                await Task.Delay(TimeSpan.FromMinutes(1), shutdownToken);
+                await Task.Delay(configuration.QueueScanInterval, shutdownToken);
 
                 var newData = await GetReceiveQueues();
 

@@ -4,4 +4,5 @@ public record Configuration
     public required string ReturnQueue { get; init; }
     public required bool SetupInfrastructure { get; init; }
     public string PoisonQueue => ReturnQueue + ".poison";
+    public TimeSpan QueueScanInterval { get; set; } = TimeSpan.FromSeconds(60);
 }
