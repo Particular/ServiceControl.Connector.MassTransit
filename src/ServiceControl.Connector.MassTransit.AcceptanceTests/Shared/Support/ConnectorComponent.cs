@@ -17,7 +17,7 @@ public class ConnectorComponent<TContext> : IComponentBehavior
 
     public Task<ComponentRunner> CreateRunner(RunDescriptor run)
     {
-        return Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, run.ScenarioContext));
+        return Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, run.ScenarioContext, new AcceptanceTestLoggerFactory(run.ScenarioContext))));
     }
 
     readonly string name;
@@ -27,11 +27,13 @@ public class ConnectorComponent<TContext> : IComponentBehavior
     class Runner : ComponentRunner
     {
         public Runner(string name, string errorQueue, string returnQueue,
-            ScenarioContext scenarioContext)
+            ScenarioContext scenarioContext, 
+            AcceptanceTestLoggerFactory loggerFactory)
         {
             this.errorQueue = errorQueue;
             this.returnQueue = returnQueue;
             this.scenarioContext = scenarioContext;
+            this.loggerFactory = loggerFactory;
             Name = name;
         }
 
@@ -58,6 +60,7 @@ public class ConnectorComponent<TContext> : IComponentBehavior
                     services.AddSingleton<MassTransitConverter>();
                     services.AddSingleton<MassTransitFailureAdapter>();
                     services.AddSingleton<ReceiverFactory>();
+                    services.AddSingleton(loggerFactory);
                     services.AddHostedService(p => p.GetRequiredService<Service>());
 
                     transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
@@ -89,5 +92,6 @@ public class ConnectorComponent<TContext> : IComponentBehavior
         readonly string errorQueue;
         readonly string returnQueue;
         readonly ScenarioContext scenarioContext;
+        readonly AcceptanceTestLoggerFactory loggerFactory;
     }
 }

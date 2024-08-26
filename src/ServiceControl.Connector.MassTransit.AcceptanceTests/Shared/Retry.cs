@@ -46,6 +46,7 @@ public class Retry : ConnectorAcceptanceTest
         {
             while (!testContext.FirstMessageReceived && !cancellationToken.IsCancellationRequested)
             {
+                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                 await bus.Publish(new FaultyMessage(), cancellationToken);
             }
         }
