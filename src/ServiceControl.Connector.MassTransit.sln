@@ -31,7 +31,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceControl.Connector.Ma
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceControl.Connector.MassTransit.AcceptanceTesting", "ServiceControl.Connector.MassTransit.AcceptanceTesting\ServiceControl.Connector.MassTransit.AcceptanceTesting.csproj", "{AD00DB16-6C71-4E38-B93D-2850D68A79C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBus", "ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBus\ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBus.csproj", "{9FD1F088-00D2-4FE7-9424-72BF6D38E98A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBus", "ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBus\ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBus.csproj", "{9FD1F088-00D2-4FE7-9424-72BF6D38E98A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Connector.MassTransit.AcceptanceTests.AmazonSQS", "ServiceControl.Connector.MassTransit.AcceptanceTests.AmazonSQS\ServiceControl.Connector.MassTransit.AcceptanceTests.AmazonSQS.csproj", "{93E5D84C-5CC7-4628-804C-A29B62C0C7E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,6 +89,10 @@ Global
 		{9FD1F088-00D2-4FE7-9424-72BF6D38E98A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9FD1F088-00D2-4FE7-9424-72BF6D38E98A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9FD1F088-00D2-4FE7-9424-72BF6D38E98A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93E5D84C-5CC7-4628-804C-A29B62C0C7E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93E5D84C-5CC7-4628-804C-A29B62C0C7E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93E5D84C-5CC7-4628-804C-A29B62C0C7E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93E5D84C-5CC7-4628-804C-A29B62C0C7E1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

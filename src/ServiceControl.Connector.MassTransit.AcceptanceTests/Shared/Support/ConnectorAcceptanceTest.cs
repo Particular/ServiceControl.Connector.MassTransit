@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using NServiceBus.AcceptanceTesting;
+﻿using NServiceBus.AcceptanceTesting;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
@@ -33,8 +30,10 @@ public class ConnectorAcceptanceTest
     }
 
     [TearDown]
-    public void TearDown()
+    public async Task TearDown()
     {
+        await TestSuiteConfiguration.Current.Cleanup();
+
         if (!TestExecutionContext.CurrentContext.TryGetRunDescriptor(out var runDescriptor))
         {
             return;
