@@ -27,7 +27,7 @@ public class ConnectorComponent<TContext> : IComponentBehavior
     class Runner : ComponentRunner
     {
         public Runner(string name, string errorQueue, string returnQueue,
-            ScenarioContext scenarioContext, 
+            ScenarioContext scenarioContext,
             AcceptanceTestLoggerFactory loggerFactory)
         {
             this.errorQueue = errorQueue;
