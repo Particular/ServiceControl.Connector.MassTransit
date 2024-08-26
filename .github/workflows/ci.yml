@@ -9,7 +9,6 @@ on:
 env:
   DOTNET_NOLOGO: true
   VERBOSE_TEST_LOGGING: true
-  AzureServiceBus_ConnectionString: Endpoint=sb://szymonp-1.servicebus.windows.net/;SharedAccessKeyName=Test1;SharedAccessKey=C0y09C2/KaSfxAh/ML014zeDqAIYx4i2Y+ASbHBH4rQ=
 defaults:
   run:
     shell: pwsh
@@ -43,13 +42,13 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_ACI_CREDENTIALS }}
           enable-AzPSSession: true
-      # - name: Setup Azure Service Bus
-      #   if: matrix.transport == 'AzureServiceBus'
-      #   uses: Particular/setup-azureservicebus-action@v2.0.0
-      #   with:
-      #     connection-string-name: AzureServiceBus_ConnectionString
-      #     azure-credentials: ${{ secrets.AZURE_ACI_CREDENTIALS }}
-      #     tag: ASBMTConnector
+      - name: Setup Azure Service Bus
+        if: matrix.transport == 'AzureServiceBus'
+        uses: Particular/setup-azureservicebus-action@v2.0.0
+        with:
+          connection-string-name: AzureServiceBus_ConnectionString
+          azure-credentials: ${{ secrets.AZURE_ACI_CREDENTIALS }}
+          tag: ASBMTConnector
       - name: Setup AWS SDK environment
         if: matrix.transport == 'AmazonSQS'
         run: |
