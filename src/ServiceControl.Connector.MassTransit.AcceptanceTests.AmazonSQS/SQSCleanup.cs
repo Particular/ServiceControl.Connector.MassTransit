@@ -28,45 +28,6 @@ public class SQSCleanup
         s3Client.Dispose();
     }
 
-    [Test]
-    [Explicit]
-    public async Task DeleteAllQueuesUsedForTests()
-    {
-        await DeleteAllQueuesWithPrefix(sqsClient, "AT");
-        await DeleteAllQueuesWithPrefix(sqsClient, "TT");
-    }
-
-    [Test]
-    [Explicit]
-    public async Task DeleteAllSubscriptionsUsedForTests()
-    {
-        await DeleteAllSubscriptionsWithPrefix(snsClient, "AT");
-        await DeleteAllSubscriptionsWithPrefix(snsClient, "TT");
-    }
-
-    [Test]
-    [Explicit]
-    public async Task DeleteAllTopicsUsedForTests()
-    {
-        await DeleteAllTopicsWithPrefix(snsClient, "AT");
-        await DeleteAllTopicsWithPrefix(snsClient, "TT");
-    }
-
-    [Test]
-    [Explicit]
-    public async Task DeleteAllBucketsUsedForTests()
-    {
-        await DeleteAllBucketsWithPrefix(s3Client, "cli-");
-    }
-
-    [Test]
-    [Explicit]
-    public async Task DeleteAllResourcesWithPrefix()
-    {
-        await DeleteAllResourcesWithPrefix(sqsClient, snsClient, s3Client, "AT");
-        await DeleteAllResourcesWithPrefix(sqsClient, snsClient, s3Client, "TT");
-    }
-
     public static Task DeleteAllResourcesWithPrefix(IAmazonSQS sqsClient, IAmazonSimpleNotificationService snsClient, IAmazonS3 s3Client, string namePrefix)
     {
         return Task.WhenAll(
@@ -76,7 +37,6 @@ public class SQSCleanup
             DeleteAllBucketsWithPrefix(s3Client, namePrefix)
         );
     }
-
 
     public static async Task DeleteAllBucketsWithPrefix(IAmazonS3 s3Client, string namePrefix)
     {
