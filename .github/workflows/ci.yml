@@ -8,6 +8,7 @@ on:
   workflow_dispatch:
 env:
   DOTNET_NOLOGO: true
+  VERBOSE_TEST_LOGGING: true
 defaults:
   run:
     shell: pwsh
@@ -47,7 +48,7 @@ jobs:
         with:
           connection-string-name: AzureServiceBus_ConnectionString
           azure-credentials: ${{ secrets.AZURE_ACI_CREDENTIALS }}
-          tag: ASBTransportBridge
+          tag: ASBMTConnector
       - name: Setup AWS SDK environment
         if: matrix.transport == 'AmazonSQS'
         run: |
@@ -59,7 +60,7 @@ jobs:
         uses: Particular/setup-rabbitmq-action@v1.7.0
         with:
           connection-string-name: RabbitMQTransport_ConnectionString
-          tag: RabbitMQTransportBridge
+          tag: RabbitMQMTConnector
           registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
           registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Run tests

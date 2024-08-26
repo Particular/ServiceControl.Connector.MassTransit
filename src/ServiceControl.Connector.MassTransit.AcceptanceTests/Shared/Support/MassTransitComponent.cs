@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.AcceptanceTesting;
@@ -59,6 +60,7 @@ public class MassTransitComponent<TContext> : IComponentBehavior
                     });
                     hostConfig(hostContext, services);
                     services.AddSingleton((TContext)scenarioContext);
+                    services.AddSingleton(loggerFactory);
                 });
 
             host = builder.Build();
