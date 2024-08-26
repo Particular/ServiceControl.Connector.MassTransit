@@ -2,7 +2,7 @@
 using Amazon.SimpleNotificationService;
 using Amazon.SQS;
 
-//[assembly: AmazonSQSTest]
+[assembly: AmazonSQSTest]
 
 public partial class TestSuiteConfiguration
 {
