@@ -17,7 +17,7 @@ public class ConnectorComponent<TContext> : IComponentBehavior
 
     public Task<ComponentRunner> CreateRunner(RunDescriptor run)
     {
-        return Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, run.ScenarioContext, new AcceptanceTestLoggerFactory(run.ScenarioContext))));
+        return Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, run.ScenarioContext, new AcceptanceTestLoggerFactory(run.ScenarioContext)));
     }
 
     readonly string name;
