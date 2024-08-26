@@ -14,8 +14,17 @@ class ConfigureAmazonSQSTransportTestExecution : IConfigureTransportTestExecutio
 
     public void ConfigureTransportForMassTransitEndpoint(IBusRegistrationConfigurator configurator)
     {
+        var accessKeyId = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
+        var secretAccessKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
+        var region = Environment.GetEnvironmentVariable("AWS_REGION");
+
         configurator.UsingAmazonSqs((context, cfg) =>
         {
+            cfg.Host(region, h =>
+            {
+                h.AccessKey(accessKeyId);
+                h.SecretKey(secretAccessKey);
+            });
         });
     }
 

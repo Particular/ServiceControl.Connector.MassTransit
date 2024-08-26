@@ -43,6 +43,7 @@ public class ConnectorAcceptanceTest
 
         if (Environment.GetEnvironmentVariable("CI") != "true" || Environment.GetEnvironmentVariable("VERBOSE_TEST_LOGGING")?.ToLower() == "true")
         {
+#pragma warning disable NUnit1033
             TestContext.WriteLine($@"Test settings:
 {string.Join(Environment.NewLine, runDescriptor.Settings.Select(setting => $"   {setting.Key}: {setting.Value}"))}");
 
@@ -60,6 +61,8 @@ public class ConnectorAcceptanceTest
                 TestContext.WriteLine($"{logEntry.Timestamp:T} {logEntry.Level} {logEntry.Endpoint ?? TestContext.CurrentContext.Test.Name}: {logEntry.Message}");
             }
             TestContext.WriteLine("--- End log entries ---------------------------------------------------");
+#pragma warning restore NUnit1033
+
         }
     }
 }

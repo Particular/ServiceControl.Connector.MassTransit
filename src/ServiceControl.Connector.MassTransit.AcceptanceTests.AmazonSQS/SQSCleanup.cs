@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Amazon.Runtime;
+﻿using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Util;
@@ -134,7 +130,7 @@ public class SQSCleanup
 
         try
         {
-            ListSubscriptionsResponse subscriptions = null;
+            ListSubscriptionsResponse? subscriptions = null;
             do
             {
                 subscriptions = await snsClient.ListSubscriptionsAsync(subscriptions?.NextToken);
@@ -181,7 +177,7 @@ public class SQSCleanup
         var deletedTopicArns = new HashSet<string>(StringComparer.Ordinal);
         try
         {
-            ListTopicsResponse upToHundredTopics = null;
+            ListTopicsResponse? upToHundredTopics = null;
             do
             {
                 upToHundredTopics = await snsClient.ListTopicsAsync(upToHundredTopics?.NextToken);

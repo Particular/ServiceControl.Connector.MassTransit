@@ -1,8 +1,6 @@
-﻿using System;
-using Amazon.S3;
+﻿using Amazon.S3;
 using Amazon.SimpleNotificationService;
 using Amazon.SQS;
-using NServiceBus;
 using NServiceBus.AcceptanceTests;
 
 public class TestableSQSTransport : SqsTransport
@@ -14,7 +12,7 @@ public class TestableSQSTransport : SqsTransport
         QueueNameGenerator = TestNameHelper.GetSqsQueueName;
         TopicNameGenerator = TestNameHelper.GetSnsTopicName;
 
-        S3BucketName = Environment.GetEnvironmentVariable(S3BucketEnvironmentVariableName);
+        S3BucketName = Environment.GetEnvironmentVariable(S3BucketEnvironmentVariableName)!;
 
         if (!string.IsNullOrEmpty(S3BucketName))
         {
