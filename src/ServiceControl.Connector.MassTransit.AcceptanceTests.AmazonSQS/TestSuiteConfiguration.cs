@@ -3,8 +3,9 @@
 public partial class TestSuiteConfiguration
 {
     public IConfigureTransportTestExecution CreateTransportConfiguration() => new ConfigureAmazonSQSTransportTestExecution();
-    public async Task Cleanup()
+    public Task Cleanup()
     {
+        return Task.CompletedTask;
         //var accessKeyId = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
         //var secretAccessKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
         //using (var sqsClient = new AmazonSQSClient(accessKeyId, secretAccessKey))
