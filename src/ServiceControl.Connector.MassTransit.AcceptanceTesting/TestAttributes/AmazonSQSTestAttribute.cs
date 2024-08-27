@@ -9,7 +9,7 @@ public class AmazonSQSTestAttribute : Attribute, IApplyToContext
     public void ApplyToContext(TestExecutionContext context)
     {
         var connectionString = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
-        if (connectionString == null)
+        if (string.IsNullOrWhiteSpace(connectionString))
         {
             Assert.Ignore("Ignoring because environment variable AWS_ACCESS_KEY_ID is not available");
         }
