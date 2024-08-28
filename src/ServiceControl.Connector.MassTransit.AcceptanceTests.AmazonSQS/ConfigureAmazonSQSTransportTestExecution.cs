@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NServiceBus.AcceptanceTesting.Support;
+using NServiceBus.AcceptanceTests;
 
 class ConfigureAmazonSQSTransportTestExecution : IConfigureTransportTestExecution
 {
@@ -34,6 +35,12 @@ class ConfigureAmazonSQSTransportTestExecution : IConfigureTransportTestExecutio
 
     public void ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration)
     {
-        services.UsingAmazonSqs();
+        services.UsingAmazonSqs(transport =>
+        {
+            transport.QueueNamePrefix = NamePrefixGenerator.GetNamePrefix();
+            transport.TopicNamePrefix = NamePrefixGenerator.GetNamePrefix();
+            transport.QueueNameGenerator = TestNameHelper.GetSqsQueueName;
+        });
+        services.AddSingleton<IQueueFilter>(new AcceptanceTestQueueFilter());
     }
 }

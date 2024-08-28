@@ -10,7 +10,7 @@
     <ProjectReference Include="..\..\NServiceBus.Transport.AzureServiceBus\src\Transport\NServiceBus.Transport.AzureServiceBus.csproj" />
     <ProjectReference Include="..\ServiceControl.Connector.MassTransit.AcceptanceTesting\ServiceControl.Connector.MassTransit.AcceptanceTesting.csproj" />
     <ProjectReference Include="..\ServiceControl.Connector.MassTransit.AzureServiceBus\ServiceControl.Connector.MassTransit.AzureServiceBus.csproj" />
-    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.2.5" />
+    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.2.3" />
   </ItemGroup>
 
   <ItemGroup>

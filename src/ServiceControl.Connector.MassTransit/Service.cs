@@ -4,7 +4,7 @@ using NServiceBus.Transport;
 
 public class Service(
     ILogger<Service> logger,
-    TransportDefinition transportDefinition,
+    TransportDefinitionFactory transportDefinitionFactory,
     IQueueInformationProvider queueInformationProvider,
     IQueueFilter queueFilter,
     MassTransitFailureAdapter adapter,
@@ -13,6 +13,7 @@ public class Service(
     IHostApplicationLifetime hostApplicationLifetime
 ) : BackgroundService
 {
+    TransportDefinition transportDefinition;
     TransportInfrastructure? infrastructure;
     HashSet<string>? massTransitErrorQueues;
 
@@ -106,6 +107,7 @@ public class Service(
 
         var receiverSettings = receiveSettings.ToArray();
 
+        transportDefinition = transportDefinitionFactory.CreateTransportDefinition();
         infrastructure = await transportDefinition.Initialize(hostSettings, receiverSettings, [], cancellationToken);
 
         var messageDispatcher = infrastructure.Dispatcher;
@@ -156,5 +158,6 @@ public class Service(
     async Task Teardown(CancellationToken cancellationToken)
     {
         await infrastructure!.Shutdown(cancellationToken);
+        transportDefinition = null;
     }
 }

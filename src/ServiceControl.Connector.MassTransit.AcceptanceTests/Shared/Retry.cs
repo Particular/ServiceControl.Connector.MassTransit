@@ -19,14 +19,11 @@ public class Retry : ConnectorAcceptanceTest
             .WithMassTransit("Receiver", bus =>
             {
                 bus.AddConsumer<FailingConsumer>();
-            }, (context, collection) =>
+            })
+            .WithMassTransit("Sender", bus => { }, (context, collection) =>
             {
                 collection.AddHostedService<Sender>();
             })
-            //.WithMassTransit("Sender", bus => { }, (context, collection) =>
-            //{
-            //    collection.AddHostedService<Sender>();
-            //})
             .WithEndpoint<ErrorSpy>()
             .Done(c => c.MessageProcessed)
             .Run();

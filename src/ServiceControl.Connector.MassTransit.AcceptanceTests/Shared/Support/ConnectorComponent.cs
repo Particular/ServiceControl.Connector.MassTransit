@@ -55,7 +55,6 @@ public class ConnectorComponent<TContext> : IComponentBehavior
                         QueueScanInterval = TimeSpan.FromSeconds(5),
                         SetupInfrastructure = false
                     });
-                    services.AddSingleton<IQueueFilter, ErrorAndSkippedQueueFilter>();
                     services.AddSingleton<Service>();
                     services.AddSingleton<MassTransitConverter>();
                     services.AddSingleton<MassTransitFailureAdapter>();
@@ -95,3 +94,4 @@ public class ConnectorComponent<TContext> : IComponentBehavior
         readonly AcceptanceTestLoggerFactory loggerFactory;
     }
 }
+
