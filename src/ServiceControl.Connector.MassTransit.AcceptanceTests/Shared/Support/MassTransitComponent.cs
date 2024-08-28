@@ -46,7 +46,7 @@ public class MassTransitComponent<TContext> : IComponentBehavior
             var transportConfig = TestSuiteConfiguration.Current.CreateTransportConfiguration();
 
             var builder = Host.CreateDefaultBuilder()
-                .ConfigureLogging(cfg => cfg.ClearProviders())
+                .ConfigureLogging(cfg => cfg.ClearProviders().SetMinimumLevel(LogLevel.Debug))
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddMassTransit(x =>

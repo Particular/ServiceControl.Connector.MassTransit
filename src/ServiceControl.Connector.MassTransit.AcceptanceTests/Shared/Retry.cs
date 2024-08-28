@@ -16,11 +16,17 @@ public class Retry : ConnectorAcceptanceTest
     {
         var ctx = await Scenario.Define<Context>()
             .WithConnector("Connector", Conventions.EndpointNamingConvention(typeof(ErrorSpy)), "Retry.Return")
-            .WithMassTransit("Receiver", bus => { bus.AddConsumer<FaultyConsumer>(); })
-            .WithMassTransit("Sender", bus => { }, (context, collection) =>
+            .WithMassTransit("Receiver", bus =>
+            {
+                bus.AddConsumer<FailingConsumer>();
+            }, (context, collection) =>
             {
                 collection.AddHostedService<Sender>();
             })
+            //.WithMassTransit("Sender", bus => { }, (context, collection) =>
+            //{
+            //    collection.AddHostedService<Sender>();
+            //})
             .WithEndpoint<ErrorSpy>()
             .Done(c => c.MessageProcessed)
             .Run();
@@ -52,11 +58,11 @@ public class Retry : ConnectorAcceptanceTest
         }
     }
 
-    public class FaultyConsumer : IConsumer<FaultyMessage>
+    public class FailingConsumer : IConsumer<FaultyMessage>
     {
         readonly Context testContext;
 
-        public FaultyConsumer(Context testContext)
+        public FailingConsumer(Context testContext)
         {
             this.testContext = testContext;
         }

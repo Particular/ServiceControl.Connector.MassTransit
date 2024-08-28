@@ -24,7 +24,11 @@ class ConfigureAmazonSQSTransportTestExecution : IConfigureTransportTestExecutio
             {
                 h.AccessKey(accessKeyId);
                 h.SecretKey(secretAccessKey);
+
+                h.Scope(NamePrefixGenerator.GetNamePrefix(), true);
             });
+
+            cfg.ConfigureEndpoints(context, new DefaultEndpointNameFormatter(NamePrefixGenerator.GetNamePrefix(), false));
         });
     }
 
