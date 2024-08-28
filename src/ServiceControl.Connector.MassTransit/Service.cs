@@ -13,7 +13,7 @@ public class Service(
     IHostApplicationLifetime hostApplicationLifetime
 ) : BackgroundService
 {
-    TransportDefinition transportDefinition;
+    TransportDefinition? transportDefinition;
     TransportInfrastructure? infrastructure;
     HashSet<string>? massTransitErrorQueues;
 
