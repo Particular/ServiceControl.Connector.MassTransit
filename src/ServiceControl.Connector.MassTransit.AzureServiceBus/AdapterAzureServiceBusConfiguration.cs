@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NServiceBus.Transport;
 
 public static class AdapterAzureServiceBusConfiguration
 {
@@ -15,11 +14,11 @@ public static class AdapterAzureServiceBusConfiguration
         }
 
         services.AddSingleton<IQueueInformationProvider>(b => new AzureServiceBusHelper(b.GetRequiredService<ILogger<AzureServiceBusHelper>>(), connectionString));
-        services.AddSingleton<TransportDefinition>(
+        services.AddSingleton(new TransportDefinitionFactory(() =>
             new AzureServiceBusTransport(connectionString)
             {
                 TransportTransactionMode = TransportTransactionMode.ReceiveOnly
-            });
+            }));
         services.AddSingleton<ReceiverFactory>(new AzureServiceBusReceiverFactory(receiveMode));
         services.AddSingleton<MassTransitFailureAdapter, AzureServiceBusMassTransitFailureAdapter>();
     }
