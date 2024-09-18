@@ -1,6 +1,24 @@
 name: servicecontrol-connector-sample
 x-transport: &transport-env
-  env_file: "rabbit.env"
+  environment: 
+    RAVENDB_CONNECTIONSTRING: "http://servicecontrol-db:8080"
+    ALLOWMESSAGEEDITING: true
+
+    #[RabbitMQ]
+    #TRANSPORTTYPE: "RabbitMQ.QuorumConventionalRouting"
+    #CONNECTIONSTRING: "host=host.docker.internal"
+    #MANAGEMENTAPI: "http://guest:guest@host.docker.internal:15672"
+
+    #[AzureServiceBus]
+    #TRANSPORTTYPE: "NetStandardAzureServiceBus"
+    #CONNECTIONSTRING: "<connection-string>"
+
+    #[Amazon SQS]
+    #TRANSPORTTYPE: "AmazonSQS"
+    #AWS_REGION: "<region>"
+    #AWS_ACCESS_KEY_ID: "<access-key>"
+    #AWS_SECRET_ACCESS_KEY: "<secret-access-key>"
+    #CONNECTIONSTRING: "Region=$AWS_REGION;AccessKeyId=$AWS_ACCESS_KEY_ID;SecretAccessKey=$AWS_SECRET_ACCESS_KEY"
    
 services:
   service-control-db:
