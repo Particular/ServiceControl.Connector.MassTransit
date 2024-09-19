@@ -169,7 +169,11 @@ public class Service(
 
     async Task Teardown(CancellationToken cancellationToken)
     {
-        await infrastructure!.Shutdown(cancellationToken);
+        if (infrastructure != null)
+        {
+            await infrastructure.Shutdown(cancellationToken);
+        }
+
         transportDefinition = null;
     }
 }
