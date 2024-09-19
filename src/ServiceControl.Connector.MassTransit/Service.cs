@@ -21,8 +21,17 @@ public class Service(
     async Task<HashSet<string>> GetReceiveQueues()
 #pragma warning restore PS0018
     {
-        var queues = await queueInformationProvider.GetQueues();
-        return queues.Where(queueFilter.IsMatch).ToHashSet();
+        try
+        {
+            var queues = await queueInformationProvider.GetQueues();
+            return queues.Where(queueFilter.IsMatch).ToHashSet();
+        }
+        catch (Exception e)
+        {
+            logger.LogWarning("Failure querying the queue information.", e);
+        }
+
+        return [];
     }
 
 #pragma warning disable PS0017
@@ -32,33 +41,36 @@ public class Service(
         var version = System.Diagnostics.FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly()!.Location).ProductVersion!;
         logger.LogInformation("ServiceControl.Connector.MassTransit {Version}", version);
 
-        massTransitErrorQueues = await GetReceiveQueues();
-        await Setup(shutdownToken);
-
+        //Setup mode only
         if (configuration.SetupInfrastructure)
         {
+            massTransitErrorQueues = await GetReceiveQueues();
+            await Setup(shutdownToken);
+
             logger.LogInformation("Signaling stop as only run in setup mode");
             hostApplicationLifetime.StopApplication();
             return;
         }
 
+        massTransitErrorQueues = [];
+
         try
         {
             while (!shutdownToken.IsCancellationRequested)
             {
-                await Task.Delay(configuration.QueueScanInterval, shutdownToken);
-
                 var newData = await GetReceiveQueues();
 
-                var setEquals = newData.SetEquals(massTransitErrorQueues);
+                var errorQueuesAreTheSame = newData.SetEquals(massTransitErrorQueues);
 
-                if (!setEquals)
+                if (errorQueuesAreTheSame == false)
                 {
                     logger.LogInformation("Changes detected, restarting");
                     await Teardown(shutdownToken);
                     massTransitErrorQueues = newData;
                     await Setup(shutdownToken);
                 }
+
+                await Task.Delay(configuration.QueueScanInterval, shutdownToken);
             }
         }
         catch (OperationCanceledException) when (shutdownToken.IsCancellationRequested)
