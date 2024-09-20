@@ -28,7 +28,7 @@ public class Service(
         }
         catch (Exception e)
         {
-            logger.LogWarning("Failure querying the queue information.", e);
+            logger.LogWarning(e, "Failure querying the queue information");
         }
 
         return [];
