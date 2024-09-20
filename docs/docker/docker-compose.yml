@@ -1,5 +1,4 @@
 name: servicecontrol-connector-sample
-x-transport: &transport-env
   environment: 
     RAVENDB_CONNECTIONSTRING: "http://servicecontrol-db:8080"
     ALLOWMESSAGEEDITING: true
