@@ -60,9 +60,9 @@ public class Service(
             {
                 var newData = await GetReceiveQueues();
 
-                var errorQueuesAreTheSame = newData.SetEquals(massTransitErrorQueues);
+                var errorQueuesAreNotTheSame = !newData.SetEquals(massTransitErrorQueues);
 
-                if (errorQueuesAreTheSame == false)
+                if (errorQueuesAreNotTheSame)
                 {
                     logger.LogInformation("Changes detected, restarting");
                     await Teardown(shutdownToken);
