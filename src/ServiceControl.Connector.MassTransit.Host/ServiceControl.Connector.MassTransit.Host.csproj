@@ -7,7 +7,7 @@
       <Nullable>enable</Nullable>
       <IsPublishable>true</IsPublishable>
       <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
-      <ContainerRepository>servicecontrol-connector-masstransit</ContainerRepository>
+      <ContainerRepository>particular/servicecontrol-connector-masstransit</ContainerRepository>
     </PropertyGroup>
 
     <ItemGroup>
