@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.Transport;
+using ServiceControl.Adapter.MassTransit;
 
 public class Service(
     ILogger<Service> logger,
@@ -42,14 +43,18 @@ public class Service(
         logger.LogInformation("ServiceControl.Connector.MassTransit {Version}", version);
 
         //Setup mode only
-        if (configuration.SetupInfrastructure)
+        if (configuration.Command is Command.Setup or Command.SetupAndRun)
         {
             massTransitErrorQueues = await GetReceiveQueues();
+
             await Setup(shutdownToken);
 
-            logger.LogInformation("Signaling stop as only run in setup mode");
-            hostApplicationLifetime.StopApplication();
-            return;
+            if (configuration.Command is Command.Setup)
+            {
+                logger.LogInformation("Signaling stop as only run in setup mode");
+                hostApplicationLifetime.StopApplication();
+                return;
+            }
         }
 
         massTransitErrorQueues = [];
@@ -67,7 +72,7 @@ public class Service(
                     logger.LogInformation("Changes detected, restarting");
                     await Teardown(shutdownToken);
                     massTransitErrorQueues = newData;
-                    await Setup(shutdownToken);
+                    await StartReceiving(shutdownToken);
                 }
 
                 await Task.Delay(configuration.QueueScanInterval, shutdownToken);
@@ -93,6 +98,38 @@ public class Service(
                 hostApplicationLifetime.StopApplication();
             },
             true
+        );
+
+        var receiveSettings = new List<ReceiveSettings>
+        {
+            new(
+                id: "Return",
+                receiveAddress: new QueueAddress(configuration.ReturnQueue),
+                usePublishSubscribe: false,
+                purgeOnStartup: false,
+                errorQueue: configuration.PoisonQueue
+            )
+        };
+
+        var receiverSettings = receiveSettings.ToArray();
+
+        transportDefinition = transportDefinitionFactory.CreateTransportDefinition();
+        infrastructure = await transportDefinition.Initialize(hostSettings, receiverSettings, [], cancellationToken);
+    }
+
+
+    async Task StartReceiving(CancellationToken cancellationToken)
+    {
+        var hostSettings = new HostSettings(
+            name: configuration.ReturnQueue,
+            hostDisplayName: configuration.ReturnQueue,
+            startupDiagnostic: new StartupDiagnosticEntries(),
+            criticalErrorAction: (_, exception, _) =>
+            {
+                logger.LogCritical(exception, "Critical error, signaling to stop host");
+                hostApplicationLifetime.StopApplication();
+            },
+            false
         );
 
         var receiveSettings = new List<ReceiveSettings>
@@ -139,12 +176,6 @@ public class Service(
 
             // TODO: Add error handling to forward message to an error/poison queue, maybe even put it back in the same queue "at the end" or maybe just have a circuit breaker and delay 
         };
-
-        if (configuration.SetupInfrastructure)
-        {
-            logger.LogInformation("Not starting receivers as in setup mode");
-            return;
-        }
 
         foreach (var receiverSetting in receiverSettings)
         {

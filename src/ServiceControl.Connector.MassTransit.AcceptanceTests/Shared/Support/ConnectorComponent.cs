@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.AcceptanceTesting;
 using NServiceBus.AcceptanceTesting.Support;
+using ServiceControl.Adapter.MassTransit;
 
 
 public class ConnectorComponent<TContext> : IComponentBehavior
@@ -53,7 +54,7 @@ public class ConnectorComponent<TContext> : IComponentBehavior
                         ReturnQueue = returnQueue,
                         ErrorQueue = errorQueue,
                         QueueScanInterval = TimeSpan.FromSeconds(5),
-                        SetupInfrastructure = false
+                        Command = Command.SetupAndRun
                     });
                     services.AddSingleton<Service>();
                     services.AddSingleton<MassTransitConverter>();

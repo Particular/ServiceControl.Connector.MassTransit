@@ -2,23 +2,27 @@ using System.Data.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ServiceControl.Adapter.MassTransit;
 
 static class HostApplicationBuilderExtensions
 {
     public static void UseMassTransitConnector(this HostApplicationBuilder builder)
     {
-        var setupInfrastructure = Environment.GetCommandLineArgs().Contains("--setup");
         var returnQueue = builder.Configuration.GetValue<string?>("ReturnQueue") ??
                           "Particular.ServiceControl.Connector.MassTransit_return";
         var errorQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "error";
 
         var services = builder.Services;
 
+        var commandLineArgs = Environment.GetCommandLineArgs();
+
         services.AddSingleton(new Configuration
         {
             ReturnQueue = returnQueue,
             ErrorQueue = errorQueue,
-            SetupInfrastructure = setupInfrastructure
+            Command = commandLineArgs.Contains("--setup")
+                ? Command.Setup
+                : commandLineArgs.Contains("--setup-and-run") ? Command.SetupAndRun : Command.Run,
         })
         .AddSingleton<IQueueFilter, ErrorAndSkippedQueueFilter>()
         .AddSingleton<Service>()
