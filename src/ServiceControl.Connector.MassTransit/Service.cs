@@ -49,7 +49,7 @@ public class Service(
 
             await Setup(shutdownToken);
 
-            if (configuration.IsRun)
+            if (!configuration.IsRun)
             {
                 logger.LogInformation("Signaling stop as only run in setup mode");
                 hostApplicationLifetime.StopApplication();
