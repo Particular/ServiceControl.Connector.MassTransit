@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NServiceBus.Routing;
 using NServiceBus.Transport;
 using ServiceControl.Adapter.MassTransit;
 
@@ -164,17 +165,31 @@ public class Service(
         OnMessage forwardMessage = async (messageContext, token) =>
         {
             using var scope = logger.BeginScope("FORWARD {ReceiveAddress} {NativeMessageId}", messageContext.ReceiveAddress, messageContext.NativeMessageId);
-            var operation = adapter.ForwardMassTransitErrorToServiceControl(messageContext);
+            TransportOperation operation;
+            try
+            {
+                operation = adapter.ForwardMassTransitErrorToServiceControl(messageContext);
+            }
+            catch (Exception e)
+            {
+                throw new ConversionException("Conversion to ServiceControl failed", e);
+            }
             await messageDispatcher.Dispatch(new TransportOperations(operation), messageContext.TransportTransaction, token);
         };
 
-        OnMessage returnMessage = async (context, token) =>
+        OnMessage returnMessage = async (messageContext, token) =>
         {
-            using var scope = logger.BeginScope("RETURN {ReceiveAddress} {NativeMessageId}", context.ReceiveAddress, context.NativeMessageId);
-            var operation = adapter.ReturnMassTransitFailure(context);
-            await messageDispatcher.Dispatch(new TransportOperations(operation), context.TransportTransaction, token);
-
-            // TODO: Add error handling to forward message to an error/poison queue, maybe even put it back in the same queue "at the end" or maybe just have a circuit breaker and delay 
+            using var scope = logger.BeginScope("RETURN {ReceiveAddress} {NativeMessageId}", messageContext.ReceiveAddress, messageContext.NativeMessageId);
+            TransportOperation operation;
+            try
+            {
+                operation = adapter.ReturnMassTransitFailure(messageContext);
+            }
+            catch (Exception e)
+            {
+                throw new ConversionException("Conversion from ServiceControl failed", e);
+            }
+            await messageDispatcher.Dispatch(new TransportOperations(operation), messageContext.TransportTransaction, token);
         };
 
         foreach (var receiverSetting in receiverSettings)
@@ -186,12 +201,41 @@ public class Service(
             var receiver = infrastructure.Receivers[receiverSetting.Id];
             await receiver.Initialize(new PushRuntimeSettings(1),
                 onMessage: (context, token) => onMessage(context, token),
-                onError: (context, _) =>
+                onError: async (context, token) =>
                 {
-                    logger.LogError(context.Exception, "Discarding due to failure: {ExceptionMessage}",
-                        context.Exception.Message);
-                    // TODO: Smarter handling
-                    return Task.FromResult(ErrorHandleResult.RetryRequired);
+                    using var scope = logger.BeginScope("OnError {NativeMessageId}", context.Message.NativeMessageId);
+                    var isPoison = context.Exception is ConversionException;
+
+                    var exceedsRetryThreshold = context.ImmediateProcessingFailures > configuration.MaxRetries;
+
+                    // TODO: Add transport specific exception handling as certain exceptions are not recoverable
+
+                    if (isPoison || exceedsRetryThreshold)
+                    {
+                        logger.LogError(context.Exception, "Moved message to {QueueName}", configuration.ErrorQueue);
+
+                        var poisonMessage = new OutgoingMessage(
+                            context.Message.MessageId,
+                            context.Message.Headers,
+                            context.Message.Body
+                        );
+                        var address = new UnicastAddressTag(configuration.ErrorQueue);
+                        var operation = new TransportOperation(poisonMessage, address);
+                        var operations = new TransportOperations(operation);
+
+                        await messageDispatcher.Dispatch(operations, context.TransportTransaction, token);
+                        return ErrorHandleResult.Handled;
+                    }
+                    else
+                    {
+                        // Exponential back-off with jitter
+                        var millisecondsDelay = (int)Math.Min(30000, 100 * Math.Pow(2, context.ImmediateProcessingFailures));
+                        millisecondsDelay += Random.Shared.Next(millisecondsDelay / 5);
+
+                        logger.LogWarning(context.Exception, "Retrying message {QueueName}, attempt {ImmediateProcessingFailures} of {MaxRetries} after {millisecondsDelay} milliseconds", configuration.ErrorQueue, context.ImmediateProcessingFailures, configuration.MaxRetries, millisecondsDelay);
+                        await Task.Delay(millisecondsDelay, token);
+                        return ErrorHandleResult.RetryRequired;
+                    }
                 }, cancellationToken: cancellationToken);
 
             await receiver.StartReceive(cancellationToken);
