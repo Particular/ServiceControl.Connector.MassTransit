@@ -7,7 +7,7 @@ public static class AdapterAmazonSqsConfiguration
         services.AddSingleton<IQueueInformationProvider>(new AmazonSqsHelper(string.Empty));
         services.AddSingleton(new TransportDefinitionFactory(() =>
         {
-            var transport = new SqsTransport { DoNotWrapOutgoingMessages = true };
+            var transport = new SqsTransport(enableDelayedDelivery: false) { DoNotWrapOutgoingMessages = true };
             transportConfig?.Invoke(transport);
             return transport;
         }));
