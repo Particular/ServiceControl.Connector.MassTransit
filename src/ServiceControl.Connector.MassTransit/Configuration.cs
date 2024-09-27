@@ -7,4 +7,7 @@ public record Configuration
     public required Command Command { get; init; }
     public string PoisonQueue => ReturnQueue + ".poison";
     public TimeSpan QueueScanInterval { get; set; } = TimeSpan.FromSeconds(60);
+
+    public bool IsSetup => Command is Command.Setup or Command.SetupAndRun;
+    public bool IsRun => Command is Command.Run or Command.SetupAndRun;
 }

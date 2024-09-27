@@ -43,13 +43,13 @@ public class Service(
         logger.LogInformation("ServiceControl.Connector.MassTransit {Version}", version);
 
         //Perform setup
-        if (configuration.Command is Command.Setup or Command.SetupAndRun)
+        if (configuration.IsSetup)
         {
             massTransitErrorQueues = await GetReceiveQueues();
 
             await Setup(shutdownToken);
 
-            if (configuration.Command is Command.Setup)
+            if (configuration.IsRun)
             {
                 logger.LogInformation("Signaling stop as only run in setup mode");
                 hostApplicationLifetime.StopApplication();
@@ -70,7 +70,7 @@ public class Service(
                 if (errorQueuesAreNotTheSame)
                 {
                     logger.LogInformation("Changes detected, restarting");
-                    await Teardown(shutdownToken);
+                    await StopReceiving(shutdownToken);
                     massTransitErrorQueues = newData;
                     await StartReceiving(shutdownToken);
                 }
@@ -198,7 +198,7 @@ public class Service(
         }
     }
 
-    async Task Teardown(CancellationToken cancellationToken)
+    async Task StopReceiving(CancellationToken cancellationToken)
     {
         if (infrastructure != null)
         {

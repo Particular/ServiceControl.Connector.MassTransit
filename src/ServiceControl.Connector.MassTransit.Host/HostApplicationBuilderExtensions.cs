@@ -8,21 +8,22 @@ static class HostApplicationBuilderExtensions
 {
     public static void UseMassTransitConnector(this HostApplicationBuilder builder)
     {
+        var commandLineArgs = Environment.GetCommandLineArgs();
+        var command = commandLineArgs.Contains("--setup")
+                ? Command.Setup
+                : commandLineArgs.Contains("--setup-and-run") ? Command.SetupAndRun : Command.Run;
+
         var returnQueue = builder.Configuration.GetValue<string?>("ReturnQueue") ??
                           "Particular.ServiceControl.Connector.MassTransit_return";
         var errorQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "error";
 
         var services = builder.Services;
 
-        var commandLineArgs = Environment.GetCommandLineArgs();
-
         services.AddSingleton(new Configuration
         {
             ReturnQueue = returnQueue,
             ErrorQueue = errorQueue,
-            Command = commandLineArgs.Contains("--setup")
-                ? Command.Setup
-                : commandLineArgs.Contains("--setup-and-run") ? Command.SetupAndRun : Command.Run,
+            Command = command,
         })
         .AddSingleton<IQueueFilter, ErrorAndSkippedQueueFilter>()
         .AddSingleton<Service>()
