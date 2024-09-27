@@ -199,7 +199,7 @@ public class Service(
                     {
                         // Exponential back-off with jitter
                         var millisecondsDelay = (int)Math.Min(30000, 100 * Math.Pow(2, context.ImmediateProcessingFailures));
-                        millisecondsDelay += ThreadSafeRandom.Instance.Next(millisecondsDelay / 5);
+                        millisecondsDelay += Random.Shared.Next(millisecondsDelay / 5);
 
                         logger.LogWarning(context.Exception, "Retrying message {QueueName}, attempt {ImmediateProcessingFailures} of {MaxRetries} after {millisecondsDelay} milliseconds", configuration.ErrorQueue, context.ImmediateProcessingFailures, configuration.MaxRetries, millisecondsDelay);
                         await Task.Delay(millisecondsDelay, token);
