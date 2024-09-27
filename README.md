@@ -26,6 +26,17 @@ git submodule init
 git submodule update
 ```
 
+### Updating submodule branches
+
+> [!NOTE]
+> This also works with git bash on Windows
+
+Currently all submodules use the `tf527` branch to store the customizations required for the connector. These can be updated to running:
+
+```
+bash update-submodules.sh
+```
+
 ### Build
 
 ```shell
