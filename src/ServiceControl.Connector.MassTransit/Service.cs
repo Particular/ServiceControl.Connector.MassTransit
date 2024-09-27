@@ -42,7 +42,7 @@ public class Service(
         var version = System.Diagnostics.FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly()!.Location).ProductVersion!;
         logger.LogInformation("ServiceControl.Connector.MassTransit {Version}", version);
 
-        //Setup mode only
+        //Perform setup
         if (configuration.Command is Command.Setup or Command.SetupAndRun)
         {
             massTransitErrorQueues = await GetReceiveQueues();
