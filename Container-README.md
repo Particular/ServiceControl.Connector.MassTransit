@@ -67,6 +67,7 @@ docker run \
 | ERRORQUEUE       | The error queue ServiceControl ingests                                                              | `error`                                                  |
 | MANAGEMENTAPI    | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
 | QUEUES_FILE      | File that contains each error queue to monitor as a seperate line                                   | None                                                     |
+| RECEIVEMODE      | Azure Service Bus: By default ingest `*_error` but can ingest from dead-letter queues               | `Queue`                                                  |
 
 ### TRANSPORTTYPE
 
@@ -124,6 +125,17 @@ Example:
 ```txt
 /queues.txt
 ```
+
+### RECEIVEMODE
+
+Default: Queue
+
+Values: Queue | DeadLetterQueue
+
+> [!NOTE]
+> Only applies to Azure Service Bus
+
+Failed message by default (mode `Queue`) will be ingested from queues matching `*_error` but by specifying `DeadLetterQueue` the connector will ingest messages from the [Service Bus dead-letter (sub) queues](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dead-letter-queues).
 
 ## Support
 
