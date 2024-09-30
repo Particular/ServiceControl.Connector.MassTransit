@@ -36,6 +36,9 @@ dotnet build src/ServiceControl.Connector.MassTransit.sln
 
 ### Local container creation
 
+> [!NOTE]
+> The following creates a multiplatform images. This can only be build when the "Use containerd for pulling and storing images" is enabled under General.
+
 To locally build and test the container run the following in any shell:
 
 ```shell
