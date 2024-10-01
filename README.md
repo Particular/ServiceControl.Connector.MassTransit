@@ -39,10 +39,13 @@ dotnet build src/ServiceControl.Connector.MassTransit.sln
 > [!NOTE]
 > The following creates a multiplatform images. This can only be build when the "Use containerd for pulling and storing images" is enabled under General.
 
+> [!NOTE]
+> The dockerfile is also compatible with https://podman.io/, replace `docker buildx build` with `podman build`.
+
 To locally build and test the container run the following in any shell:
 
 ```shell
 git submodule init
 git submodule update
-docker buildx build --file src/ServiceControl.Connector.MassTransit.Host/Dockerfile --platform linux/arm64,linux/amd64 --tag particular/servicecontrol-connector-masstransit:latest .
+docker buildx --file src/ServiceControl.Connector.MassTransit.Host/Dockerfile --platform linux/arm64,linux/amd64 --tag particular/servicecontrol-connector-masstransit:latest .
 ```
