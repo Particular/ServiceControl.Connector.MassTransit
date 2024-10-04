@@ -11,7 +11,8 @@ class RabbitMQHelper : IQueueInformationProvider
     {
         _vhost = vhost;
         _url = apiBaseUrl + "api/queues";
-
+        Console.WriteLine($"RabbitMQ API URL: {_url}");
+        Console.WriteLine($"ApiBase {apiBaseUrl.UserInfo}");
         var auth = Convert.ToBase64String(Encoding.ASCII.GetBytes(apiBaseUrl.UserInfo));
 
         _httpClient = new HttpClient();
