@@ -58,5 +58,21 @@ To locally build and test the container run the following in any shell:
 ```shell
 git submodule init
 git submodule update
-docker buildx --file src/ServiceControl.Connector.MassTransit.Host/Dockerfile --platform linux/arm64,linux/amd64 --tag particular/servicecontrol-connector-masstransit:latest .
+docker buildx build --file src/ServiceControl.Connector.MassTransit.Host/Dockerfile --platform linux/arm64,linux/amd64 --tag particular/servicecontrol-connector-masstransit:latest .
+```
+### Troubleshooting
+
+If you encounter the formatting issues error `IDE0055: Fix formatting` try removing the .editorconfig files from the repo folder
+
+#### On cmd shell
+
+```shell
+dir /s/b ".editorconfig"
+del /s ".editorconfig"
+```
+
+#### On Mac/Linux shell
+
+```shell
+rm .editorconfig -r
 ```
