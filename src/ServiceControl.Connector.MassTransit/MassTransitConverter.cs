@@ -21,11 +21,6 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
             {
                 headers.Remove(key);
             }
-
-            if (key.StartsWith("ServiceControl."))
-            {
-                headers.Remove(key);
-            }
         }
     }
 
