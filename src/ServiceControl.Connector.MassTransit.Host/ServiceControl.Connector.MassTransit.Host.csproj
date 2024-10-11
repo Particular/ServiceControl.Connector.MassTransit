@@ -8,6 +8,7 @@
       <IsPublishable>true</IsPublishable>
       <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
       <ContainerRepository>particular/servicecontrol-connector-masstransit</ContainerRepository>
+      <ServerGarbageCollection>true</ServerGarbageCollection>
     </PropertyGroup>
 
     <ItemGroup>
