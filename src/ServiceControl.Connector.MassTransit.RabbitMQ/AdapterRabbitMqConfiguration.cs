@@ -10,5 +10,6 @@ public static class AdapterRabbitMqConfiguration
             connectionString,
             enableDelayedDelivery: false
         )));
+        services.AddSingleton<MassTransitFailureAdapter, RabbitMQMassTransitFailureAdapter>();
     }
 }

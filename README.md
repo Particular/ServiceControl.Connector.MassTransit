@@ -26,6 +26,17 @@ git submodule init
 git submodule update
 ```
 
+### Updating submodule branches
+
+> [!NOTE]
+> This also works with git bash on Windows
+
+Currently all submodules use the `tf527` branch to store the customizations required for the connector. These can be updated to running:
+
+```
+bash update-submodules.sh
+```
+
 ### Build
 
 ```shell
@@ -39,10 +50,29 @@ dotnet build src/ServiceControl.Connector.MassTransit.sln
 > [!NOTE]
 > The following creates a multiplatform images. This can only be build when the "Use containerd for pulling and storing images" is enabled under General.
 
+> [!NOTE]
+> The dockerfile is also compatible with https://podman.io/, replace `docker buildx build` with `podman build`.
+
 To locally build and test the container run the following in any shell:
 
 ```shell
 git submodule init
 git submodule update
 docker buildx build --file src/ServiceControl.Connector.MassTransit.Host/Dockerfile --platform linux/arm64,linux/amd64 --tag particular/servicecontrol-connector-masstransit:latest .
+```
+### Troubleshooting
+
+If you encounter the formatting issues error `IDE0055: Fix formatting` try removing the .editorconfig files from the repo folder
+
+#### On cmd shell
+
+```shell
+dir /s/b ".editorconfig"
+del /s ".editorconfig"
+```
+
+#### On Mac/Linux shell
+
+```shell
+rm .editorconfig -r
 ```

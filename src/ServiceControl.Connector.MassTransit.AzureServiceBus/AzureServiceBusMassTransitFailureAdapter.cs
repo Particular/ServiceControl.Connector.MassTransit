@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using NServiceBus.Transport;
 using NServiceBus.Transport.AzureServiceBus.Experimental;
 
-class AzureServiceBusMassTransitFailureAdapter(
+sealed class AzureServiceBusMassTransitFailureAdapter(
     ILogger<MassTransitFailureAdapter> logger,
     MassTransitConverter mtConverter,
     Configuration configuration

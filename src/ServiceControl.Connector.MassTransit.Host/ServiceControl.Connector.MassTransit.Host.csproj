@@ -6,8 +6,6 @@
       <ImplicitUsings>enable</ImplicitUsings>
       <Nullable>enable</Nullable>
       <IsPublishable>true</IsPublishable>
-      <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
-      <ContainerRepository>particular/servicecontrol-connector-masstransit</ContainerRepository>
       <ServerGarbageCollection>true</ServerGarbageCollection>
     </PropertyGroup>
 
@@ -17,7 +15,7 @@
       <ProjectReference Include="..\ServiceControl.Connector.MassTransit.AzureServiceBus\ServiceControl.Connector.MassTransit.AzureServiceBus.csproj" />
       <ProjectReference Include="..\ServiceControl.Connector.MassTransit.RabbitMQ\ServiceControl.Connector.MassTransit.RabbitMQ.csproj" />
       <ProjectReference Include="..\ServiceControl.Connector.MassTransit\ServiceControl.Connector.MassTransit.csproj" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
       <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="None" />
     </ItemGroup>
   
