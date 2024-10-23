@@ -15,6 +15,7 @@ public class MassTransitFailureAdapter(
 
     long forwardCount;
     long returnCount;
+    protected virtual string QueuePrefix => "queue:";
 
     public virtual TransportOperation ForwardMassTransitErrorToServiceControl(MessageContext messageContext)
     {
@@ -88,11 +89,26 @@ public class MassTransitFailureAdapter(
             operation.Properties.Add(Headers.ContentType, contentType);
         }
 
+        PatchAckQueue(operation);
+
         // AzureServiceBus
         // TODO: AzureServiceBus  operation.DisableLegacyHeaders();
         // RabbitMQ and AzureServiceBus
         operation.Properties[Headers.MessageId] = messageId; // MassTransit sets native message ID to logical message id value
 
         return operation;
+    }
+
+    protected virtual void PatchAckQueue(TransportOperation operation)
+    {
+        const string RetryConfirmationQueueHeaderKey = "ServiceControl.Retry.AcknowledgementQueue";
+        var h = operation.Message.Headers;
+        if (!h.TryGetValue(RetryConfirmationQueueHeaderKey, out var ackQueue))
+        {
+            throw new InvalidOperationException($"Messages is expected to have '{RetryConfirmationQueueHeaderKey};  header");
+        }
+
+        ackQueue = QueuePrefix + ackQueue;
+        h[RetryConfirmationQueueHeaderKey] = ackQueue;
     }
 }
