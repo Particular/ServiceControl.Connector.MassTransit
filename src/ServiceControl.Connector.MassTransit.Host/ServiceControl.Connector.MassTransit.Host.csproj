@@ -6,8 +6,6 @@
       <ImplicitUsings>enable</ImplicitUsings>
       <Nullable>enable</Nullable>
       <IsPublishable>true</IsPublishable>
-      <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
-      <ContainerRepository>particular/servicecontrol-connector-masstransit</ContainerRepository>
     </PropertyGroup>
 
     <ItemGroup>
