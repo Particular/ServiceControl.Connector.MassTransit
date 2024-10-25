@@ -16,8 +16,8 @@ public static class EndpointCustomizationConfigurationExtensions
 
         var assemblies = assemblyScanner.GetScannableAssemblies();
 
+        //exclude acceptance tests by default
         var assembliesToScan = assemblies.Assemblies
-            //exclude acceptance tests by default
             .Where(a => a != Assembly.GetExecutingAssembly()).ToList();
         var types = assembliesToScan
             .SelectMany(a => a.GetTypes());

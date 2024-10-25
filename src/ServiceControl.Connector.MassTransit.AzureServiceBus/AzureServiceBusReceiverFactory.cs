@@ -1,19 +1,22 @@
 using NServiceBus.Transport;
-using NServiceBus.Transport.AzureServiceBus;
 
 class AzureServiceBusReceiverFactory(ReceiveMode receiveMode) : ReceiverFactory
 {
+    static readonly IReadOnlyDictionary<string, string> NormalQueue = new Dictionary<string, string>(1) { { nameof(ReceiveMode), ReceiveMode.Queue.ToString() } };
+    static readonly IReadOnlyDictionary<string, string> DeadLetterQueue = new Dictionary<string, string>(1) { { nameof(ReceiveMode), ReceiveMode.DeadLetterQueue.ToString() } };
+
     public override ReceiveSettings Create(string inputQueue, string errorQueue)
     {
-        return new AzureServiceBusReceiveSettings(
+        var queueProperties = receiveMode == ReceiveMode.DeadLetterQueue
+            ? DeadLetterQueue
+            : NormalQueue;
+
+        return new ReceiveSettings(
             id: inputQueue,
-            receiveAddress: new QueueAddress(inputQueue),
+            receiveAddress: new QueueAddress(inputQueue, properties: queueProperties),
             usePublishSubscribe: false,
             purgeOnStartup: false,
             errorQueue: errorQueue
-        )
-        {
-            DeadLetterQueue = receiveMode == ReceiveMode.DeadLetterQueue
-        };
+        );
     }
 }
