@@ -23,5 +23,7 @@ public static class AdapterAzureServiceBusConfiguration
 
     static void OutgoingNativeMessageCustomization(IOutgoingTransportOperation operation, ServiceBusMessage message)
     {
+        message.MessageId = operation.Properties[OperationPropertyKeys.MessageId];
+        message.ContentType = operation.Properties[OperationPropertyKeys.ContentType];
     }
 }

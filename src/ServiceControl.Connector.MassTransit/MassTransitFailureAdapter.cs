@@ -91,12 +91,10 @@ public class MassTransitFailureAdapter(
             operation.Properties.Add(ContentTypeKey, contentType);
         }
 
-        PatchAckQueue(operation);
-
-        // AzureServiceBus
-        // TODO: AzureServiceBus  operation.DisableLegacyHeaders();
         // RabbitMQ and AzureServiceBus
-        operation.Properties[Headers.MessageId] = messageId; // MassTransit sets native message ID to logical message id value
+        operation.Properties[OperationPropertyKeys.MessageId] = messageId; // MassTransit sets native message ID to logical message id value
+
+        PatchAckQueue(operation);
 
         return operation;
     }
