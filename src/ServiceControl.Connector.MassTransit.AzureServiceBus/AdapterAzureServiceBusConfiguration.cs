@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,19 +17,8 @@ public static class AdapterAzureServiceBusConfiguration
         }
 
         services.AddSingleton<IQueueInformationProvider>(b => new AzureServiceBusHelper(b.GetRequiredService<ILogger<AzureServiceBusHelper>>(), connectionString));
-        services.AddSingleton(new TransportDefinitionFactory(() =>
-            new AzureServiceBusTransport(connectionString) { TransportTransactionMode = TransportTransactionMode.ReceiveOnly, DoNotSendTransportEncodingHeader = true, OutgoingNativeMessageCustomization = OutgoingNativeMessageCustomization, ServiceBusProcessorOptionsCustomizer = ServiceBusProcessorOptionsCustomizer }));
-
+        services.AddSingleton(new TransportDefinitionFactory(() => new AzureServiceBusTransport(connectionString) { TransportTransactionMode = TransportTransactionMode.ReceiveOnly, DoNotSendTransportEncodingHeader = true, OutgoingNativeMessageCustomization = OutgoingNativeMessageCustomization }));
         services.AddSingleton<ReceiverFactory>(new AzureServiceBusReceiverFactory(receiveMode));
-    }
-
-    static void ServiceBusProcessorOptionsCustomizer(ReceiveSettings receiveSettings, ServiceBusProcessorOptions processorOptions)
-    {
-        var isDlq = receiveSettings.ReceiveAddress.Properties[nameof(ReceiveMode)] == ReceiveMode.DeadLetterQueue.ToString();
-        if (isDlq)
-        {
-            processorOptions.SubQueue = SubQueue.DeadLetter;
-        }
     }
 
     static void OutgoingNativeMessageCustomization(IOutgoingTransportOperation operation, ServiceBusMessage message)
