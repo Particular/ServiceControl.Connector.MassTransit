@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,9 +8,9 @@ public static class AdapterAzureServiceBusConfiguration
 {
     public static void UsingAzureServiceBus(this IServiceCollection services, IConfiguration configuration, string connectionString)
     {
-        var receiveMode = configuration.GetValue<ReceiveMode?>("ReceiveMode") ?? ReceiveMode.Queue;
+        var receiveMode = configuration.GetValue<SubQueue?>(nameof(SubQueue)) ?? SubQueue.None;
 
-        if (receiveMode == ReceiveMode.DeadLetterQueue)
+        if (receiveMode == SubQueue.DeadLetter)
         {
             services.AddSingleton<IQueueFilter, AllQueueFilter>();
         }
