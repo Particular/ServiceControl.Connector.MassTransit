@@ -4,7 +4,7 @@ using NServiceBus.Transport;
 class AzureServiceBusReceiverFactory(ReceiveMode receiveMode) : ReceiverFactory
 {
     static readonly string SubQueueKey = typeof(SubQueue).FullName!;
-    static readonly IReadOnlyDictionary<string, string> DeadLetterQueue = new Dictionary<string, string>(1) { { SubQueueKey, ReceiveMode.DeadLetterQueue.ToString() } };
+    static readonly IReadOnlyDictionary<string, string> DeadLetterQueue = new Dictionary<string, string>(1) { { SubQueueKey, SubQueue.DeadLetter.ToString() } };
 
     public override ReceiveSettings Create(string inputQueue, string errorQueue)
     {
