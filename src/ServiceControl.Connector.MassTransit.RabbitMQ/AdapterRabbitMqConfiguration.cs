@@ -11,7 +11,9 @@ public static class AdapterRabbitMqConfiguration
                 RoutingTopology.Conventional(QueueType.Quorum),
                 connectionString,
                 enableDelayedDelivery: false
-            ) { OutgoingNativeMessageCustomization = (operation, properties) =>
+            )
+            {
+                OutgoingNativeMessageCustomization = (operation, properties) =>
                 {
                     if (operation.Properties.TryGetValue(MassTransitFailureAdapter.ContentTypeProperty, out var contentType))
                     {
