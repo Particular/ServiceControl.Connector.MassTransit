@@ -13,10 +13,10 @@ public static class AdapterRabbitMqConfiguration
                 enableDelayedDelivery: false
             ) { OutgoingNativeMessageCustomization = (operation, properties) =>
                 {
-                    //if (operation.Properties.TryGetValue(MassTransitFailureAdapter.ContentTypeProperty, out var contentType))
-                    //{
-                    //    properties.ContentType = contentType;
-                    //}
+                    if (operation.Properties.TryGetValue(MassTransitFailureAdapter.ContentTypeProperty, out var contentType))
+                    {
+                        properties.ContentType = contentType;
+                    }
                 }
             };
             return transport;
