@@ -70,7 +70,7 @@ public class Retry : ConnectorAcceptanceTest
         public Task Consume(ConsumeContext<FaultyMessage> context)
         {
             testContext.FirstMessageReceived = true;
-            if (!testContext.MessageStatus.TryGetValue(context.MessageId.Value, out var failed))
+            if (!testContext.MessageStatus.TryGetValue(context.MessageId!.Value, out var failed))
             {
                 testContext.MessageStatus.TryAdd(context.MessageId.Value, true);
                 throw new Exception("Simulated");
@@ -129,7 +129,7 @@ public class Retry : ConnectorAcceptanceTest
         public ConcurrentDictionary<Guid, bool> MessageStatus { get; set; } = new ConcurrentDictionary<Guid, bool>();
         public bool MessageProcessed { get; set; }
         public bool FirstMessageReceived { get; set; }
-        public Action VerifyMessageAction { get; set; }
+        public Action? VerifyMessageAction { get; set; }
 
     }
 }
