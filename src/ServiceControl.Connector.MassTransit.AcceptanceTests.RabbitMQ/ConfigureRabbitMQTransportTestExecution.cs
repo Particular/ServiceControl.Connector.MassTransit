@@ -10,6 +10,7 @@ class ConfigureRabbitMQTransportTestExecution : IConfigureTransportTestExecution
         var transport = new RabbitMQTransport(
             RoutingTopology.Conventional(QueueType.Quorum), "host=localhost", false);
         endpointConfiguration.UseTransport(transport);
+
         return Cleanup;
     }
 
@@ -25,6 +26,8 @@ class ConfigureRabbitMQTransportTestExecution : IConfigureTransportTestExecution
 
             cfg.ConfigureEndpoints(context);
         });
+
+        configurator.AddSingleton<IRetryMessageVerification>(new RabbitMQRetryMessageVerification());
 
         configurator.AddConfigureEndpointsCallback((name, cfg) =>
         {

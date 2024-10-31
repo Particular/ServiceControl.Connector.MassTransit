@@ -13,6 +13,8 @@ public class MassTransitFailureAdapter(
     const string TargetEndpointAddress = "ServiceControl.TargetEndpointAddress";
     const string RetryTo = "ServiceControl.RetryTo";
 
+    public const string ContentTypeProperty = "ServiceControl.Connector.MassTransit.ContentType";
+
     long forwardCount;
     long returnCount;
     protected virtual string QueuePrefix => "queue:";
@@ -86,7 +88,7 @@ public class MassTransitFailureAdapter(
         // RabbitMQ and AzureServiceBus
         if (contentType != null)
         {
-            operation.Properties.Add(Headers.ContentType, contentType);
+            operation.Properties.Add(ContentTypeProperty, contentType);
         }
 
         PatchAckQueue(operation);

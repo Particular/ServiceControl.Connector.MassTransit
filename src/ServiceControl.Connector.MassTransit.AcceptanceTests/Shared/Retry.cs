@@ -30,6 +30,7 @@ public class Retry : ConnectorAcceptanceTest
 
         Assert.That(ctx.MessageFailed, Is.True);
         Assert.That(ctx.MessageProcessed, Is.True);
+        ctx.VerifyMessageAction?.Invoke();
     }
 
     public class Sender : BackgroundService
@@ -58,10 +59,12 @@ public class Retry : ConnectorAcceptanceTest
     public class FailingConsumer : IConsumer<FaultyMessage>
     {
         readonly Context testContext;
+        readonly IServiceProvider serviceProvider;
 
-        public FailingConsumer(Context testContext)
+        public FailingConsumer(Context testContext, IServiceProvider serviceProvider)
         {
             this.testContext = testContext;
+            this.serviceProvider = serviceProvider;
         }
 
         public Task Consume(ConsumeContext<FaultyMessage> context)
@@ -70,6 +73,12 @@ public class Retry : ConnectorAcceptanceTest
             if (!testContext.MessageFailed)
             {
                 throw new Exception("Simulated");
+            }
+
+            var verification = serviceProvider.GetService<IRetryMessageVerification>();
+            if (verification != null)
+            {
+                testContext.VerifyMessageAction = () => verification.Verify(context);
             }
             testContext.MessageProcessed = true;
             return Task.CompletedTask;
@@ -120,7 +129,14 @@ public class Retry : ConnectorAcceptanceTest
         public bool MessageFailed { get; set; }
         public bool MessageProcessed { get; set; }
         public bool FirstMessageReceived { get; set; }
+        public Action VerifyMessageAction { get; set; }
+
     }
+}
+
+public interface IRetryMessageVerification
+{
+    void Verify(ConsumeContext<FaultyMessage> context);
 }
 
 namespace RetryTest
