@@ -126,16 +126,16 @@ Example:
 /queues.txt
 ```
 
-### RECEIVEMODE
+### SUBQUEUE
 
 Default: Queue
 
-Values: Queue | DeadLetterQueue
+Values: None | DeadLetter
 
 > [!NOTE]
 > Only applies to Azure Service Bus
 
-Failed message by default (mode `Queue`) will be ingested from queues matching `*_error` but by specifying `DeadLetterQueue` the connector will ingest messages from the [Service Bus dead-letter (sub) queues](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dead-letter-queues).
+Failed message by default (mode `Queue`) will be ingested from queues matching `*_error` but by specifying `DeadLetter` the connector will ingest messages from the [Service Bus dead-letter (sub) queues](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dead-letter-queues).
 
 ## Support
 

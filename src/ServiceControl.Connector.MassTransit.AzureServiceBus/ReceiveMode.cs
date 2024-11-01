@@ -1,5 +1,0 @@
-enum ReceiveMode
-{
-    Queue,
-    DeadLetterQueue
-}

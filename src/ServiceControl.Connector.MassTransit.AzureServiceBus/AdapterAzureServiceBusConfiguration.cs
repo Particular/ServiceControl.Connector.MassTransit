@@ -1,25 +1,35 @@
+using Azure.Messaging.ServiceBus;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using NServiceBus.Transport;
 
 public static class AdapterAzureServiceBusConfiguration
 {
     public static void UsingAzureServiceBus(this IServiceCollection services, IConfiguration configuration, string connectionString)
     {
-        var receiveMode = configuration.GetValue<ReceiveMode?>("ReceiveMode") ?? ReceiveMode.Queue;
+        var receiveMode = configuration.GetValue<SubQueue?>(nameof(SubQueue)) ?? SubQueue.None;
 
-        if (receiveMode == ReceiveMode.DeadLetterQueue)
+        if (receiveMode == SubQueue.DeadLetter)
         {
             services.AddSingleton<IQueueFilter, AllQueueFilter>();
         }
 
         services.AddSingleton<IQueueInformationProvider>(b => new AzureServiceBusHelper(b.GetRequiredService<ILogger<AzureServiceBusHelper>>(), connectionString));
-        services.AddSingleton(new TransportDefinitionFactory(() =>
-            new AzureServiceBusTransport(connectionString)
-            {
-                TransportTransactionMode = TransportTransactionMode.ReceiveOnly
-            }));
+        services.AddSingleton(new TransportDefinitionFactory(() => new AzureServiceBusTransport(connectionString) { TransportTransactionMode = TransportTransactionMode.ReceiveOnly, DoNotSendTransportEncodingHeader = true, OutgoingNativeMessageCustomization = OutgoingNativeMessageCustomization }));
         services.AddSingleton<ReceiverFactory>(new AzureServiceBusReceiverFactory(receiveMode));
-        services.AddSingleton<MassTransitFailureAdapter, AzureServiceBusMassTransitFailureAdapter>();
+    }
+
+    static void OutgoingNativeMessageCustomization(IOutgoingTransportOperation operation, ServiceBusMessage message)
+    {
+        var p = operation.Properties;
+        if (p.TryGetValue(MassTransitFailureAdapter.MessageIdKey, out var messageId))
+        {
+            message.MessageId = messageId;
+        }
+        if (p.TryGetValue(MassTransitFailureAdapter.ContentTypeKey, out var contentType))
+        {
+            message.ContentType = contentType;
+        }
     }
 }
