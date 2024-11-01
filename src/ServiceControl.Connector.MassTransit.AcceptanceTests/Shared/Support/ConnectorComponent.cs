@@ -9,30 +9,33 @@ using ServiceControl.Adapter.MassTransit;
 public class ConnectorComponent<TContext> : IComponentBehavior
     where TContext : ScenarioContext
 {
-    public ConnectorComponent(string name, string errorQueue, string returnQueue)
+    public ConnectorComponent(string name, string errorQueue, string returnQueue, string controlQueue)
     {
         this.name = name;
         this.errorQueue = errorQueue;
+        this.controlQueue = controlQueue;
         this.returnQueue = returnQueue;
     }
 
     public Task<ComponentRunner> CreateRunner(RunDescriptor run)
     {
-        return Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, run.ScenarioContext, new AcceptanceTestLoggerFactory(run.ScenarioContext)));
+        return Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, controlQueue, run.ScenarioContext, new AcceptanceTestLoggerFactory(run.ScenarioContext)));
     }
 
     readonly string name;
     readonly string errorQueue;
+    readonly string controlQueue;
     readonly string returnQueue;
 
     class Runner : ComponentRunner
     {
-        public Runner(string name, string errorQueue, string returnQueue,
+        public Runner(string name, string errorQueue, string returnQueue, string controlQueue,
             ScenarioContext scenarioContext,
             AcceptanceTestLoggerFactory loggerFactory)
         {
             this.errorQueue = errorQueue;
             this.returnQueue = returnQueue;
+            this.controlQueue = controlQueue;
             this.scenarioContext = scenarioContext;
             this.loggerFactory = loggerFactory;
             Name = name;
@@ -53,6 +56,7 @@ public class ConnectorComponent<TContext> : IComponentBehavior
                     {
                         ReturnQueue = returnQueue,
                         ErrorQueue = errorQueue,
+                        ControlQueue = controlQueue,
                         QueueScanInterval = TimeSpan.FromSeconds(5),
                         Command = Command.SetupAndRun
                     });
@@ -91,6 +95,7 @@ public class ConnectorComponent<TContext> : IComponentBehavior
 
         readonly string errorQueue;
         readonly string returnQueue;
+        readonly string controlQueue;
         readonly ScenarioContext scenarioContext;
         readonly AcceptanceTestLoggerFactory loggerFactory;
     }
