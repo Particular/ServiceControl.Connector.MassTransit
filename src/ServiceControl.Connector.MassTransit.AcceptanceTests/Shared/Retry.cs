@@ -113,8 +113,7 @@ public class Retry : ConnectorAcceptanceTest
                 //Simulate ServiceControl retry behavior
                 var failedQueue = context.Message.Headers["NServiceBus.FailedQ"];
                 headers["ServiceControl.TargetEndpointAddress"] = failedQueue;
-                headers["ServiceControl.Retry.AcknowledgementQueue"] =
-                    Conventions.EndpointNamingConvention(typeof(ErrorSpy));
+                headers["ServiceControl.Retry.AcknowledgementQueue"] = Conventions.EndpointNamingConvention(typeof(ErrorSpy));
 
                 var returnMessage = new OutgoingMessage(context.MessageId, headers, context.Message.Body);
 
@@ -126,7 +125,7 @@ public class Retry : ConnectorAcceptanceTest
 
     public class Context : ScenarioContext
     {
-        public ConcurrentDictionary<Guid, bool> MessageStatus { get; set; } = new ConcurrentDictionary<Guid, bool>();
+        public ConcurrentDictionary<Guid, bool> MessageStatus { get; set; } = new ();
         public bool MessageProcessed { get; set; }
         public bool FirstMessageReceived { get; set; }
         public Action? VerifyMessageAction { get; set; }
@@ -143,6 +142,5 @@ namespace RetryTest
 {
     public class FaultyMessage
     {
-
     }
 }

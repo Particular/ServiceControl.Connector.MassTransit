@@ -10,7 +10,6 @@ class ConfigureRabbitMQTransportTestExecution : IConfigureTransportTestExecution
         var transport = new RabbitMQTransport(
             RoutingTopology.Conventional(QueueType.Quorum), "host=localhost", false);
         endpointConfiguration.UseTransport(transport);
-
         return Cleanup;
     }
 
