@@ -81,6 +81,7 @@ public class Retry : ConnectorAcceptanceTest
             {
                 testContext.VerifyMessageAction = () => verification.Verify(context);
             }
+
             testContext.MessageProcessed = true;
             return Task.CompletedTask;
         }
@@ -125,11 +126,10 @@ public class Retry : ConnectorAcceptanceTest
 
     public class Context : ScenarioContext
     {
-        public ConcurrentDictionary<Guid, bool> MessageStatus { get; set; } = new ();
+        public ConcurrentDictionary<Guid, bool> MessageStatus { get; set; } = new();
         public bool MessageProcessed { get; set; }
         public bool FirstMessageReceived { get; set; }
         public Action? VerifyMessageAction { get; set; }
-
     }
 }
 
