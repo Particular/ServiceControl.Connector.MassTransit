@@ -198,7 +198,7 @@ public class Service(
                 : forwardMessage;
 
             var receiver = infrastructure.Receivers[receiverSetting.Id];
-            await receiver.Initialize(new PushRuntimeSettings(1),
+            await receiver.Initialize(new PushRuntimeSettings(),
                 onMessage: (context, token) => onMessage(context, token),
                 onError: async (context, token) =>
                 {
