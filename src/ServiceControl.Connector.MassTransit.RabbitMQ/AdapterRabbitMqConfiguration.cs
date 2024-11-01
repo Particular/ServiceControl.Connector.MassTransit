@@ -15,7 +15,7 @@ public static class AdapterRabbitMqConfiguration
             {
                 OutgoingNativeMessageCustomization = (operation, properties) =>
                 {
-                    if (operation.Properties.TryGetValue(MassTransitFailureAdapter.ContentTypeProperty, out var contentType))
+                    if (operation.Properties.TryGetValue(MassTransitFailureAdapter.ContentTypeKey, out var contentType))
                     {
                         properties.ContentType = contentType;
                     }
