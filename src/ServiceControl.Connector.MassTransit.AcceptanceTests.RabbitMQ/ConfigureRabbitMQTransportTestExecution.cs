@@ -26,6 +26,8 @@ class ConfigureRabbitMQTransportTestExecution : IConfigureTransportTestExecution
             cfg.ConfigureEndpoints(context);
         });
 
+        configurator.AddSingleton<IRetryMessageVerification>(new RabbitMQRetryMessageVerification());
+
         configurator.AddConfigureEndpointsCallback((name, cfg) =>
         {
             if (cfg is IRabbitMqReceiveEndpointConfigurator rmq)
