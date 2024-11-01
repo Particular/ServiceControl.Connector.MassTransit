@@ -13,7 +13,8 @@ public class MassTransitFailureAdapter(
     const string TargetEndpointAddress = "ServiceControl.TargetEndpointAddress";
     const string RetryTo = "ServiceControl.RetryTo";
 
-    public const string ContentTypeKey = "Content-Type"; // As HTTP spec
+    public const string ContentTypeKey = "Content-Type"; // As MIME spec
+    public const string MessageIdKey = "Message-ID"; // As MIME spec
 
     long forwardCount;
     long returnCount;
@@ -92,7 +93,7 @@ public class MassTransitFailureAdapter(
         }
 
         // RabbitMQ and AzureServiceBus
-        operation.Properties[OperationPropertyKeys.MessageId] = messageId; // MassTransit sets native message ID to logical message id value
+        operation.Properties[MessageIdKey] = messageId; // MassTransit sets native message ID to logical message id value
 
         PatchAckQueue(operation);
 

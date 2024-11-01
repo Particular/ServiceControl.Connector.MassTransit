@@ -23,11 +23,11 @@ public static class AdapterAzureServiceBusConfiguration
     static void OutgoingNativeMessageCustomization(IOutgoingTransportOperation operation, ServiceBusMessage message)
     {
         var p = operation.Properties;
-        if (p.TryGetValue(OperationPropertyKeys.MessageId, out var messageId))
+        if (p.TryGetValue(MassTransitFailureAdapter.MessageIdKey, out var messageId))
         {
             message.MessageId = messageId;
         }
-        if (p.TryGetValue(OperationPropertyKeys.ContentType, out var contentType))
+        if (p.TryGetValue(MassTransitFailureAdapter.ContentTypeKey, out var contentType))
         {
             message.ContentType = contentType;
         }
