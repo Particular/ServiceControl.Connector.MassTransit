@@ -3,22 +3,20 @@ using NServiceBus.Transport;
 
 class AzureServiceBusReceiverFactory(SubQueue subQueue) : ReceiverFactory
 {
-    static readonly string SubQueueKey = typeof(SubQueue).FullName!;
-    static readonly IReadOnlyDictionary<string, string> DeadLetterQueue = new Dictionary<string, string>(1) { { SubQueueKey, SubQueue.DeadLetter.ToString() } };
-
     public override ReceiveSettings Create(string inputQueue, string errorQueue)
     {
         if (subQueue == SubQueue.TransferDeadLetter)
         {
             throw new NotSupportedException(nameof(SubQueue.TransferDeadLetter));
         }
-        var queueProperties = subQueue == SubQueue.DeadLetter
-            ? DeadLetterQueue
+
+        var qualifier = subQueue == SubQueue.DeadLetter
+            ? QueueAddressQualifier.DeadLetterQueue
             : null;
 
         return new ReceiveSettings(
             id: inputQueue,
-            receiveAddress: new QueueAddress(inputQueue, properties: queueProperties),
+            receiveAddress: new QueueAddress(inputQueue, qualifier: qualifier),
             usePublishSubscribe: false,
             purgeOnStartup: false,
             errorQueue: errorQueue
