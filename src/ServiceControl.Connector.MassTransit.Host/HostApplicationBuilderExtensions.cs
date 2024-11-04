@@ -17,11 +17,7 @@ static class HostApplicationBuilderExtensions
                           "Particular.ServiceControl.Connector.MassTransit_return";
         var errorQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "error";
 
-        var queueFilterPrefix = builder.Configuration.GetValue<string?>("QUEUENAMEPREFIX");
-        var queueFilterSuffix = builder.Configuration.GetValue<string?>("QUEUENAMESUFFIX");
-        var queueFilter = builder.Configuration.GetValue<string?>("QUEUENAMEFILTER");
-
-        ValidateQueueFilterValues(queueFilterPrefix, queueFilterSuffix, queueFilter);
+        var queueFilter = builder.Configuration.GetValue<string?>("QUEUENAMEREGEXFILTER");
 
         var services = builder.Services;
 
@@ -31,7 +27,7 @@ static class HostApplicationBuilderExtensions
             ErrorQueue = errorQueue,
             Command = command,
         })
-        .AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(queueFilter, queueFilterPrefix, queueFilterSuffix))
+        .AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(queueFilter))
         .AddSingleton<IQueueFilter, ErrorAndSkippedQueueFilter>()
         .AddSingleton<Service>()
         .AddSingleton<MassTransitConverter>()
@@ -87,30 +83,6 @@ static class HostApplicationBuilderExtensions
         if (staticQueueList != null)
         {
             services.AddSingleton<IQueueInformationProvider>(new FileBasedQueueInformationProvider(staticQueueList));
-        }
-    }
-
-    static void ValidateQueueFilterValues(string? queueFilterPrefix, string? queueFilterSuffix, string? queueFilter)
-    {
-        var numberOfOptionsProvided = 0;
-        if (string.IsNullOrWhiteSpace(queueFilterPrefix))
-        {
-            numberOfOptionsProvided++;
-        }
-
-        if (string.IsNullOrWhiteSpace(queueFilterSuffix))
-        {
-            numberOfOptionsProvided++;
-        }
-
-        if (string.IsNullOrWhiteSpace(queueFilter))
-        {
-            numberOfOptionsProvided++;
-        }
-
-        if (numberOfOptionsProvided > 1)
-        {
-            throw new Exception("Cannot specify more than one queue filter. Ensure that only QUEUENAMEPREFIX, QUEUENAMESUFFIX, or QUEUENAMEFILTER are specified.");
         }
     }
 }
