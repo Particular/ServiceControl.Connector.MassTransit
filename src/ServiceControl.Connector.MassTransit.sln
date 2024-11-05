@@ -33,6 +33,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceControl.Connector.Ma
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Connector.MassTransit.AcceptanceTests.AmazonSQS", "ServiceControl.Connector.MassTransit.AcceptanceTests.AmazonSQS\ServiceControl.Connector.MassTransit.AcceptanceTests.AmazonSQS.csproj", "{93E5D84C-5CC7-4628-804C-A29B62C0C7E1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Connector.MassTransit.Tests", "ServiceControl.Connector.MassTransit.Tests\ServiceControl.Connector.MassTransit.Tests.csproj", "{D1335BCA-C2A5-415D-8877-61FA146391AC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,10 @@ Global
 		{93E5D84C-5CC7-4628-804C-A29B62C0C7E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93E5D84C-5CC7-4628-804C-A29B62C0C7E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93E5D84C-5CC7-4628-804C-A29B62C0C7E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1335BCA-C2A5-415D-8877-61FA146391AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1335BCA-C2A5-415D-8877-61FA146391AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1335BCA-C2A5-415D-8877-61FA146391AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1335BCA-C2A5-415D-8877-61FA146391AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
