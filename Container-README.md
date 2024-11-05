@@ -59,15 +59,16 @@ docker run \
 
 ## Configuration
 
-| Key              | Description                                                                                         | Default                                                  |
-|------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------------------------|
-| TRANSPORTTYPE    | The transport type                                                                                  | None                                                     |
-| CONNECTIONSTRING | The NServiceBus connection string for the specified transport                                       | None                                                     |
-| RETURNQUEUE      | The intermediate queue used by the connector to which ServiceControl will send its retried messages | `Particular.ServiceControl.Connector.MassTransit_return` |
-| ERRORQUEUE       | The error queue ServiceControl ingests                                                              | `error`                                                  |
-| MANAGEMENTAPI    | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
-| QUEUES_FILE      | File that contains each error queue to monitor as a seperate line                                   | None                                                     |
-| RECEIVEMODE      | Azure Service Bus: By default ingest `*_error` but can ingest from dead-letter queues               | `Queue`                                                  |
+| Key                  | Description                                                                                         | Default                                                  |
+|----------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------------------------|
+| TRANSPORTTYPE        | The transport type                                                                                  | None                                                     |
+| CONNECTIONSTRING     | The NServiceBus connection string for the specified transport                                       | None                                                     |
+| RETURNQUEUE          | The intermediate queue used by the connector to which ServiceControl will send its retried messages | `Particular.ServiceControl.Connector.MassTransit_return` |
+| ERRORQUEUE           | The error queue ServiceControl ingests                                                              | `error`                                                  |
+| MANAGEMENTAPI        | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
+| QUEUES_FILE          | File that contains each error queue to monitor as a seperate line                                   | None                                                     |
+| RECEIVEMODE          | Azure Service Bus: By default ingest `*_error` but can ingest from dead-letter queues               | `Queue`                                                  |
+| QUEUENAMEREGEXFILTER | Queue name regular expression filter                                                                | None
 
 ### TRANSPORTTYPE
 
@@ -136,6 +137,42 @@ Values: None | DeadLetter
 > Only applies to Azure Service Bus
 
 Failed message by default (mode `Queue`) will be ingested from queues matching `*_error` but by specifying `DeadLetter` the connector will ingest messages from the [Service Bus dead-letter (sub) queues](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dead-letter-queues).
+
+### QUEUENAMEREGEXFILTER
+
+Specifying a value for `QUEUENAMEREGEXFILTER` allows the list of queues that are monitored to be filtered by the provided Regular Expression. This can be useful in scenarios where only part of a system must have the failed messages managed by the Particular Platform.
+
+Examples:
+
+Match queues that **start** with `Dev`:
+```env
+QUEUENAMEREGEXFILTER=^Dev
+```
+
+Match queues the **end** with `Dev`:
+```env
+QUEUENAMEREGEXFILTER=Dev$
+```
+Match queues that **contain** `Dev`:
+```env
+QUEUENAMEREGEXFILTER=Dev
+```
+
+If the broker had the following queues:
+```txt
+SalesReport
+SalesDevReport
+Orders
+OrdersReport
+OrdersDev
+```
+
+When specifying `QUEUENAMEREGEXFILTER=Dev`, then the following queues would be monitored for failures:
+
+```txt
+SalesDevReport
+OrdersDev
+```
 
 ## Support
 

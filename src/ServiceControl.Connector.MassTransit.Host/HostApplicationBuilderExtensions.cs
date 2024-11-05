@@ -17,6 +17,8 @@ static class HostApplicationBuilderExtensions
                           "Particular.ServiceControl.Connector.MassTransit_return";
         var errorQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "error";
 
+        var queueFilter = builder.Configuration.GetValue<string?>("QUEUENAMEREGEXFILTER");
+
         var services = builder.Services;
 
         services.AddSingleton(new Configuration
@@ -25,6 +27,7 @@ static class HostApplicationBuilderExtensions
             ErrorQueue = errorQueue,
             Command = command,
         })
+        .AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(queueFilter))
         .AddSingleton<IQueueFilter, ErrorAndSkippedQueueFilter>()
         .AddSingleton<Service>()
         .AddSingleton<MassTransitConverter>()

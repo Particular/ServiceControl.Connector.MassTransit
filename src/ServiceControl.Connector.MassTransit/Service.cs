@@ -2,12 +2,14 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.Routing;
 using NServiceBus.Transport;
+using ServiceControl.Connector.MassTransit;
 
 public class Service(
     ILogger<Service> logger,
     TransportDefinitionFactory transportDefinitionFactory,
     IQueueInformationProvider queueInformationProvider,
     IQueueFilter queueFilter,
+    IUserProvidedQueueNameFilter userQueueNameFilter,
     MassTransitFailureAdapter adapter,
     Configuration configuration,
     ReceiverFactory receiverFactory,
@@ -25,7 +27,10 @@ public class Service(
         try
         {
             var queues = await queueInformationProvider.GetQueues();
-            return queues.Where(queueFilter.IsMatch).ToHashSet();
+            return queues
+                .Where(queueFilter.IsMatch)
+                .Where(userQueueNameFilter.IsMatch)
+                .ToHashSet();
         }
         catch (Exception e)
         {

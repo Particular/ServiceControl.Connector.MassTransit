@@ -55,13 +55,13 @@ public class ConnectorComponent<TContext> : IComponentBehavior
                         QueueScanInterval = TimeSpan.FromSeconds(5),
                         Command = Command.SetupAndRun
                     });
+                    services.AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(null));
                     services.AddSingleton<Service>();
                     services.AddSingleton<MassTransitConverter>();
                     services.AddSingleton<MassTransitFailureAdapter>();
                     services.AddSingleton<ReceiverFactory>();
                     services.AddSingleton(loggerFactory);
                     services.AddHostedService(p => p.GetRequiredService<Service>());
-
                     transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
                 });
 
