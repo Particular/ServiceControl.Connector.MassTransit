@@ -2,7 +2,7 @@
 
 using System.Text.RegularExpressions;
 
-public class UserProvidedQueueNameFilter(string? filter) : IUserProvidedQueueNameFilter
+public sealed class UserProvidedQueueNameFilter(string? filter) : IUserProvidedQueueNameFilter
 {
     public bool IsMatch(string queueName)
     {
