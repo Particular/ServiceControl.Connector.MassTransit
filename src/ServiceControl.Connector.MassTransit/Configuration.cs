@@ -1,4 +1,4 @@
-using ServiceControl.Adapter.MassTransit;
+using ServiceControl.Connector.MassTransit;
 
 public record Configuration
 {
