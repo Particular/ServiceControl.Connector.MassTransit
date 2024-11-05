@@ -2,7 +2,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.Routing;
 using NServiceBus.Transport;
-using ServiceControl.Adapter.MassTransit;
+using ServiceControl.Connector.MassTransit;
 
 public class Service(
     ILogger<Service> logger,

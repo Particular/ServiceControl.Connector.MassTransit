@@ -1,4 +1,4 @@
-﻿namespace ServiceControl.Adapter.MassTransit;
+﻿namespace ServiceControl.Connector.MassTransit;
 
 public interface IUserProvidedQueueNameFilter
 {
