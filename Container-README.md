@@ -59,16 +59,16 @@ docker run \
 
 ## Configuration
 
-| Key              | Description                                                                                         | Default                                                  |
-|------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------------------------|
-| TRANSPORTTYPE    | The transport type                                                                                  | None                                                     |
-| CONNECTIONSTRING | The NServiceBus connection string for the specified transport                                       | None                                                     |
-| RETURNQUEUE      | The intermediate queue used by the connector to which ServiceControl will send its retried messages | `Particular.ServiceControl.Connector.MassTransit_return` |
-| ERRORQUEUE       | The error queue ServiceControl ingests                                                              | `error`                                                  |
-| MANAGEMENTAPI    | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
-| QUEUES_FILE      | File that contains each error queue to monitor as a seperate line                                   | None                                                     |
-| RECEIVEMODE      | Azure Service Bus: By default ingest `*_error` but can ingest from dead-letter queues               | `Queue`                                                  |
-| QUEUENAMEREGEXFILTER | Queue name regular expression filter
+| Key                  | Description                                                                                         | Default                                                  |
+|----------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------------------------|
+| TRANSPORTTYPE        | The transport type                                                                                  | None                                                     |
+| CONNECTIONSTRING     | The NServiceBus connection string for the specified transport                                       | None                                                     |
+| RETURNQUEUE          | The intermediate queue used by the connector to which ServiceControl will send its retried messages | `Particular.ServiceControl.Connector.MassTransit_return` |
+| ERRORQUEUE           | The error queue ServiceControl ingests                                                              | `error`                                                  |
+| MANAGEMENTAPI        | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
+| QUEUES_FILE          | File that contains each error queue to monitor as a seperate line                                   | None                                                     |
+| RECEIVEMODE          | Azure Service Bus: By default ingest `*_error` but can ingest from dead-letter queues               | `Queue`                                                  |
+| QUEUENAMEREGEXFILTER | Queue name regular expression filter                                                                | None
 
 ### TRANSPORTTYPE
 
