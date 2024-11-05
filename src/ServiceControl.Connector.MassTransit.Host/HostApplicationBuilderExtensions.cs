@@ -2,7 +2,7 @@ using System.Data.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ServiceControl.Adapter.MassTransit;
+using ServiceControl.Connector.MassTransit;
 
 static class HostApplicationBuilderExtensions
 {
