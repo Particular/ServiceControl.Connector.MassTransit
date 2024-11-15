@@ -6,7 +6,7 @@ using ServiceControl.Connector.MassTransit;
 
 public class Service(
     ILogger<Service> logger,
-    TransportDefinitionFactory transportDefinitionFactory,
+    TransportInfrastructureFactory transportDefinitionFactory,
     IQueueInformationProvider queueInformationProvider,
     IQueueFilter queueFilter,
     IUserProvidedQueueNameFilter userQueueNameFilter,
@@ -16,7 +16,6 @@ public class Service(
     IHostApplicationLifetime hostApplicationLifetime
 ) : BackgroundService
 {
-    TransportDefinition? transportDefinition;
     TransportInfrastructure? infrastructure;
     HashSet<string>? massTransitErrorQueues;
 
@@ -85,10 +84,12 @@ public class Service(
         }
         catch (OperationCanceledException) when (shutdownToken.IsCancellationRequested)
         {
-            // Ignore
+            logger.LogInformation("Shutting down initiated by host");
         }
-
-        await StopAsync(shutdownToken);
+        catch (Exception e)
+        {
+            logger.LogCritical(e, "Failure");
+        }
     }
 
     async Task Setup(CancellationToken cancellationToken)
@@ -118,8 +119,7 @@ public class Service(
 
         var receiverSettings = receiveSettings.ToArray();
 
-        transportDefinition = transportDefinitionFactory.CreateTransportDefinition();
-        infrastructure = await transportDefinition.Initialize(hostSettings, receiverSettings, [], cancellationToken);
+        infrastructure = await transportDefinitionFactory.CreateTransportInfrastructure(hostSettings, receiverSettings, [], cancellationToken);
     }
 
 
@@ -161,8 +161,7 @@ public class Service(
 
         var receiverSettings = receiveSettings.ToArray();
 
-        transportDefinition = transportDefinitionFactory.CreateTransportDefinition();
-        infrastructure = await transportDefinition.Initialize(hostSettings, receiverSettings, [], cancellationToken);
+        infrastructure = await transportDefinitionFactory.CreateTransportInfrastructure(hostSettings, receiverSettings, [], cancellationToken);
 
         var messageDispatcher = infrastructure.Dispatcher;
 
@@ -252,7 +251,5 @@ public class Service(
         {
             await infrastructure.Shutdown(cancellationToken);
         }
-
-        transportDefinition = null;
     }
 }
