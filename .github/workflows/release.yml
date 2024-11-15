@@ -28,7 +28,6 @@ jobs:
         uses: actions/checkout@v4.2.2
         with:
           fetch-depth: 0
-          submodules: true
       - name: Install MinVer CLI
         run: dotnet tool install --global minver-cli
       - name: Determine versions
