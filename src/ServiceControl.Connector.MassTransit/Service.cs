@@ -161,8 +161,7 @@ public class Service(
 
         var receiverSettings = receiveSettings.ToArray();
 
-        transportDefinition = transportDefinitionFactory.CreateTransportDefinition();
-        infrastructure = await transportDefinition.Initialize(hostSettings, receiverSettings, [], cancellationToken);
+        infrastructure = await transportDefinitionFactory.CreateTransportInfrastructure(hostSettings, receiverSettings, [], cancellationToken);
 
         var messageDispatcher = infrastructure.Dispatcher;
 
