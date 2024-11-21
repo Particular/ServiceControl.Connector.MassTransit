@@ -48,7 +48,7 @@ public class Heartbeat(
             var routing = endpointConfiguration.UseTransport(transportDefinitionFactory.CreateTransportDefinition());
             routing.RouteToEndpoint(typeof(ConnectedApplication), configuration.ControlQueue);
 
-            var endpointInstance = await Endpoint.Start(endpointConfiguration);
+            var endpointInstance = await Endpoint.Start(endpointConfiguration, shutdownToken);
 
             while (!shutdownToken.IsCancellationRequested)
             {
@@ -60,12 +60,12 @@ public class Heartbeat(
                     Application = ConnectedApplicationName,
                     SupportsHeartbeats = false,
                     ErrorQueues = massTransitErrorQueues,
-                });
+                }, shutdownToken);
 
                 await Task.Delay(configuration.HeartbeatInterval, shutdownToken);
             }
 
-            await endpointInstance.Stop();
+            await endpointInstance.Stop(shutdownToken);
         }
         catch (OperationCanceledException) when (shutdownToken.IsCancellationRequested)
         {
