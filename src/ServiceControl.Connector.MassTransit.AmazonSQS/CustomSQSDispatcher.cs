@@ -5,11 +5,13 @@ using NServiceBus.Transport;
 
 public class CustomSQSDispatcher : IMessageDispatcher
 {
+    readonly AmazonSQSClient client;
     readonly IMessageDispatcher defaultDispatcher;
     readonly string errorQueue;
 
-    public CustomSQSDispatcher(IMessageDispatcher defaultDispatcher, string errorQueue)
+    public CustomSQSDispatcher(AmazonSQSClient client, IMessageDispatcher defaultDispatcher, string errorQueue)
     {
+        this.client = client;
         this.defaultDispatcher = defaultDispatcher;
         this.errorQueue = errorQueue;
     }
@@ -24,9 +26,6 @@ public class CustomSQSDispatcher : IMessageDispatcher
             return;
         }
 
-        var client = new AmazonSQSClient();
-
-
         var message = outgoingMessages.UnicastTransportOperations[0].Message;
         var massTransitReturnQueueName = message.Headers["MT-Fault-InputAddress"];
         var queueName = massTransitReturnQueueName.Substring(massTransitReturnQueueName.LastIndexOf('/') + 1);
@@ -40,7 +39,7 @@ public class CustomSQSDispatcher : IMessageDispatcher
         //TODO: make sure we don't exceed 10 headers limit. If so remove, SC related headers
         foreach (KeyValuePair<string, string> header in message.Headers)
         {
-            attributes.Add(header.Key, new MessageAttributeValue { StringValue = header.Value, DataType = "String"});
+            attributes.Add(header.Key, new MessageAttributeValue { StringValue = header.Value, DataType = "String" });
         }
 
         sqsMessage.MessageAttributes = attributes;
