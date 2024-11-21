@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Text;
 using Amazon.SQS;
 using Amazon.SQS.Model;
@@ -8,6 +9,7 @@ public class CustomSQSDispatcher : IMessageDispatcher
     readonly AmazonSQSClient client;
     readonly IMessageDispatcher defaultDispatcher;
     readonly string errorQueue;
+    readonly ConcurrentDictionary<string, Task<string>> queueUrlCache = new();
 
     public CustomSQSDispatcher(AmazonSQSClient client, IMessageDispatcher defaultDispatcher, string errorQueue)
     {
@@ -28,11 +30,15 @@ public class CustomSQSDispatcher : IMessageDispatcher
 
         var message = outgoingMessages.UnicastTransportOperations[0].Message;
         var massTransitReturnQueueName = message.Headers["MT-Fault-InputAddress"];
-        var queueName = massTransitReturnQueueName.Substring(massTransitReturnQueueName.LastIndexOf('/') + 1);
-        var getQueueUrlResponse = await client.GetQueueUrlAsync(queueName, cancellationToken);
 
-        //TODO: ensure we extract the proper queue url from the headers
-        var sqsMessage = new SendMessageRequest(getQueueUrlResponse.QueueUrl, Encoding.UTF8.GetString(message.Body.Span));
+        var queueUrl = await queueUrlCache.GetOrAdd(massTransitReturnQueueName, async (k) =>
+        {
+            var queueName = massTransitReturnQueueName.Substring(massTransitReturnQueueName.LastIndexOf('/') + 1);
+            var getQueueUrlResponse = await client.GetQueueUrlAsync(queueName, cancellationToken);
+            return getQueueUrlResponse.QueueUrl;
+        });
+
+        var sqsMessage = new SendMessageRequest(queueUrl, Encoding.UTF8.GetString(message.Body.Span));
 
         var attributes = new Dictionary<string, MessageAttributeValue>();
 
