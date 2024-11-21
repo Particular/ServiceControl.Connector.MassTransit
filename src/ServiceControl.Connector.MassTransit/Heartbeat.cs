@@ -2,10 +2,9 @@
 using Microsoft.Extensions.Logging;
 using NServiceBus.Routing;
 using NServiceBus.Transport;
-using ServiceControl.Adapter.MassTransit;
 using ServiceControl.Monitoring;
 
-namespace ServiceControl.Adapter.MassTransit
+namespace ServiceControl.Connector.MassTransit
 {
     public class Heartbeat(
         ILogger<Service> logger,
