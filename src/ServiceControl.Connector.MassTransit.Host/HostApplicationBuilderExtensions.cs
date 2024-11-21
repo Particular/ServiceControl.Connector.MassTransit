@@ -2,7 +2,7 @@ using System.Data.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ServiceControl.Adapter.MassTransit;
+using ServiceControl.Connector.MassTransit;
 
 static class HostApplicationBuilderExtensions
 {
@@ -18,6 +18,8 @@ static class HostApplicationBuilderExtensions
         var errorQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "error";
         var controlQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "Particular.ServiceControl";
 
+        var queueFilter = builder.Configuration.GetValue<string?>("QUEUENAMEREGEXFILTER");
+
         var services = builder.Services;
 
         services.AddSingleton(new Configuration
@@ -27,6 +29,7 @@ static class HostApplicationBuilderExtensions
             ControlQueue = controlQueue,
             Command = command,
         })
+        .AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(queueFilter))
         .AddSingleton<IQueueFilter, ErrorAndSkippedQueueFilter>()
         .AddSingleton<Service>()
         .AddSingleton<Heartbeat>()

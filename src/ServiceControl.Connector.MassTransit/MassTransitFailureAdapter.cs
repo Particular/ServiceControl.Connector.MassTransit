@@ -13,6 +13,9 @@ public class MassTransitFailureAdapter(
     const string TargetEndpointAddress = "ServiceControl.TargetEndpointAddress";
     const string RetryTo = "ServiceControl.RetryTo";
 
+    public const string ContentTypeKey = "Content-Type"; // As MIME spec
+    public const string MessageIdKey = "Message-ID"; // As MIME spec
+
     long forwardCount;
     long returnCount;
     protected virtual string QueuePrefix => "queue:";
@@ -86,15 +89,13 @@ public class MassTransitFailureAdapter(
         // RabbitMQ and AzureServiceBus
         if (contentType != null)
         {
-            operation.Properties.Add(Headers.ContentType, contentType);
+            operation.Properties.Add(ContentTypeKey, contentType);
         }
 
         PatchAckQueue(operation);
 
-        // AzureServiceBus
-        // TODO: AzureServiceBus  operation.DisableLegacyHeaders();
         // RabbitMQ and AzureServiceBus
-        operation.Properties[Headers.MessageId] = messageId; // MassTransit sets native message ID to logical message id value
+        operation.Properties[MessageIdKey] = messageId; // MassTransit sets native message ID to logical message id value
 
         return operation;
     }

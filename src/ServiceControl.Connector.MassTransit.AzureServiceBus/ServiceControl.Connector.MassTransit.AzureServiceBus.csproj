@@ -4,13 +4,13 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>ServiceControl.Adapter.MassTransit.AzureServiceBus</RootNamespace>
+    <RootNamespace>ServiceControl.Connector.MassTransit.AzureServiceBus</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MassTransit" Version="8.2.5" />
+    <PackageReference Include="MassTransit" Version="8.3.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
-    <ProjectReference Include="..\..\NServiceBus.Transport.AzureServiceBus\src\Transport\NServiceBus.Transport.AzureServiceBus.csproj" />
+    <PackageReference Include="NServiceBus.Transport.AzureServiceBus" Version="4.3.0-alpha.1" />
     <ProjectReference Include="..\ServiceControl.Connector.MassTransit\ServiceControl.Connector.MassTransit.csproj" />
     <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="None" />
   </ItemGroup>

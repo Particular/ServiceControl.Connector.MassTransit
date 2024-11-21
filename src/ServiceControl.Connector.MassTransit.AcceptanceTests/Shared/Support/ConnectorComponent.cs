@@ -3,8 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.AcceptanceTesting;
 using NServiceBus.AcceptanceTesting.Support;
-using ServiceControl.Adapter.MassTransit;
-
+using ServiceControl.Connector.MassTransit;
 
 public class ConnectorComponent<TContext> : IComponentBehavior
     where TContext : ScenarioContext
@@ -60,13 +59,13 @@ public class ConnectorComponent<TContext> : IComponentBehavior
                         QueueScanInterval = TimeSpan.FromSeconds(5),
                         Command = Command.SetupAndRun
                     });
+                    services.AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(null));
                     services.AddSingleton<Service>();
                     services.AddSingleton<MassTransitConverter>();
                     services.AddSingleton<MassTransitFailureAdapter>();
                     services.AddSingleton<ReceiverFactory>();
                     services.AddSingleton(loggerFactory);
                     services.AddHostedService(p => p.GetRequiredService<Service>());
-
                     transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
                 });
 
