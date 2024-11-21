@@ -16,14 +16,12 @@ public static class AdapterAzureServiceBusConfiguration
         }
 
         services.AddSingleton<IQueueInformationProvider>(b => new AzureServiceBusHelper(b.GetRequiredService<ILogger<AzureServiceBusHelper>>(), connectionString));
-        services.AddSingleton(new TransportDefinitionFactory(() => new AzureServiceBusTransport(connectionString)
-        {
-            TransportTransactionMode = TransportTransactionMode.ReceiveOnly,
-            OutgoingNativeMessageCustomization = OutgoingNativeMessageCustomization,
-#pragma warning disable CS0618 // Type or member is obsolete
-            DoNotSendTransportEncodingHeader = true
-#pragma warning restore CS0618 // Type or member is obsolete
-        }));
+        //services.AddSingleton(new TransportDefinitionFactory(() => new AzureServiceBusTransport(connectionString)
+        //{
+        //    TransportTransactionMode = TransportTransactionMode.ReceiveOnly,
+        //    OutgoingNativeMessageCustomization = OutgoingNativeMessageCustomization,
+        //    DoNotSendTransportEncodingHeader = true
+        //}));
         services.AddSingleton<ReceiverFactory>(new AzureServiceBusReceiverFactory(receiveMode));
     }
 
