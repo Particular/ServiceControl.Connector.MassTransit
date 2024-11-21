@@ -16,6 +16,8 @@ namespace ServiceControl.Adapter.MassTransit
         ) : BackgroundService
     {
 
+        internal const string ConnectedApplicationName = "MassTransitConnector";
+
 #pragma warning disable PS0018
         async Task<string[]> GetReceiveQueues()
 #pragma warning restore PS0018
@@ -56,7 +58,8 @@ namespace ServiceControl.Adapter.MassTransit
                     using var scope = logger.BeginScope("HEARTBEAT");
                     await endpointInstance.Send(new ConnectedApplication
                     {
-                        Application = "MassTransitConnector",
+                        Application = ConnectedApplicationName,
+                        SupportsHeartbeats = false,
                         ErrorQueues = massTransitErrorQueues,
                     });
 

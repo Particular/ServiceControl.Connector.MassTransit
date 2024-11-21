@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using NServiceBus.Faults;
 using NsbHeaders = NServiceBus.Headers;
 using MessageContext = NServiceBus.Transport.MessageContext;
+using ServiceControl.Adapter.MassTransit;
 
 public class MassTransitConverter(ILogger<MassTransitConverter> logger)
 {
@@ -41,16 +42,16 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
         }
 
         // Because transport native content type value isn't provided by transport we probe the headers instead....
-        var hasEnvelop = !headers.ContainsKey(MessageHeaders.MessageId);
+        var hasEnvelope = !headers.ContainsKey(MessageHeaders.MessageId);
 
-        var contentType = hasEnvelop
+        var contentType = hasEnvelope
             ? SystemTextJsonMessageSerializer.JsonContentType.ToString() //"application/vnd.masstransit+json"
             : ContentTypes.Json;
 
         headers[NsbHeaders.ContentType] = contentType;
 
 #pragma warning disable PS0022
-        if (hasEnvelop)
+        if (hasEnvelope)
         {
             var messageEnvelope = DeserializeEnvelope(messageContext);
 
@@ -113,6 +114,9 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
                               throw new InvalidOperationException();
             headers[NsbHeaders.OriginatingMachine] = busHostInfo.MachineName;
         }
+        headers[NsbHeaders.HostId] = DeterministicGuid.MakeId(headers[NsbHeaders.OriginatingEndpoint], headers[MessageHeaders.Host.MachineName]).ToString("N");
+        headers["NServiceBus.ConnectedApplication"] = Heartbeat.ConnectedApplicationName;
+
 
         // MT-Fault-***
         if (headers.TryGetValue(MessageHeaders.FaultRetryCount, out var faultRetryCount))
