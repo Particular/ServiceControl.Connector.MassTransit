@@ -8,9 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\NServiceBus.RabbitMQ\src\NServiceBus.Transport.RabbitMQ\NServiceBus.Transport.RabbitMQ.csproj" />
     <ProjectReference Include="..\ServiceControl.Connector.MassTransit\ServiceControl.Connector.MassTransit.csproj" />
     <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="None" />
+    <PackageReference Include="NServiceBus.RabbitMQ" Version="9.2.0" />
   </ItemGroup>
 
 </Project>
