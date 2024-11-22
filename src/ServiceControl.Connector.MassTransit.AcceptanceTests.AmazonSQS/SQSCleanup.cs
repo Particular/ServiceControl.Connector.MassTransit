@@ -23,9 +23,9 @@ public class SQSCleanup
     [TearDown]
     public void Teardown()
     {
-        sqsClient.Dispose();
-        snsClient.Dispose();
-        s3Client.Dispose();
+        sqsClient?.Dispose();
+        snsClient?.Dispose();
+        s3Client?.Dispose();
     }
 
     public static Task DeleteAllResourcesWithPrefix(IAmazonSQS sqsClient, IAmazonSimpleNotificationService snsClient, IAmazonS3 s3Client, string namePrefix)
