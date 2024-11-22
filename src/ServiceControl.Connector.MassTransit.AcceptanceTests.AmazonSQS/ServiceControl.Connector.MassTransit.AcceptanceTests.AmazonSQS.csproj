@@ -10,7 +10,7 @@
     <ProjectReference Include="..\..\NServiceBus.AmazonSQS\src\NServiceBus.Transport.SQS\NServiceBus.Transport.SQS.csproj" />
     <ProjectReference Include="..\ServiceControl.Connector.MassTransit.AcceptanceTesting\ServiceControl.Connector.MassTransit.AcceptanceTesting.csproj" />
     <ProjectReference Include="..\ServiceControl.Connector.MassTransit.AmazonSQS\ServiceControl.Connector.MassTransit.AmazonSQS.csproj" />
-    <PackageReference Include="MassTransit.AmazonSQS" Version="8.3.0" />
+    <PackageReference Include="MassTransit.AmazonSQS" Version="8.3.1" />
   </ItemGroup>
 
   <ItemGroup>
