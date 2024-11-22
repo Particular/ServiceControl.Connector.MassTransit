@@ -7,7 +7,7 @@ public static class AdapterAmazonSqsConfiguration
     public static void UsingAmazonSqs(this IServiceCollection services, Action<SqsTransport>? transportConfig = null)
     {
         services.AddSingleton<IQueueInformationProvider>(new AmazonSqsHelper(string.Empty));
-        services.AddSingleton<AmazonSQSClient>();
+        services.AddSingleton<IAmazonSQS, AmazonSQSClient>();
         services.AddSingleton(sp => new TransportDefinitionFactory(async (HostSettings hostSettings, ReceiveSettings[] receivers,
             string[] sendingAddresses, CancellationToken cancellationToken) =>
         {
@@ -19,7 +19,7 @@ public static class AdapterAmazonSqsConfiguration
 
             var configuration = sp.GetRequiredService<Configuration>();
 
-            return new Wrapper(infrastructure, new CustomSQSDispatcher(sp.GetRequiredService<AmazonSQSClient>(), infrastructure.Dispatcher, configuration.ErrorQueue));
+            return new Wrapper(infrastructure, new CustomSQSDispatcher(sp.GetRequiredService<IAmazonSQS>(), infrastructure.Dispatcher, configuration.ErrorQueue));
         }));
         services.AddSingleton<MassTransitFailureAdapter, AmazonSqsMassTransitFailureAdapter>();
     }

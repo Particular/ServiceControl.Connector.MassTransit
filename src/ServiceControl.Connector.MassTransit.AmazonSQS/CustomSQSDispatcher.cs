@@ -6,12 +6,12 @@ using NServiceBus.Transport;
 
 public class CustomSQSDispatcher : IMessageDispatcher
 {
-    readonly AmazonSQSClient client;
+    readonly IAmazonSQS client;
     readonly IMessageDispatcher defaultDispatcher;
     readonly string errorQueue;
     readonly ConcurrentDictionary<string, Task<string>> queueUrlCache = new();
 
-    public CustomSQSDispatcher(AmazonSQSClient client, IMessageDispatcher defaultDispatcher, string errorQueue)
+    public CustomSQSDispatcher(IAmazonSQS client, IMessageDispatcher defaultDispatcher, string errorQueue)
     {
         this.client = client;
         this.defaultDispatcher = defaultDispatcher;
