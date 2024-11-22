@@ -16,7 +16,7 @@ static class HostApplicationBuilderExtensions
         var returnQueue = builder.Configuration.GetValue<string?>("ReturnQueue") ??
                           "Particular.ServiceControl.Connector.MassTransit_return";
         var errorQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "error";
-        var controlQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "Particular.ServiceControl";
+        var controlQueue = builder.Configuration.GetValue<string?>("ControlQueue") ?? "Particular.ServiceControl";
 
         var queueFilter = builder.Configuration.GetValue<string?>("QUEUENAMEREGEXFILTER");
 
