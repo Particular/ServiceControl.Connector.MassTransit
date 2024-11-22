@@ -21,6 +21,5 @@ public static class AdapterAmazonSqsConfiguration
 
             return new Wrapper(infrastructure, new CustomSQSDispatcher(sp.GetRequiredService<IAmazonSQS>(), infrastructure.Dispatcher, configuration.ErrorQueue));
         }));
-        services.AddSingleton<MassTransitFailureAdapter, AmazonSqsMassTransitFailureAdapter>();
     }
 }
