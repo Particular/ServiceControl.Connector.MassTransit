@@ -4,7 +4,7 @@ using Amazon.SQS;
 using Amazon.SQS.Model;
 using NServiceBus.Transport;
 
-public class CustomSQSDispatcher : IMessageDispatcher
+sealed class CustomSQSDispatcher : IMessageDispatcher
 {
     readonly IAmazonSQS client;
     readonly IMessageDispatcher defaultDispatcher;

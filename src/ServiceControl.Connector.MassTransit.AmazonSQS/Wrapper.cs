@@ -1,6 +1,6 @@
 using NServiceBus.Transport;
 
-class Wrapper : TransportInfrastructure
+sealed class Wrapper : TransportInfrastructure
 {
     readonly TransportInfrastructure infrastructure;
 
