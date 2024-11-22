@@ -9,4 +9,3 @@ public class DefaultPublisher : IEndpointSetupTemplate
         return new DefaultServer().GetConfiguration(runDescriptor, endpointConfiguration, configurationBuilderCustomization);
     }
 }
-

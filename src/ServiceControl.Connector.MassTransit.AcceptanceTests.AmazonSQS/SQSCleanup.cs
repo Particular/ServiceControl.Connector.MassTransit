@@ -218,7 +218,7 @@ public class SQSCleanup
         }
     }
 
-    AmazonSQSClient sqsClient;
-    AmazonSimpleNotificationServiceClient snsClient;
-    AmazonS3Client s3Client;
+    AmazonSQSClient? sqsClient;
+    AmazonSimpleNotificationServiceClient? snsClient;
+    AmazonS3Client? s3Client;
 }

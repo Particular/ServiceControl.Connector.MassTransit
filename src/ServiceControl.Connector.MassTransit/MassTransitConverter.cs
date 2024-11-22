@@ -6,8 +6,8 @@ using MassTransit.Metadata;
 using MassTransit.Serialization;
 using Microsoft.Extensions.Logging;
 using NServiceBus.Faults;
-using NsbHeaders = NServiceBus.Headers;
 using MessageContext = NServiceBus.Transport.MessageContext;
+using NsbHeaders = NServiceBus.Headers;
 
 public class MassTransitConverter(ILogger<MassTransitConverter> logger)
 {
