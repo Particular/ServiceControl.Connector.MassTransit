@@ -3,4 +3,3 @@
     public IConfigureTransportTestExecution CreateTransportConfiguration() => throw new NotImplementedException();
     public Task Cleanup() => Task.CompletedTask;
 }
-
