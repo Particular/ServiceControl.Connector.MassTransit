@@ -31,13 +31,12 @@ static class HostApplicationBuilderExtensions
         })
         .AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(queueFilter))
         .AddSingleton<IQueueFilter, ErrorAndSkippedQueueFilter>()
-        .AddSingleton<Service>()
-        .AddSingleton<Heartbeat>()
         .AddSingleton<MassTransitConverter>()
         .AddSingleton<MassTransitFailureAdapter>()
         .AddSingleton<ReceiverFactory>()
-        .AddHostedService(p => p.GetRequiredService<Service>())
-        .AddHostedService(p => p.GetRequiredService<Heartbeat>());
+        .AddSingleton<TimeProvider>(TimeProvider.System)
+        .AddHostedService<Service>()
+        .AddHostedService<Heartbeat>();
 
         var configuration = builder.Configuration;
 

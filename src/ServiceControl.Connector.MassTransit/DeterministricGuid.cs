@@ -4,6 +4,7 @@ using System;
 using System.Security.Cryptography;
 using System.Text;
 
+// Code taken from https://github.com/Particular/ServiceControl/blob/master/src/ServiceControl/Infrastructure/DeterministicGuid.cs. Any changes should be replicated back to the source
 static class DeterministicGuid
 {
     public static Guid MakeId(string data)
