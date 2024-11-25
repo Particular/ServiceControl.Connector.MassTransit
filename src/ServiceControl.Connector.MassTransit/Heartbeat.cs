@@ -55,11 +55,11 @@ public class Heartbeat(
 
             do
             {
+                using var scope = logger.BeginScope("HEARTBEAT");
                 try
                 {
                     var massTransitErrorQueues = await GetReceiveQueues(shutdownToken);
 
-                    using var scope = logger.BeginScope("HEARTBEAT");
                     await endpointInstance.Send(
                         new ConnectedApplication
                         {

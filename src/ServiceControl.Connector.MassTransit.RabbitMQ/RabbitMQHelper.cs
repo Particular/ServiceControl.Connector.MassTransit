@@ -18,9 +18,7 @@ class RabbitMQHelper : IQueueInformationProvider
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", auth);
     }
-#pragma warning disable PS0018
     public async Task<IEnumerable<string>> GetQueues(CancellationToken cancellationToken)
-#pragma warning restore PS0018
     {
         var response = await _httpClient.GetAsync(_url, cancellationToken);
 
