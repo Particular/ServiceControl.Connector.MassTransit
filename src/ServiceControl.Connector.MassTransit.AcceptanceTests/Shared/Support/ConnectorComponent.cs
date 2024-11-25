@@ -99,4 +99,3 @@ public class ConnectorComponent<TContext> : IComponentBehavior
         readonly AcceptanceTestLoggerFactory loggerFactory;
     }
 }
-
