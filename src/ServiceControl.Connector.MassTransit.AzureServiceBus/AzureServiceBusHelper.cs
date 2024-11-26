@@ -5,7 +5,7 @@ class AzureServiceBusHelper(ILogger<AzureServiceBusHelper> logger, string connec
 {
     readonly ServiceBusAdministrationClient client = new(connectionstring);
 
-    async Task<IEnumerable<string>> IQueueInformationProvider.GetQueues(CancellationToken cancellationToken = default)
+    async Task<IEnumerable<string>> IQueueInformationProvider.GetQueues(CancellationToken cancellationToken)
     {
         var list = new List<string>();
         var result = client.GetQueuesAsync(cancellationToken);

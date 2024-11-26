@@ -43,6 +43,12 @@ public class Heartbeat(
     protected override async Task ExecuteAsync(CancellationToken shutdownToken = default)
 #pragma warning restore PS0017
     {
+
+        if (!configuration.IsRun)
+        {
+            return;
+        }
+
         var endpointConfiguration = new EndpointConfiguration(configuration.ReturnQueue);
         endpointConfiguration.UseSerialization<SystemJsonSerializer>();
         endpointConfiguration.Recoverability().Delayed(settings => settings.NumberOfRetries(0));
@@ -73,11 +79,9 @@ public class Heartbeat(
                             ErrorQueues = massTransitErrorQueues,
                         }, shutdownToken);
                 }
-                catch (OperationCanceledException) when (shutdownToken.IsCancellationRequested)
-                {
-                    throw;
-                }
+#pragma warning disable PS0019
                 catch (Exception ex) when (ex is not OperationCanceledException)
+#pragma warning restore PS0019
                 {
                     logger.LogError(ex, "Failed to send heartbeat");
                 }
@@ -89,7 +93,7 @@ public class Heartbeat(
         }
         finally
         {
-            await endpointInstance.Stop(shutdownToken);
+            await endpointInstance.Stop(CancellationToken.None);
         }
     }
 }
