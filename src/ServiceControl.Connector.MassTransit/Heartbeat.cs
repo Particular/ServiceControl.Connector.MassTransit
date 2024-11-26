@@ -27,6 +27,10 @@ public class Heartbeat(
             var queues = await queueInformationProvider.GetQueues(cancellationToken);
             return queues.Where(queueFilter.IsMatch).ToArray();
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            logger.LogInformation($"Cancelled queue query request");
+        }
         catch (Exception e)
         {
             logger.LogWarning(e, "Failure querying the queue information");
@@ -68,6 +72,10 @@ public class Heartbeat(
                             SupportsHeartbeats = false,
                             ErrorQueues = massTransitErrorQueues,
                         }, shutdownToken);
+                }
+                catch (OperationCanceledException) when (shutdownToken.IsCancellationRequested)
+                {
+                    throw;
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException)
                 {

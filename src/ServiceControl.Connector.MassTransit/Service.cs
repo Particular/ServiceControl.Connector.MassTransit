@@ -30,6 +30,10 @@ public class Service(
                 .Where(userQueueNameFilter.IsMatch)
                 .ToHashSet();
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            logger.LogInformation($"Cancelled queue query request");
+        }
         catch (Exception e)
         {
             logger.LogWarning(e, "Failure querying the queue information");
