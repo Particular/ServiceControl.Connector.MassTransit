@@ -10,7 +10,7 @@ public static class AdapterAmazonSqsConfiguration
         services.AddSingleton<IQueueInformationProvider>(new AmazonSqsHelper(string.Empty));
         services.AddSingleton<IAmazonSQS, AmazonSQSClient>();
         services.AddSingleton<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
-        services.AddSingleton(sp => new TransportDefinitionFactory(async (HostSettings hostSettings, ReceiveSettings[] receivers, string[] sendingAddresses, CancellationToken cancellationToken) =>
+        services.AddSingleton(sp => new TransportInfrastructureFactory(async (HostSettings hostSettings, ReceiveSettings[] receivers, string[] sendingAddresses, CancellationToken cancellationToken) =>
         {
             var sqs = sp.GetRequiredService<IAmazonSQS>();
             var sns = sp.GetRequiredService<IAmazonSimpleNotificationService>();

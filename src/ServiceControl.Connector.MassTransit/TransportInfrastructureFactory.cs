@@ -1,15 +1,11 @@
 using NServiceBus.Transport;
 
-public sealed class TransportDefinitionFactory
+public sealed class TransportInfrastructureFactory
 {
     readonly Func<HostSettings, ReceiveSettings[], string[], CancellationToken, Task<TransportInfrastructure>> factoryMethod;
 
-    public TransportDefinitionFactory(
-        Func<HostSettings,
-        ReceiveSettings[],
-        string[],
-        CancellationToken,
-        Task<TransportInfrastructure>> factoryMethod
+    public TransportInfrastructureFactory(
+        Func<HostSettings, ReceiveSettings[], string[], CancellationToken, Task<TransportInfrastructure>> factoryMethod
     )
     {
         this.factoryMethod = factoryMethod;

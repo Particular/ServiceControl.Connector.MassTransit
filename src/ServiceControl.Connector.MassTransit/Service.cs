@@ -6,7 +6,7 @@ using ServiceControl.Connector.MassTransit;
 
 public class Service(
     ILogger<Service> logger,
-    TransportDefinitionFactory transportDefinitionFactory,
+    TransportInfrastructureFactory transportDefinitionFactory,
     IQueueInformationProvider queueInformationProvider,
     IQueueFilter queueFilter,
     IUserProvidedQueueNameFilter userQueueNameFilter,
