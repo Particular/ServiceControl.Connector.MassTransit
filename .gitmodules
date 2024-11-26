@@ -2,7 +2,4 @@
 	path = NServiceBus.RabbitMQ
 	url = https://github.com/Particular/NServiceBus.RabbitMQ
 	branch = tf527
-[submodule "NServiceBus.AmazonSQS"]
-	path = NServiceBus.AmazonSQS
-	url = https://github.com/Particular/NServiceBus.AmazonSQS
-	branch = tf527
+
