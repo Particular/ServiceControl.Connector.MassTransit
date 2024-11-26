@@ -3,7 +3,7 @@ using Amazon.SQS.Model;
 
 class AmazonSqsHelper(string? queueNamePrefix = null) : IQueueInformationProvider
 {
-    public async Task<IEnumerable<string>> GetQueues(CancellationToken cancellationToken)
+    public async Task<IEnumerable<string>> GetQueues(CancellationToken cancellationToken = default)
     {
         var client = new AmazonSQSClient();
 

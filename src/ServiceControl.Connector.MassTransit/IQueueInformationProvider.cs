@@ -1,4 +1,4 @@
 public interface IQueueInformationProvider
 {
-    Task<IEnumerable<string>> GetQueues(CancellationToken cancellationToken);
+    Task<IEnumerable<string>> GetQueues(CancellationToken cancellationToken = default);
 }

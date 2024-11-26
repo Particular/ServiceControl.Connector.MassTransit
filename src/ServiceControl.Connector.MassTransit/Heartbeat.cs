@@ -6,6 +6,7 @@ using NServiceBus.Routing;
 using NServiceBus.Transport;
 using ServiceControl.Monitoring;
 using System;
+using System.Threading;
 
 public class Heartbeat(
     ILogger<Heartbeat> logger,
@@ -74,7 +75,7 @@ public class Heartbeat(
                 }
             } while (await timer.WaitForNextTickAsync(shutdownToken));
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException) when (shutdownToken.IsCancellationRequested)
         {
             logger.LogInformation($"Stopping {nameof(Heartbeat)}");
         }
