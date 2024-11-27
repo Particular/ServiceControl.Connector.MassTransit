@@ -84,10 +84,12 @@ public class Service(
         }
         catch (OperationCanceledException) when (shutdownToken.IsCancellationRequested)
         {
-            // Ignore
+            logger.LogInformation("Shutting down initiated by host");
         }
-
-        await StopAsync(shutdownToken);
+        catch (Exception e)
+        {
+            logger.LogCritical(e, "Failure");
+        }
     }
 
     async Task Setup(CancellationToken cancellationToken)
