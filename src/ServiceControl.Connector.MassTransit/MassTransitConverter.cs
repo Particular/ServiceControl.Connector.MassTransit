@@ -74,7 +74,7 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
             headers[NsbHeaders.OriginatingEndpoint] = messageEnvelope.SourceAddress;
             if (messageEnvelope.Host?.MachineName != null)
             {
-                headers[NsbHeaders.OriginatingMachine] = messageEnvelope.Host?.MachineName;
+                headers[NsbHeaders.OriginatingMachine] = messageEnvelope.Host?.MachineName ?? headers.GetValueOrDefault(MessageHeaders.Host.MachineName);
             }
         }
         else // Get data from headers
@@ -112,9 +112,9 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
 
             var busHostInfo = JsonSerializer.Deserialize<BusHostInfo>(hostInfo) ??
                               throw new InvalidOperationException();
-            headers[NsbHeaders.OriginatingMachine] = busHostInfo.MachineName;
+            headers[NsbHeaders.OriginatingMachine] = busHostInfo.MachineName ?? headers.GetValueOrDefault(MessageHeaders.Host.MachineName);
         }
-        headers[NsbHeaders.HostId] = DeterministicGuid.MakeId(headers[NsbHeaders.OriginatingEndpoint], headers[MessageHeaders.Host.MachineName]).ToString("N");
+        headers[NsbHeaders.HostId] = DeterministicGuid.MakeId(headers[NsbHeaders.OriginatingEndpoint], headers.GetValueOrDefault(NsbHeaders.OriginatingMachine, "NotSet")).ToString("N");
         headers["NServiceBus.ConnectedApplication"] = Heartbeat.ConnectedApplicationName;
 
 
