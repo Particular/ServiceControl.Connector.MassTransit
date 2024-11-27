@@ -6,7 +6,7 @@ using ServiceControl.Connector.MassTransit;
 
 public class Service(
     ILogger<Service> logger,
-    TransportInfrastructureFactory transportDefinitionFactory,
+    TransportInfrastructureFactory transportInfrastructureFactory,
     IQueueInformationProvider queueInformationProvider,
     IQueueFilter queueFilter,
     IUserProvidedQueueNameFilter userQueueNameFilter,
@@ -14,8 +14,11 @@ public class Service(
     Configuration configuration,
     ReceiverFactory receiverFactory,
     IHostApplicationLifetime hostApplicationLifetime
-) : BackgroundService
+) : IHostedService
 {
+    readonly CancellationTokenSource StopCancellationTokenSource = new();
+    Task? loopTask;
+
     TransportInfrastructure? infrastructure;
     HashSet<string>? massTransitErrorQueues;
 
@@ -39,9 +42,7 @@ public class Service(
         return [];
     }
 
-#pragma warning disable PS0017
-    protected override async Task ExecuteAsync(CancellationToken shutdownToken = default)
-#pragma warning restore PS0017
+    public async Task StartAsync(CancellationToken cancellationToken = default)
     {
         var version = System.Diagnostics.FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly()!.Location).ProductVersion!;
         logger.LogInformation("ServiceControl.Connector.MassTransit {Version}", version);
@@ -51,7 +52,7 @@ public class Service(
         {
             massTransitErrorQueues = await GetReceiveQueues();
 
-            await Setup(shutdownToken);
+            await Setup(cancellationToken);
 
             if (!configuration.IsRun)
             {
@@ -62,34 +63,49 @@ public class Service(
         }
 
         massTransitErrorQueues = [];
+        loopTask = Loop(StopCancellationTokenSource.Token);
+    }
 
+    async Task Loop(CancellationToken cancellationToken)
+    {
         try
         {
-            while (!shutdownToken.IsCancellationRequested)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 var newData = await GetReceiveQueues();
 
-                var errorQueuesAreNotTheSame = !newData.SetEquals(massTransitErrorQueues);
+                var errorQueuesAreNotTheSame = !newData.SetEquals(massTransitErrorQueues!);
 
                 if (errorQueuesAreNotTheSame)
                 {
                     logger.LogInformation("Changes detected, restarting");
-                    await StopReceiving(shutdownToken);
+                    await StopReceiving(cancellationToken);
                     massTransitErrorQueues = newData;
-                    await StartReceiving(shutdownToken);
+                    await StartReceiving(cancellationToken);
                 }
 
-                await Task.Delay(configuration.QueueScanInterval, shutdownToken);
+                await Task.Delay(configuration.QueueScanInterval, cancellationToken);
             }
         }
-        catch (OperationCanceledException) when (shutdownToken.IsCancellationRequested)
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             logger.LogInformation("Shutting down initiated by host");
         }
         catch (Exception e)
         {
             logger.LogCritical(e, "Failure");
+            hostApplicationLifetime.StopApplication();
         }
+    }
+
+    public async Task StopAsync(CancellationToken cancellationToken = default)
+    {
+        await StopCancellationTokenSource.CancelAsync();
+        if (loopTask != null)
+        {
+            await loopTask;
+        }
+        await StopReceiving(cancellationToken);
     }
 
     async Task Setup(CancellationToken cancellationToken)
@@ -119,7 +135,7 @@ public class Service(
 
         var receiverSettings = receiveSettings.ToArray();
 
-        infrastructure = await transportDefinitionFactory.CreateTransportInfrastructure(hostSettings, receiverSettings, [], cancellationToken);
+        infrastructure = await transportInfrastructureFactory.CreateTransportInfrastructure(hostSettings, receiverSettings, [], cancellationToken);
     }
 
 
@@ -161,7 +177,7 @@ public class Service(
 
         var receiverSettings = receiveSettings.ToArray();
 
-        infrastructure = await transportDefinitionFactory.CreateTransportInfrastructure(hostSettings, receiverSettings, [], cancellationToken);
+        infrastructure = await transportInfrastructureFactory.CreateTransportInfrastructure(hostSettings, receiverSettings, [], cancellationToken);
 
         var messageDispatcher = infrastructure.Dispatcher;
 
@@ -177,6 +193,7 @@ public class Service(
             {
                 throw new ConversionException("Conversion to ServiceControl failed", e);
             }
+
             await messageDispatcher.Dispatch(new TransportOperations(operation), messageContext.TransportTransaction, token);
         };
 
@@ -192,6 +209,7 @@ public class Service(
             {
                 throw new ConversionException("Conversion from ServiceControl failed", e);
             }
+
             await messageDispatcher.Dispatch(new TransportOperations(operation), messageContext.TransportTransaction, token);
         };
 
