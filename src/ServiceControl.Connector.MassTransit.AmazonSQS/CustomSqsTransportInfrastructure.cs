@@ -1,14 +1,18 @@
 using NServiceBus.Transport;
 
-sealed class Wrapper : TransportInfrastructure
+sealed class CustomSqsTransportInfrastructure : TransportInfrastructure
 {
     readonly TransportInfrastructure infrastructure;
 
-    public Wrapper(TransportInfrastructure infrastructure, IMessageDispatcher customDispatcher)
+    public CustomSqsTransportInfrastructure(TransportInfrastructure infrastructure, IMessageDispatcher customDispatcher)
     {
         this.infrastructure = infrastructure;
 
-        Receivers = infrastructure.Receivers;
+        Receivers = infrastructure.Receivers.ToDictionary(
+            kvp => kvp.Key,
+            kvp => new CustomSqsReceiver(kvp.Value) as IMessageReceiver
+            ).AsReadOnly();
+
         Dispatcher = customDispatcher;
     }
 

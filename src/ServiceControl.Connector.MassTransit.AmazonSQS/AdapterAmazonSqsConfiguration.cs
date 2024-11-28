@@ -25,7 +25,7 @@ public static class AdapterAmazonSqsConfiguration
             var transport = sp.GetRequiredService<TransportDefinition>();
             var infrastructure = await transport.Initialize(hostSettings, receivers, sendingAddresses, cancellationToken);
             var configuration = sp.GetRequiredService<Configuration>();
-            return new Wrapper(infrastructure, new CustomSQSDispatcher(sp.GetRequiredService<IAmazonSQS>(), infrastructure.Dispatcher, configuration.ErrorQueue));
+            return new CustomSqsTransportInfrastructure(infrastructure, new CustomSQSDispatcher(sp.GetRequiredService<IAmazonSQS>(), infrastructure.Dispatcher, configuration.ErrorQueue));
         }));
     }
 }
