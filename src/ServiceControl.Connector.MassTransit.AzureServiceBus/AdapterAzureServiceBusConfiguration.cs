@@ -16,7 +16,7 @@ public static class AdapterAzureServiceBusConfiguration
         }
 
         services.AddSingleton<IQueueInformationProvider>(b => new AzureServiceBusHelper(b.GetRequiredService<ILogger<AzureServiceBusHelper>>(), connectionString));
-        services.AddSingleton<TransportDefinition>(sp => new AzureServiceBusTransport(connectionString)
+        services.AddTransient<TransportDefinition>(sp => new AzureServiceBusTransport(connectionString)
         {
             TransportTransactionMode = TransportTransactionMode.ReceiveOnly,
             OutgoingNativeMessageCustomization = OutgoingNativeMessageCustomization,

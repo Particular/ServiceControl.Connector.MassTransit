@@ -10,7 +10,7 @@ public static class AdapterAmazonSqsConfiguration
         services.AddSingleton<IQueueInformationProvider>(new AmazonSqsHelper(string.Empty));
         services.AddTransient<IAmazonSQS, AmazonSQSClient>();
         services.AddTransient<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
-        services.AddSingleton<TransportDefinition>(sp =>
+        services.AddTransient<TransportDefinition>(sp =>
         {
             var sqs = sp.GetRequiredService<IAmazonSQS>();
             var sns = sp.GetRequiredService<IAmazonSimpleNotificationService>();
