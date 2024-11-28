@@ -16,16 +16,17 @@ public static class AdapterAzureServiceBusConfiguration
         }
 
         services.AddSingleton<IQueueInformationProvider>(b => new AzureServiceBusHelper(b.GetRequiredService<ILogger<AzureServiceBusHelper>>(), connectionString));
-        services.AddSingleton(new TransportInfrastructureFactory(async (HostSettings hostSettings, ReceiveSettings[] receivers, string[] sendingAddresses, CancellationToken cancellationToken) =>
+        services.AddSingleton<TransportDefinition>(sp => new AzureServiceBusTransport(connectionString)
         {
-            var transport = new AzureServiceBusTransport(connectionString)
-            {
-                TransportTransactionMode = TransportTransactionMode.ReceiveOnly,
-                OutgoingNativeMessageCustomization = OutgoingNativeMessageCustomization,
+            TransportTransactionMode = TransportTransactionMode.ReceiveOnly,
+            OutgoingNativeMessageCustomization = OutgoingNativeMessageCustomization,
 #pragma warning disable CS0618 // Type or member is obsolete
-                DoNotSendTransportEncodingHeader = true
+            DoNotSendTransportEncodingHeader = true
 #pragma warning restore CS0618 // Type or member is obsolete
-            };
+        });
+        services.AddSingleton(sp => new TransportInfrastructureFactory(async (HostSettings hostSettings, ReceiveSettings[] receivers, string[] sendingAddresses, CancellationToken cancellationToken) =>
+        {
+            var transport = sp.GetRequiredService<TransportDefinition>();
             return await transport.Initialize(hostSettings, receivers, sendingAddresses, cancellationToken);
         }));
         services.AddSingleton<ReceiverFactory>(new AzureServiceBusReceiverFactory(receiveMode));
@@ -38,6 +39,7 @@ public static class AdapterAzureServiceBusConfiguration
         {
             message.MessageId = messageId;
         }
+
         if (p.TryGetValue(MassTransitFailureAdapter.ContentTypeKey, out var contentType))
         {
             message.ContentType = contentType;
