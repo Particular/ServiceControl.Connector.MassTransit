@@ -6,7 +6,7 @@ public static class AdapterRabbitMqConfiguration
     public static void UsingRabbitMQ(this IServiceCollection services, string connectionString, Uri managementApi)
     {
         services.AddSingleton<IQueueInformationProvider>(new RabbitMQHelper("/", managementApi));
-        services.AddTransient<TransportDefinition>(new RabbitMQTransport(
+        services.AddTransient<TransportDefinition>(sp => new RabbitMQTransport(
             RoutingTopology.Conventional(QueueType.Quorum),
             connectionString,
             enableDelayedDelivery: false
