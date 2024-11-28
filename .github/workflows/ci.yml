@@ -61,7 +61,7 @@ jobs:
           echo "Hello"
       - name: Setup RabbitMQ
         if: matrix.transport == 'RabbitMQ'
-        uses: Particular/setup-rabbitmq-action@v1.7.0
+        uses: Particular/setup-rabbitmq-action@v1.7.1
         with:
           connection-string-name: RabbitMQTransport_ConnectionString
           tag: RabbitMQMTConnector
