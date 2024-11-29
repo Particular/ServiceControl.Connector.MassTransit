@@ -16,13 +16,18 @@ public static class AdapterAzureServiceBusConfiguration
         }
 
         services.AddSingleton<IQueueInformationProvider>(b => new AzureServiceBusHelper(b.GetRequiredService<ILogger<AzureServiceBusHelper>>(), connectionString));
-        services.AddSingleton(new TransportDefinitionFactory(() => new AzureServiceBusTransport(connectionString)
+        services.AddTransient<TransportDefinition>(sp => new AzureServiceBusTransport(connectionString)
         {
             TransportTransactionMode = TransportTransactionMode.ReceiveOnly,
             OutgoingNativeMessageCustomization = OutgoingNativeMessageCustomization,
 #pragma warning disable CS0618 // Type or member is obsolete
             DoNotSendTransportEncodingHeader = true
 #pragma warning restore CS0618 // Type or member is obsolete
+        });
+        services.AddSingleton(sp => new TransportInfrastructureFactory(async (HostSettings hostSettings, ReceiveSettings[] receivers, string[] sendingAddresses, CancellationToken cancellationToken) =>
+        {
+            var transport = sp.GetRequiredService<TransportDefinition>();
+            return await transport.Initialize(hostSettings, receivers, sendingAddresses, cancellationToken);
         }));
         services.AddSingleton<ReceiverFactory>(new AzureServiceBusReceiverFactory(receiveMode));
     }
@@ -34,6 +39,7 @@ public static class AdapterAzureServiceBusConfiguration
         {
             message.MessageId = messageId;
         }
+
         if (p.TryGetValue(MassTransitFailureAdapter.ContentTypeKey, out var contentType))
         {
             message.ContentType = contentType;
