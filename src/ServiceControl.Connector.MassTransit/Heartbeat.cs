@@ -10,7 +10,7 @@ using System.Threading;
 
 public class Heartbeat(
     ILogger<Heartbeat> logger,
-    TransportDefinitionFactory transportDefinitionFactory,
+    TransportDefinition transportDefinition,
     IQueueInformationProvider queueInformationProvider,
     IQueueFilter queueFilter,
     TimeProvider timeProvider,
@@ -54,7 +54,7 @@ public class Heartbeat(
         endpointConfiguration.Recoverability().Delayed(settings => settings.NumberOfRetries(0));
         endpointConfiguration.SendOnly();
 
-        var routing = endpointConfiguration.UseTransport(transportDefinitionFactory.CreateTransportDefinition());
+        var routing = endpointConfiguration.UseTransport(transportDefinition);
         routing.RouteToEndpoint(typeof(ConnectedApplication), configuration.ControlQueue);
 
         var endpointInstance = await Endpoint.Start(endpointConfiguration, shutdownToken);
