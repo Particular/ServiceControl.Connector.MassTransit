@@ -265,9 +265,34 @@ public class Service(
 
     async Task StopReceiving(CancellationToken cancellationToken)
     {
-        if (infrastructure != null)
+        var i = infrastructure;
+        if (i == null)
         {
-            await infrastructure.Shutdown(cancellationToken);
+            return;
         }
+        infrastructure = null;
+
+        // Behavior copied from https://github.com/Particular/NServiceBus/blob/9.2.3/src/NServiceBus.Core/Receiving/ReceiveComponent.cs#L229-L246
+        var receivers = i.Receivers.Values;
+        var receiverStopTasks = receivers.Select(async receiver =>
+        {
+            try
+            {
+                logger.LogDebug("Stopping {ReceiverId} receiver", receiver.Id);
+                await receiver.StopReceive(cancellationToken);
+                logger.LogDebug("Stopped {ReceiverId} receiver", receiver.Id);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                // Host is terminating
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Receiver {ReceiverId} threw an exception on stopping.", receiver.Id);
+            }
+        });
+
+        await Task.WhenAll(receiverStopTasks);
+        await i.Shutdown(cancellationToken);
     }
 }
