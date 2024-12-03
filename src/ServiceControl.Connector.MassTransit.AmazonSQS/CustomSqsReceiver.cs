@@ -28,6 +28,14 @@ class CustomSqsReceiver(IMessageReceiver receiver) : IMessageReceiver
 
     static void AddIfNotExistThrowIfValueMismatch(MessageContext messageContext, Dictionary<string, string> headers, KeyValuePair<string, MessageAttributeValue> attribute)
     {
+        if (attribute.Key == Headers.MessageId)
+        {
+            //HINT: SQS messages retried from ServiceControl will have NServiceBus.MessageId value both in the
+            //      message attribute of the native message and in the headers collection in the message body
+            //      these values are different, but that is not a problem as it's not used in any way by the MassTransit consumers
+            return;
+        }
+
         if (headers.TryGetValue(attribute.Key, out var existingHeaderValue))
         {
             if (existingHeaderValue != attribute.Value.StringValue)
