@@ -46,7 +46,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "commandLineArgs": "--TransportType=NetStandardAzureServiceBus --ConnectionString=%CONNECTIONSTRING_AZURESERVICEBUS% --setup --console"
+      "commandLineArgs": "--TransportType=NetStandardAzureServiceBus --ConnectionString=%CONNECTIONSTRING_AZURESERVICEBUS% --setup-and-run --console"
     },
     "NetStandardAzureServiceBus Dead-letter queues": {
       "commandName": "Project",
