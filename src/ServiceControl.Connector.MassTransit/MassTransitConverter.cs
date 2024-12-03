@@ -1,6 +1,6 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.Json.Serialization.Metadata;
+using System.Text.Json.Serialization;
 using MassTransit;
 using MassTransit.Metadata;
 using MassTransit.Serialization;
@@ -114,7 +114,7 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
                               throw new InvalidOperationException();
             headers[NsbHeaders.OriginatingMachine] = busHostInfo.MachineName ?? headers.GetValueOrDefault(MessageHeaders.Host.MachineName);
         }
-        headers[NsbHeaders.HostId] = DeterministicGuid.MakeId(headers[NsbHeaders.OriginatingEndpoint], headers.GetValueOrDefault(NsbHeaders.OriginatingMachine, "NotSet")).ToString("N");
+        headers[NsbHeaders.HostId] = DeterministicGuid.MakeId(headers[NsbHeaders.OriginatingEndpoint], headers.GetValueOrDefault(NsbHeaders.OriginatingMachine, "Not set")).ToString("N");
         headers["NServiceBus.ConnectedApplication"] = Heartbeat.ConnectedApplicationName;
 
 
@@ -173,7 +173,7 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
         }
 
         // TODO: Currently using FaultConsumerType as fallback as MT does not have a processing machine equivalent
-        headers[NsbHeaders.ProcessingMachine] = headers.GetValueOrDefault(MessageHeaders.Host.MachineName, "❌");
+        headers[NsbHeaders.ProcessingMachine] = headers.GetValueOrDefault(MessageHeaders.Host.MachineName, "Not set");
 #pragma warning restore PS0018
     }
 
@@ -189,17 +189,41 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         };
 
-        void Item(JsonTypeInfo typeInfo)
-        {
-            if (typeInfo.Type == typeof(HostInfo))
-            {
-                typeInfo.CreateObject = () => new BusHostInfo();
-            }
-        }
-
-        options.TypeInfoResolver = new DefaultJsonTypeInfoResolver { Modifiers = { Item } };
+        options.Converters.Add(new InterfaceConverterFactory<BusHostInfo, HostInfo>());
 
         return JsonSerializer.Deserialize<JsonMessageEnvelope>(messageContext.Body.Span, options)
                ?? throw new InvalidOperationException();
+    }
+
+    class InterfaceConverterFactory<TImplementation, TInterface> : JsonConverterFactory
+    {
+        public Type ImplementationType { get; }
+        public Type InterfaceType { get; }
+
+        public InterfaceConverterFactory()
+        {
+            ImplementationType = typeof(TImplementation);
+            InterfaceType = typeof(TInterface);
+        }
+
+        public override bool CanConvert(Type typeToConvert)
+            => typeToConvert == InterfaceType;
+
+        public override JsonConverter? CreateConverter(Type typeToConvert, JsonSerializerOptions options)
+        {
+            var converterType = typeof(InterfaceConverter<,>).MakeGenericType(ImplementationType, InterfaceType);
+            return Activator.CreateInstance(converterType) as JsonConverter;
+        }
+    }
+
+    class InterfaceConverter<TImplementation, TInterface> : JsonConverter<TInterface>
+        where TImplementation : class, TInterface
+    {
+        public override TInterface? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+            => JsonSerializer.Deserialize<TImplementation>(ref reader, options);
+
+        public override void Write(Utf8JsonWriter writer, TInterface value, JsonSerializerOptions options)
+        {
+        }
     }
 }
