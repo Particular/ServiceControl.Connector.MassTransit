@@ -13,7 +13,7 @@ sealed class AmazonSqsHelper(string? queueNamePrefix = null) : IQueueInformation
         ListQueuesResponse response;
         do
         {
-            response = await client.ListQueuesAsync(request);
+            response = await client.ListQueuesAsync(request, cancellationToken);
             foreach (var queueUrl in response.QueueUrls)
             {
                 var queue = queueUrl.Substring(queueUrl.LastIndexOf('/') + 1);

@@ -1,20 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <RootNamespace>ServiceControl.Connector.MassTransit</RootNamespace>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>ServiceControl.Connector.MassTransit</RootNamespace>
+  </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MassTransit" Version="8.3.0" />
-    <PackageReference Include="MassTransit.Abstractions" Version="8.3.0" />
-    <PackageReference Include="NServiceBus" Version="[9.0.0, 10.0.0)" />
-    <PackageReference Include="UUIDNext" Version="3.0.0" />
-<!--    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />-->
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
-    <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="None" />
+    <PackageReference Include="MassTransit" Version="8.3.0"/>
+    <PackageReference Include="MassTransit.Abstractions" Version="8.3.0"/>
+    <PackageReference Include="NServiceBus" Version="[9.0.0, 10.0.0)"/>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1"/>
+    <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="None"/>
   </ItemGroup>
 
 </Project>
