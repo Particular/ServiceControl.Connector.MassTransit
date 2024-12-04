@@ -17,31 +17,9 @@ The connector is container image which is **Linux Arm64** and **Linux Amd64** co
 > [!NOTE]
 > All snippets below assume these are launches from the root of the repo
 
-### Init git submodules
-
-The connector requires some changes to the transports that do not yet exist on the transport packages. To version these changes we use git submodules which need to be initialized in order for the solution to be build.
-
-```shell
-git submodule init
-git submodule update
-```
-
-### Updating submodule branches
-
-> [!NOTE]
-> This also works with git bash on Windows
-
-Currently all submodules use the `tf527` branch to store the customizations required for the connector. These can be updated to running:
-
-```
-bash update-submodules.sh
-```
-
 ### Build
 
 ```shell
-git submodule init
-git submodule update
 dotnet build src/ServiceControl.Connector.MassTransit.sln
 ```
 
@@ -56,8 +34,6 @@ dotnet build src/ServiceControl.Connector.MassTransit.sln
 To locally build and test the container run the following in any shell:
 
 ```shell
-git submodule init
-git submodule update
 docker buildx build --file src/ServiceControl.Connector.MassTransit.Host/Dockerfile --platform linux/arm64,linux/amd64 --tag particular/servicecontrol-connector-masstransit:latest .
 ```
 ### Troubleshooting

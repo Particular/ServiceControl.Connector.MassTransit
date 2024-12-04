@@ -8,9 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AWSSDK.SQS" Version="3.7.400.58" />
     <PackageReference Include="MassTransit" Version="8.3.0" />
-<!--    <PackageReference Include="NServiceBus.AmazonSQS" Version="7.0.0"/>-->
-    <ProjectReference Include="..\..\NServiceBus.AmazonSQS\src\NServiceBus.Transport.SQS\NServiceBus.Transport.SQS.csproj" />
+    <PackageReference Include="NServiceBus.AmazonSQS" Version="7.1.1" />
     <ProjectReference Include="..\ServiceControl.Connector.MassTransit\ServiceControl.Connector.MassTransit.csproj" />
     <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="None" />
   </ItemGroup>
