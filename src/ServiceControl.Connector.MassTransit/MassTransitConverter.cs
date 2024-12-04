@@ -21,6 +21,11 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
             {
                 headers.Remove(key);
             }
+            if (key.StartsWith("MT-Fault"))
+            {
+                headers.Remove(key);
+            }
+            headers.Remove("MT-Reason");
         }
     }
 
