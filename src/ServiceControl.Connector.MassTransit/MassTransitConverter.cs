@@ -18,7 +18,7 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
 
         foreach (var key in headers.Keys)
         {
-            if (key.StartsWith("NServiceBus."))
+            if (key.StartsWith("NServiceBus.") || key.StartsWith("$.diagnostics."))
             {
                 headers.Remove(key);
             }
