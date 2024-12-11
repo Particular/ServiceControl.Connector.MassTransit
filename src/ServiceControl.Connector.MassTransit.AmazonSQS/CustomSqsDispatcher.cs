@@ -22,8 +22,9 @@ sealed class CustomSqsDispatcher(IAmazonSQS client, IMessageDispatcher defaultDi
             return;
         }
 
-        var message = outgoingMessages.UnicastTransportOperations[0].Message;
-        var massTransitReturnQueueName = message.Headers["MT-Fault-InputAddress"];
+        var operation = outgoingMessages.UnicastTransportOperations[0];
+        var message = operation.Message;
+        var massTransitReturnQueueName = operation.Destination;
 
         var queueUrl = await queueUrlCache.GetOrAdd(massTransitReturnQueueName, async (k) =>
         {
