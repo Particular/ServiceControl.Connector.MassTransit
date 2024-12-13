@@ -5,7 +5,9 @@ public static class AdapterRabbitMqConfiguration
 {
     public static void UsingRabbitMQ(this IServiceCollection services, string connectionString, Uri managementApi)
     {
-        services.AddSingleton<IQueueInformationProvider>(new RabbitMQHelper("/", managementApi));
+        var rabbitMqHelper = new RabbitMQHelper("/", managementApi);
+        services.AddSingleton<IQueueInformationProvider>(rabbitMqHelper);
+        services.AddSingleton<IQueueLengthProvider>(rabbitMqHelper);
         services.AddTransient<TransportDefinition>(sp => new RabbitMQTransport(
             RoutingTopology.Conventional(QueueType.Quorum),
             connectionString,

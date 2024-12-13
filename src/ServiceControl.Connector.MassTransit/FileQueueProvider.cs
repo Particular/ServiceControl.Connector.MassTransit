@@ -9,4 +9,12 @@ public sealed class FileBasedQueueInformationProvider(string path) : IQueueInfor
         // TODO: Could be combined with transport implementation to filter out non-existing queues
         return await File.ReadAllLinesAsync(path);
     }
+
+#pragma warning disable PS0018
+    public Task<long> GetQueueLength(string name)
+#pragma warning restore PS0018
+    {
+        //TODO: I think we need to split these interfaces
+        return Task.FromResult<long>(0);
+    }
 }

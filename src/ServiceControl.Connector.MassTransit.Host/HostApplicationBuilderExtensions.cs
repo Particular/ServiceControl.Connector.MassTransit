@@ -2,6 +2,7 @@ using System.Data.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NServiceBus.Transport;
 using ServiceControl.Connector.MassTransit;
 
 static class HostApplicationBuilderExtensions
@@ -17,23 +18,34 @@ static class HostApplicationBuilderExtensions
                           "Particular.ServiceControl.Connector.MassTransit_return";
         var errorQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "error";
 
+        var customChecksQueue = builder.Configuration.GetValue<string?>("CustomChecksQueue") ??
+                          "Particular.ServiceControl";
+
         var queueFilter = builder.Configuration.GetValue<string?>("QUEUENAMEREGEXFILTER");
 
         var services = builder.Services;
 
-        services.AddSingleton(new Configuration
+        var config = new Configuration
         {
             ReturnQueue = returnQueue,
             ErrorQueue = errorQueue,
-            Command = command,
-        })
+            CustomChecksQueue = customChecksQueue,
+            Command = command
+        };
+        services.AddSingleton(config)
         .AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(queueFilter))
         .AddSingleton<IQueueFilter, ErrorAndSkippedQueueFilter>()
         .AddSingleton<Service>()
         .AddSingleton<MassTransitConverter>()
         .AddSingleton<MassTransitFailureAdapter>()
         .AddSingleton<ReceiverFactory>()
-        .AddHostedService(p => p.GetRequiredService<Service>());
+        .AddHostedService(p => p.GetRequiredService<Service>())
+        .AddHostedService<CustomCheckReporter>(provider =>
+            new CustomCheckReporter(
+                provider.GetRequiredService<TransportDefinition>(),
+                provider.GetRequiredService<IQueueLengthProvider>(),
+                config,
+                provider.GetRequiredService<IHostApplicationLifetime>()));
 
         var configuration = builder.Configuration;
 

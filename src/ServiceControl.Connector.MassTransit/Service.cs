@@ -135,7 +135,12 @@ public class Service(
 
         var receiverSettings = receiveSettings.ToArray();
 
-        infrastructure = await transportInfrastructureFactory.CreateTransportInfrastructure(hostSettings, receiverSettings, [], cancellationToken);
+        infrastructure = await transportInfrastructureFactory.CreateTransportInfrastructure(
+             hostSettings,
+             receiverSettings,
+             [configuration.PoisonQueue, configuration.CustomChecksQueue],
+             cancellationToken
+         );
     }
 
 
@@ -177,7 +182,12 @@ public class Service(
 
         var receiverSettings = receiveSettings.ToArray();
 
-        infrastructure = await transportInfrastructureFactory.CreateTransportInfrastructure(hostSettings, receiverSettings, [], cancellationToken);
+        infrastructure = await transportInfrastructureFactory.CreateTransportInfrastructure(
+            hostSettings,
+            receiverSettings,
+            [configuration.PoisonQueue, configuration.CustomChecksQueue],
+            cancellationToken
+        );
 
         var messageDispatcher = infrastructure.Dispatcher;
 
@@ -233,14 +243,14 @@ public class Service(
 
                     if (isPoison || exceedsRetryThreshold)
                     {
-                        logger.LogError(context.Exception, "Moved message to {QueueName}", configuration.ErrorQueue);
+                        logger.LogError(context.Exception, "Moved message to {QueueName}", configuration.PoisonQueue);
 
                         var poisonMessage = new OutgoingMessage(
                             context.Message.MessageId,
                             context.Message.Headers,
                             context.Message.Body
                         );
-                        var address = new UnicastAddressTag(configuration.ErrorQueue);
+                        var address = new UnicastAddressTag(configuration.PoisonQueue);
                         var operation = new TransportOperation(poisonMessage, address);
                         var operations = new TransportOperations(operation);
 

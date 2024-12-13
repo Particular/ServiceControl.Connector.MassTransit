@@ -1,7 +1,7 @@
 using System.Text;
 using System.Text.Json;
 
-class RabbitMQHelper : IQueueInformationProvider
+class RabbitMQHelper : IQueueInformationProvider, IQueueLengthProvider
 {
     readonly string _url;
     readonly HttpClient _httpClient;
@@ -43,5 +43,35 @@ class RabbitMQHelper : IQueueInformationProvider
         }
 
         return list;
+    }
+
+    public async Task<long> GetQueueLength(string name, CancellationToken cancellationToken = default)
+    {
+        var requestUri = $"{_url}/{_vhost.Replace("/", "%2F")}/{name}"; //Encode /
+        try
+        {
+            var response = await _httpClient.GetAsync(requestUri, cancellationToken);
+
+            response.EnsureSuccessStatusCode();
+
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            var jsonDoc = await JsonDocument.ParseAsync(stream, new JsonDocumentOptions(), cancellationToken);
+
+            if (jsonDoc.RootElement.TryGetProperty("messages", out var value))
+            {
+                return value.GetInt64();
+            }
+
+            return 0; //No value available yet shortly after queue has been created
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            //Shutting down
+            return 0;
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Failed to check the length of the queue {name} via URL {requestUri}.", e);
+        }
     }
 }

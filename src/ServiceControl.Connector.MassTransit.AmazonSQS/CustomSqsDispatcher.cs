@@ -4,8 +4,9 @@ using Amazon.SQS;
 using Amazon.SQS.Model;
 using NServiceBus.Transport;
 
-sealed class CustomSqsDispatcher(IAmazonSQS client, IMessageDispatcher defaultDispatcher, string errorQueue) : IMessageDispatcher
+sealed class CustomSqsDispatcher(SqsTransport transport, IAmazonSQS client, IMessageDispatcher defaultDispatcher, string errorQueue) : IMessageDispatcher
 {
+    readonly SqsTransport transport = transport;
     readonly ConcurrentDictionary<string, Task<string>> queueUrlCache = new();
 
     public async Task Dispatch(
@@ -16,6 +17,7 @@ sealed class CustomSqsDispatcher(IAmazonSQS client, IMessageDispatcher defaultDi
     {
         var isForwardMessage = outgoingMessages.UnicastTransportOperations.Count == 1 &&
                                outgoingMessages.UnicastTransportOperations[0].Destination == errorQueue;
+
         if (isForwardMessage)
         {
             await defaultDispatcher.Dispatch(outgoingMessages, transaction, cancellationToken);
@@ -29,6 +31,10 @@ sealed class CustomSqsDispatcher(IAmazonSQS client, IMessageDispatcher defaultDi
         var queueUrl = await queueUrlCache.GetOrAdd(massTransitReturnQueueName, async (k) =>
         {
             var queueName = massTransitReturnQueueName.Substring(massTransitReturnQueueName.LastIndexOf('/') + 1);
+            if (!queueName.StartsWith(transport.QueueNamePrefix))
+            {
+                queueName = transport.QueueNameGenerator(queueName, transport.QueueNamePrefix);
+            }
             var getQueueUrlResponse = await client.GetQueueUrlAsync(queueName, cancellationToken);
             return getQueueUrlResponse.QueueUrl;
         });
@@ -44,7 +50,6 @@ sealed class CustomSqsDispatcher(IAmazonSQS client, IMessageDispatcher defaultDi
         }
 
         sqsMessage.MessageAttributes = attributes;
-
         await client.SendMessageAsync(sqsMessage, cancellationToken);
     }
 }

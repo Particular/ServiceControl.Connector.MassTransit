@@ -7,9 +7,10 @@ public static class ConnectorComponentExtensions
         this IScenarioWithEndpointBehavior<TContext> scenario,
         string name,
         string errorQueue,
-        string returnQueue)
+        string returnQueue,
+        string? customCheckQueue = null)
         where TContext : ScenarioContext
     {
-        return scenario.WithComponent(new ConnectorComponent<TContext>(name, errorQueue, returnQueue));
+        return scenario.WithComponent(new ConnectorComponent<TContext>(name, errorQueue, returnQueue, customCheckQueue));
     }
 }
