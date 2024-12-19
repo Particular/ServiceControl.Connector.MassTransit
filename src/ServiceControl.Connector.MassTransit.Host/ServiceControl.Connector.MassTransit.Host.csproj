@@ -5,8 +5,12 @@
       <TargetFramework>net8.0</TargetFramework>
       <ImplicitUsings>enable</ImplicitUsings>
       <Nullable>enable</Nullable>
-      <IsPublishable>true</IsPublishable>
       <ServerGarbageCollection>true</ServerGarbageCollection>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <RuntimeIdentifier Condition="'$(TargetArch)' == 'amd64'">linux-x64</RuntimeIdentifier>
+      <RuntimeIdentifier Condition="'$(TargetArch)' == 'arm64'">linux-arm64</RuntimeIdentifier>
     </PropertyGroup>
 
     <ItemGroup>

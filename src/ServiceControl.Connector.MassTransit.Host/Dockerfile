@@ -5,10 +5,12 @@ COPY . /import
 WORKDIR /import
 ENV CI=true
 
-RUN dotnet publish --os linux --arch $TARGETARCH src/ServiceControl.Connector.MassTransit.Host/ServiceControl.Connector.MassTransit.Host.csproj --configuration Release -graph --output /build
+RUN dotnet build src/ServiceControl.Connector.MassTransit.Host/ServiceControl.Connector.MassTransit.Host.csproj --configuration Release --property:TargetArch=$TARGETARCH --output /build
+
+RUN touch /build/queues.txt
 
 # Runtime image
-FROM mcr.microsoft.com/dotnet/runtime:8.0
+FROM mcr.microsoft.com/dotnet/runtime:8.0-jammy-chiseled
 ARG VERSION
 WORKDIR /app
 
@@ -21,6 +23,8 @@ LABEL org.opencontainers.image.source=https://github.com/Particular/ServiceContr
       org.opencontainers.image.description="ServiceControl MassTransit connector"
 
 COPY --from=build ./build /app
+
+ENV QUEUES_FILE="/app/queues.txt"
 
 USER $APP_UID
 ENTRYPOINT ["/app/ServiceControl.Connector.MassTransit.Host"]
