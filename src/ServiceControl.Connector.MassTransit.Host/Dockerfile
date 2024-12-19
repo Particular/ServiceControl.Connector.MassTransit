@@ -5,12 +5,12 @@ COPY . /import
 WORKDIR /import
 ENV CI=true
 
-RUN dotnet build src/ServiceControl.Connector.MassTransit.Host/ServiceControl.Connector.MassTransit.Host.csproj --configuration Release --property:TargetArch=$TARGETARCH --output /build
+RUN dotnet publish src/ServiceControl.Connector.MassTransit.Host/ServiceControl.Connector.MassTransit.Host.csproj --configuration Release --arch $TARGETARCH --output /build
 
 RUN touch /build/queues.txt
 
 # Runtime image
-FROM mcr.microsoft.com/dotnet/runtime:8.0-jammy-chiseled
+FROM mcr.microsoft.com/dotnet/runtime:8.0-noble-chiseled
 ARG VERSION
 WORKDIR /app
 

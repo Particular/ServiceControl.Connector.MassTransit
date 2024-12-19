@@ -70,7 +70,7 @@ jobs:
               --annotation "index:org.opencontainers.image.source=https://github.com/Particular/ServiceControl.Connector.MassTransit/tree/${{ github.sha }}" \
               --annotation "index:org.opencontainers.image.url=https://hub.docker.com/r/particular/servicecontrol-connector-masstransit" \
               --annotation "index:org.opencontainers.image.documentation=https://docs.particular.net/servicecontrol/" \
-              --annotation "index:org.opencontainers.image.base.name=mcr.microsoft.com/dotnet/8.0-jammy-chiseled" \
+              --annotation "index:org.opencontainers.image.base.name=mcr.microsoft.com/dotnet/runtime:8.0-noble-chiseled" \
               --platform linux/arm64,linux/amd64 .
           docker buildx imagetools inspect ghcr.io/particular/servicecontrol-connector-masstransit:${{ env.TAG_NAME }}
       - name: Deploy
