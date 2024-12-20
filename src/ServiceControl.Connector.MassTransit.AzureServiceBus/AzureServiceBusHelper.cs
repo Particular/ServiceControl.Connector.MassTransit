@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Azure.Messaging.ServiceBus.Administration;
 using Microsoft.Extensions.Logging;
 
@@ -5,9 +6,8 @@ class AzureServiceBusHelper(ILogger<AzureServiceBusHelper> logger, string connec
 {
     readonly ServiceBusAdministrationClient client = new(connectionstring);
 
-    async Task<IEnumerable<string>> IQueueInformationProvider.GetQueues(CancellationToken cancellationToken)
+    public async IAsyncEnumerable<string> GetQueues([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var list = new List<string>();
         var result = client.GetQueuesAsync(cancellationToken);
 
         await foreach (var queueProperties in result)
@@ -19,9 +19,9 @@ class AzureServiceBusHelper(ILogger<AzureServiceBusHelper> logger, string connec
                 continue;
             }
 
-            list.Add(queueProperties.Name);
+            yield return queueProperties.Name;
         }
-
-        return list;
     }
+
+    public async Task<bool> QueueExists(string queueName, CancellationToken cancellationToken) => (await client.QueueExistsAsync(queueName, cancellationToken)).Value;
 }

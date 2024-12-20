@@ -70,11 +70,11 @@ static class HostApplicationBuilderExtensions
                 var managementApiValue = configuration.GetValue<string>("MANAGEMENT_API") ?? throw new Exception("MANAGEMENT_API not specified");
                 if (!Uri.TryCreate(managementApiValue, UriKind.Absolute, out var managementApi))
                 {
-                    throw new Exception("MANAGEMENTAPI is invalid. Ensure the value is a valid url without any quotes i.e. http://localhost:15672");
+                    throw new Exception("MANAGEMENT_API is invalid. Ensure the value is a valid url without any quotes i.e. http://localhost:15672");
                 }
                 if (string.IsNullOrEmpty(configuration.GetValue<string>("MANAGEMENT_API_USERNAME")))
                 {
-                    throw new Exception("MANAGEMENT_API_USERNAME must contain username and password i.e. http://guest:guest@localhost:15672");
+                    throw new Exception("MANAGEMENT_API_USERNAME must contain username");
                 }
                 services.UsingRabbitMQ(connectionstring ?? throw new Exception("CONNECTIONSTRING not specified"), managementApi, configuration.GetValue<string>("MANAGEMENT_API_USERNAME"), configuration.GetValue<string>("MANAGEMENT_API_PASSWORD"));
                 break;
@@ -82,12 +82,13 @@ static class HostApplicationBuilderExtensions
                 throw new NotSupportedException($"Transport type {transporttype} is not supported");
         }
 
-        // Override any transport specific implementation
-        var staticQueueList = configuration.GetValue<string?>("QUEUES_FILE");
+        var staticQueueList = configuration.GetValue<string>("QUEUES_FILE");
 
-        if (staticQueueList != null)
+        if (staticQueueList == null)
         {
-            services.AddSingleton<IQueueInformationProvider>(new FileBasedQueueInformationProvider(staticQueueList));
+            throw new Exception("QUEUES_FILE not specified");
         }
+
+        services.AddSingleton<IFileBasedQueueInformationProvider>(new FileBasedQueueInformationProvider(staticQueueList));
     }
 }

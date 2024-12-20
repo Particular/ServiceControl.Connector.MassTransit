@@ -1,43 +1,28 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.AcceptanceTesting;
 using NServiceBus.AcceptanceTesting.Support;
 using ServiceControl.Connector.MassTransit;
 
-public class ConnectorComponent<TContext> : IComponentBehavior
+public class ConnectorComponent<TContext>(string name, string errorQueue, string returnQueue, string[] queueNames) : IComponentBehavior
     where TContext : ScenarioContext
 {
-    public ConnectorComponent(string name, string errorQueue, string returnQueue)
-    {
-        this.name = name;
-        this.errorQueue = errorQueue;
-        this.returnQueue = returnQueue;
-    }
-
     public Task<ComponentRunner> CreateRunner(RunDescriptor run)
     {
-        return Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, run.ScenarioContext, new AcceptanceTestLoggerFactory(run.ScenarioContext)));
+        return Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, queueNames, run.ScenarioContext, new AcceptanceTestLoggerFactory(run.ScenarioContext)));
     }
 
-    readonly string name;
-    readonly string errorQueue;
-    readonly string returnQueue;
-
-    class Runner : ComponentRunner
+    class StaticQueueNames(string[] queueNames) : IFileBasedQueueInformationProvider
     {
-        public Runner(string name, string errorQueue, string returnQueue,
-            ScenarioContext scenarioContext,
-            AcceptanceTestLoggerFactory loggerFactory)
-        {
-            this.errorQueue = errorQueue;
-            this.returnQueue = returnQueue;
-            this.scenarioContext = scenarioContext;
-            this.loggerFactory = loggerFactory;
-            Name = name;
-        }
+        public Task<IEnumerable<string>> GetQueues(CancellationToken cancellationToken) => Task.FromResult<IEnumerable<string>>(queueNames);
+    }
 
-        public override string Name { get; }
+    class Runner(string name, string errorQueue, string returnQueue, string[] queueNames,
+        ScenarioContext scenarioContext,
+        AcceptanceTestLoggerFactory loggerFactory) : ComponentRunner
+    {
+        public override string Name { get; } = name;
 
         public override async Task Start(CancellationToken cancellationToken = default)
         {
@@ -52,7 +37,7 @@ public class ConnectorComponent<TContext> : IComponentBehavior
                     {
                         ReturnQueue = returnQueue,
                         ErrorQueue = errorQueue,
-                        QueueScanInterval = TimeSpan.FromSeconds(5),
+                        //QueueScanInterval = TimeSpan.FromSeconds(5),
                         Command = Command.SetupAndRun
                     });
                     services.AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(null));
@@ -63,6 +48,7 @@ public class ConnectorComponent<TContext> : IComponentBehavior
                     services.AddHostedService<Service>();
                     services.AddSingleton(TimeProvider.System);
                     services.AddSingleton<IProvisionQueues, ProvisionQueues>();
+                    services.AddSingleton<IFileBasedQueueInformationProvider>(new StaticQueueNames(queueNames));
                     transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
                 });
 
@@ -93,9 +79,9 @@ public class ConnectorComponent<TContext> : IComponentBehavior
 
         IHost? host;
 
-        readonly string errorQueue;
-        readonly string returnQueue;
-        readonly ScenarioContext scenarioContext;
-        readonly AcceptanceTestLoggerFactory loggerFactory;
+        readonly string errorQueue = errorQueue;
+        readonly string returnQueue = returnQueue;
+        readonly ScenarioContext scenarioContext = scenarioContext;
+        readonly AcceptanceTestLoggerFactory loggerFactory = loggerFactory;
     }
 }
