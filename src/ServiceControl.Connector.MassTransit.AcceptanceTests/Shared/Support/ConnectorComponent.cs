@@ -56,12 +56,12 @@ public class ConnectorComponent<TContext> : IComponentBehavior
                         Command = Command.SetupAndRun
                     });
                     services.AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(null));
-                    services.AddSingleton<Service>();
                     services.AddSingleton<MassTransitConverter>();
                     services.AddSingleton<MassTransitFailureAdapter>();
                     services.AddSingleton<ReceiverFactory>();
                     services.AddSingleton(loggerFactory);
-                    services.AddHostedService(p => p.GetRequiredService<Service>());
+                    services.AddHostedService<Service>();
+                    services.AddSingleton(TimeProvider.System);
                     transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
                 });
 

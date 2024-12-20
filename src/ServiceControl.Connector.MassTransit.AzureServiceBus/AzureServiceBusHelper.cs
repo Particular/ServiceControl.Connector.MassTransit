@@ -5,21 +5,23 @@ class AzureServiceBusHelper(ILogger<AzureServiceBusHelper> logger, string connec
 {
     readonly ServiceBusAdministrationClient client = new(connectionstring);
 
-    async Task<IEnumerable<string>> IQueueInformationProvider.GetQueues()
+    async Task<IEnumerable<string>> IQueueInformationProvider.GetQueues(CancellationToken cancellationToken)
     {
         var list = new List<string>();
-        var result = client.GetQueuesAsync();
+        var result = client.GetQueuesAsync(cancellationToken);
 
         await foreach (var queueProperties in result)
         {
             if (queueProperties.RequiresSession)
             {
-                logger.LogDebug("Skipping '{QueueName}', Queues that require sessions are currently unsupported", queueProperties.Name);
+                logger.LogDebug("Skipping '{QueueName}', Queues that require sessions are currently unsupported",
+                    queueProperties.Name);
                 continue;
             }
 
             list.Add(queueProperties.Name);
         }
+
         return list;
     }
 }

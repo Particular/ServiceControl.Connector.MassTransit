@@ -13,26 +13,26 @@ public class Service(
     MassTransitFailureAdapter adapter,
     Configuration configuration,
     ReceiverFactory receiverFactory,
-    IHostApplicationLifetime hostApplicationLifetime
-) : IHostedService
+    IHostApplicationLifetime hostApplicationLifetime,
+    TimeProvider timeProvider
+) : BackgroundService
 {
-    readonly CancellationTokenSource StopCancellationTokenSource = new();
-    Task? loopTask;
-
     TransportInfrastructure? infrastructure;
-    HashSet<string>? massTransitErrorQueues;
+    HashSet<string> massTransitErrorQueues = [];
 
-#pragma warning disable PS0018
-    async Task<HashSet<string>> GetReceiveQueues()
-#pragma warning restore PS0018
+    async Task<HashSet<string>> GetReceiveQueues(CancellationToken cancellationToken)
     {
         try
         {
-            var queues = await queueInformationProvider.GetQueues();
+            var queues = await queueInformationProvider.GetQueues(cancellationToken);
             return queues
                 .Where(queueFilter.IsMatch)
                 .Where(userQueueNameFilter.IsMatch)
                 .ToHashSet();
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            logger.LogInformation("Cancelled queue query request");
         }
         catch (Exception e)
         {
@@ -42,102 +42,57 @@ public class Service(
         return [];
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken = default)
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        var version = System.Diagnostics.FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly()!.Location).ProductVersion!;
-        logger.LogInformation("ServiceControl.Connector.MassTransit {Version}", version);
+        logger.LogInformation($"Starting {nameof(Service)}");
 
-        //Perform setup
-        if (configuration.IsSetup)
-        {
-            massTransitErrorQueues = await GetReceiveQueues();
-
-            await Setup(cancellationToken);
-
-            if (!configuration.IsRun)
-            {
-                logger.LogInformation("Signaling stop as only run in setup mode");
-                hostApplicationLifetime.StopApplication();
-                return;
-            }
-        }
-
-        massTransitErrorQueues = [];
-        loopTask = Loop(StopCancellationTokenSource.Token);
-    }
-
-    async Task Loop(CancellationToken cancellationToken)
-    {
         try
         {
-            while (!cancellationToken.IsCancellationRequested)
+            using PeriodicTimer timer = new(configuration.QueueScanInterval, timeProvider);
+            do
             {
-                var newData = await GetReceiveQueues();
-
-                var errorQueuesAreNotTheSame = !newData.SetEquals(massTransitErrorQueues!);
-
-                if (errorQueuesAreNotTheSame)
+                try
                 {
-                    logger.LogInformation("Changes detected, restarting");
-                    await StopReceiving(cancellationToken);
-                    massTransitErrorQueues = newData;
-                    await StartReceiving(cancellationToken);
-                }
+                    var newData = await GetReceiveQueues(cancellationToken);
+                    var errorQueuesAreTheSame = newData.SetEquals(massTransitErrorQueues);
 
-                await Task.Delay(configuration.QueueScanInterval, cancellationToken);
+                    if (errorQueuesAreTheSame)
+                    {
+                        logger.LogInformation("No changes detected for Masstransit queues");
+                        continue;
+                    }
+
+                    massTransitErrorQueues = newData;
+
+                    if (infrastructure is not null)
+                    {
+                        logger.LogInformation("Changes detected, restarting");
+
+                        await StopReceiving(CancellationToken.None);
+                    }
+
+                    await StartReceiving(CancellationToken.None);
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    logger.LogError(ex, "Failed to shoveling Masstransit messages");
+                }
+            } while (await timer.WaitForNextTickAsync(cancellationToken));
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogInformation($"Stopping {nameof(Service)}");
+
+            try
+            {
+                await StopReceiving(CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to stop all the receivers");
             }
         }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            logger.LogInformation("Shutting down initiated by host");
-        }
-        catch (Exception e)
-        {
-            logger.LogCritical(e, "Failure");
-            hostApplicationLifetime.StopApplication();
-        }
     }
-
-    public async Task StopAsync(CancellationToken cancellationToken = default)
-    {
-        await StopCancellationTokenSource.CancelAsync();
-        if (loopTask != null)
-        {
-            await loopTask;
-        }
-        await StopReceiving(cancellationToken);
-    }
-
-    async Task Setup(CancellationToken cancellationToken)
-    {
-        var hostSettings = new HostSettings(
-            name: configuration.ReturnQueue,
-            hostDisplayName: configuration.ReturnQueue,
-            startupDiagnostic: new StartupDiagnosticEntries(),
-            criticalErrorAction: (_, exception, _) =>
-            {
-                logger.LogCritical(exception, "Critical error, signaling to stop host");
-                hostApplicationLifetime.StopApplication();
-            },
-            true
-        );
-
-        var receiveSettings = new List<ReceiveSettings>
-        {
-            new(
-                id: "Return",
-                receiveAddress: new QueueAddress(configuration.ReturnQueue),
-                usePublishSubscribe: false,
-                purgeOnStartup: false,
-                errorQueue: configuration.PoisonQueue
-            )
-        };
-
-        var receiverSettings = receiveSettings.ToArray();
-
-        infrastructure = await transportInfrastructureFactory.CreateTransportInfrastructure(hostSettings, receiverSettings, [], cancellationToken);
-    }
-
 
     async Task StartReceiving(CancellationToken cancellationToken)
     {
@@ -164,9 +119,9 @@ public class Service(
             )
         };
 
-        foreach (var massTransitErrorQueue in massTransitErrorQueues!)
+        foreach (var massTransitErrorQueue in massTransitErrorQueues)
         {
-            logger.LogInformation("listening to: {InputQueue}", massTransitErrorQueue);
+            logger.LogInformation("Ingesting messages from {InputQueue}", massTransitErrorQueue);
             receiveSettings.Add(receiverFactory.Create(massTransitErrorQueue, configuration.ErrorQueue));
         }
 
@@ -183,7 +138,7 @@ public class Service(
 
         OnMessage forwardMessage = async (messageContext, token) =>
         {
-            using var scope = logger.BeginScope("FORWARD {ReceiveAddress} {NativeMessageId}", messageContext.ReceiveAddress, messageContext.NativeMessageId);
+            logger.LogInformation("FORWARD {ReceiveAddress} {NativeMessageId}", messageContext.ReceiveAddress, messageContext.NativeMessageId);
             TransportOperation operation;
             try
             {
@@ -193,13 +148,12 @@ public class Service(
             {
                 throw new ConversionException("Conversion to ServiceControl failed", e);
             }
-
             await messageDispatcher.Dispatch(new TransportOperations(operation), messageContext.TransportTransaction, token);
         };
 
         OnMessage returnMessage = async (messageContext, token) =>
         {
-            using var scope = logger.BeginScope("RETURN {ReceiveAddress} {NativeMessageId}", messageContext.ReceiveAddress, messageContext.NativeMessageId);
+            logger.LogInformation("RETURN {ReceiveAddress} {NativeMessageId}", messageContext.ReceiveAddress, messageContext.NativeMessageId);
             TransportOperation operation;
             try
             {
@@ -209,18 +163,17 @@ public class Service(
             {
                 throw new ConversionException("Conversion from ServiceControl failed", e);
             }
-
             await messageDispatcher.Dispatch(new TransportOperations(operation), messageContext.TransportTransaction, token);
         };
 
         foreach (var receiverSetting in receiverSettings)
         {
-            OnMessage onMessage = receiverSetting.Id == "Return"
+            var onMessage = receiverSetting.Id == "Return"
                 ? returnMessage
                 : forwardMessage;
 
             var receiver = infrastructure.Receivers[receiverSetting.Id];
-            await receiver.Initialize(new PushRuntimeSettings(),
+            await receiver.Initialize(PushRuntimeSettings.Default,
                 onMessage: (context, token) => onMessage(context, token),
                 onError: async (context, token) =>
                 {
@@ -240,24 +193,22 @@ public class Service(
                             context.Message.Headers,
                             context.Message.Body
                         );
-                        var address = new UnicastAddressTag(configuration.ErrorQueue);
+                        var address = new UnicastAddressTag(configuration.PoisonQueue);
                         var operation = new TransportOperation(poisonMessage, address);
                         var operations = new TransportOperations(operation);
 
                         await messageDispatcher.Dispatch(operations, context.TransportTransaction, token);
                         return ErrorHandleResult.Handled;
                     }
-                    else
-                    {
-                        // Exponential back-off with jitter
-                        var millisecondsDelay = (int)Math.Min(30000, 100 * Math.Pow(2, context.ImmediateProcessingFailures));
-                        millisecondsDelay += Random.Shared.Next(millisecondsDelay / 5);
 
-                        logger.LogWarning(context.Exception, "Retrying message {QueueName}, attempt {ImmediateProcessingFailures} of {MaxRetries} after {millisecondsDelay} milliseconds", configuration.ErrorQueue, context.ImmediateProcessingFailures, configuration.MaxRetries, millisecondsDelay);
-                        await Task.Delay(millisecondsDelay, token);
-                        return ErrorHandleResult.RetryRequired;
-                    }
-                }, cancellationToken: cancellationToken);
+                    // Exponential back-off with jitter
+                    var millisecondsDelay = (int)Math.Min(30000, 100 * Math.Pow(2, context.ImmediateProcessingFailures));
+                    millisecondsDelay += Random.Shared.Next(millisecondsDelay / 5);
+
+                    logger.LogWarning(context.Exception, "Retrying message {QueueName}, attempt {ImmediateProcessingFailures} of {MaxRetries} after {millisecondsDelay} milliseconds", configuration.ErrorQueue, context.ImmediateProcessingFailures, configuration.MaxRetries, millisecondsDelay);
+                    await Task.Delay(millisecondsDelay, token);
+                    return ErrorHandleResult.RetryRequired;
+                }, cancellationToken);
 
             await receiver.StartReceive(cancellationToken);
         }
@@ -265,34 +216,11 @@ public class Service(
 
     async Task StopReceiving(CancellationToken cancellationToken)
     {
-        var i = infrastructure;
-        if (i == null)
+        if (infrastructure != null)
         {
-            return;
+            var tasks = infrastructure.Receivers.Select(pair => pair.Value.StopReceive(cancellationToken));
+            await Task.WhenAll(tasks);
+            await infrastructure.Shutdown(cancellationToken);
         }
-        infrastructure = null;
-
-        // Behavior copied from https://github.com/Particular/NServiceBus/blob/9.2.3/src/NServiceBus.Core/Receiving/ReceiveComponent.cs#L229-L246
-        var receivers = i.Receivers.Values;
-        var receiverStopTasks = receivers.Select(async receiver =>
-        {
-            try
-            {
-                logger.LogDebug("Stopping {ReceiverId} receiver", receiver.Id);
-                await receiver.StopReceive(cancellationToken);
-                logger.LogDebug("Stopped {ReceiverId} receiver", receiver.Id);
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                // Host is terminating
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, "Receiver {ReceiverId} threw an exception on stopping.", receiver.Id);
-            }
-        });
-
-        await Task.WhenAll(receiverStopTasks);
-        await i.Shutdown(cancellationToken);
     }
 }
