@@ -7,8 +7,6 @@ ENV CI=true
 
 RUN dotnet publish src/ServiceControl.Connector.MassTransit.Host/ServiceControl.Connector.MassTransit.Host.csproj --configuration Release --arch $TARGETARCH --output /build
 
-RUN touch /build/queues.txt
-
 # Runtime image
 FROM mcr.microsoft.com/dotnet/runtime:8.0-noble-chiseled
 ARG VERSION
@@ -23,8 +21,6 @@ LABEL org.opencontainers.image.source=https://github.com/Particular/ServiceContr
       org.opencontainers.image.description="ServiceControl MassTransit connector"
 
 COPY --from=build ./build /app
-
-ENV QUEUES_FILE="/app/queues.txt"
 
 USER $APP_UID
 ENTRYPOINT ["/app/ServiceControl.Connector.MassTransit.Host"]
