@@ -15,11 +15,17 @@ public class Retry : ConnectorAcceptanceTest
     [Test]
     public async Task Should_forward_error_messages_by_not_modify_message()
     {
+        const string queueName = "failing";
+
         var ctx = await Scenario.Define<Context>()
-            .WithConnector("Connector", Conventions.EndpointNamingConvention(typeof(ErrorSpy)), "Retry.Return", ["failing"])
+            .WithConnector("Connector", Conventions.EndpointNamingConvention(typeof(ErrorSpy)), "Retry.Return", [$"{queueName}_error"])
             .WithMassTransit("Receiver", bus =>
             {
-                bus.AddConsumer<FailingConsumer, FailingConsumerDefinition>();
+                bus.AddConsumer<FailingConsumer>().Endpoint(configurator =>
+                {
+                    // We are giving it an explicit name 
+                    configurator.Name = queueName;
+                });
             })
             .WithMassTransit("Sender", bus => { }, (context, collection) =>
             {
@@ -53,14 +59,6 @@ public class Retry : ConnectorAcceptanceTest
                 await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
                 await bus.Publish(new FaultyMessage(), cancellationToken);
             }
-        }
-    }
-
-    public class FailingConsumerDefinition : ConsumerDefinition<FailingConsumer>
-    {
-        public FailingConsumerDefinition()
-        {
-            EndpointName = "failing";
         }
     }
 

@@ -8,9 +8,9 @@ public static class ConnectorComponentExtensions
         string name,
         string errorQueue,
         string returnQueue,
-        string[] queueNames)
+        string[] queueNamesToMonitor)
         where TContext : ScenarioContext
     {
-        return scenario.WithComponent(new ConnectorComponent<TContext>(name, errorQueue, returnQueue, queueNames));
+        return scenario.WithComponent(new ConnectorComponent<TContext>(name, errorQueue, returnQueue, queueNamesToMonitor));
     }
 }

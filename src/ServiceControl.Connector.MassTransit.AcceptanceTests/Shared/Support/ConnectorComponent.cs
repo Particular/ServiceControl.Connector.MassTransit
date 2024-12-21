@@ -5,12 +5,12 @@ using NServiceBus.AcceptanceTesting;
 using NServiceBus.AcceptanceTesting.Support;
 using ServiceControl.Connector.MassTransit;
 
-public class ConnectorComponent<TContext>(string name, string errorQueue, string returnQueue, string[] queueNames) : IComponentBehavior
+public class ConnectorComponent<TContext>(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor) : IComponentBehavior
     where TContext : ScenarioContext
 {
     public Task<ComponentRunner> CreateRunner(RunDescriptor run)
     {
-        return Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, queueNames, run.ScenarioContext, new AcceptanceTestLoggerFactory(run.ScenarioContext)));
+        return Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, queueNamesToMonitor, run.ScenarioContext, new AcceptanceTestLoggerFactory(run.ScenarioContext)));
     }
 
     class StaticQueueNames(string[] queueNames) : IFileBasedQueueInformationProvider
@@ -18,7 +18,7 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
         public Task<IEnumerable<string>> GetQueues(CancellationToken cancellationToken) => Task.FromResult<IEnumerable<string>>(queueNames);
     }
 
-    class Runner(string name, string errorQueue, string returnQueue, string[] queueNames,
+    class Runner(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor,
         ScenarioContext scenarioContext,
         AcceptanceTestLoggerFactory loggerFactory) : ComponentRunner
     {
@@ -37,7 +37,6 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
                     {
                         ReturnQueue = returnQueue,
                         ErrorQueue = errorQueue,
-                        //QueueScanInterval = TimeSpan.FromSeconds(5),
                         Command = Command.SetupAndRun
                     });
                     services.AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(null));
@@ -48,7 +47,7 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
                     services.AddHostedService<Service>();
                     services.AddSingleton(TimeProvider.System);
                     services.AddSingleton<IProvisionQueues, ProvisionQueues>();
-                    services.AddSingleton<IFileBasedQueueInformationProvider>(new StaticQueueNames(queueNames));
+                    services.AddSingleton<IFileBasedQueueInformationProvider>(new StaticQueueNames(queueNamesToMonitor));
                     transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
                 });
 
