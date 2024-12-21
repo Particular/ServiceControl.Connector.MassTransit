@@ -62,10 +62,15 @@ public class ConnectorComponent<TContext> : IComponentBehavior
                     services.AddSingleton(loggerFactory);
                     services.AddHostedService<Service>();
                     services.AddSingleton(TimeProvider.System);
+                    services.AddSingleton<IProvisionQueues, ProvisionQueues>();
                     transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
                 });
 
             host = builder.Build();
+
+            var provisionQueues = host.Services.GetRequiredService<IProvisionQueues>();
+            await provisionQueues.TryProvision(cancellationToken);
+
             await host.StartAsync(cancellationToken).ConfigureAwait(false);
         }
 

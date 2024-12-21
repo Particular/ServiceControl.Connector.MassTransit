@@ -32,14 +32,14 @@ NServiceBus.Logging.LogManager.UseFactory(new ExtensionsLoggerFactory(loggerFact
 
 var provisionQueues = host.Services.GetRequiredService<IProvisionQueues>();
 var configure = host.Services.GetRequiredService<Configuration>();
-var result = true;
+var provisionQueuesResult = true;
 
 if (configure.Command != Command.Run)
 {
-    result = await provisionQueues.TryProvision(CancellationToken.None);
+    provisionQueuesResult = await provisionQueues.TryProvision(CancellationToken.None);
 }
 
-if (result == false)
+if (!provisionQueuesResult)
 {
     return 1;
 }
