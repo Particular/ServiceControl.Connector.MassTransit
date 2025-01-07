@@ -11,10 +11,10 @@ public static class AdapterRabbitMqConfiguration
     public static void UsingRabbitMQ(this IServiceCollection services, string connectionString, Uri managementApi, string? username, string? password)
     {
         var connectionConfiguration = ConnectionConfiguration.Create(connectionString, string.Empty);
-        var defaultCredential = new NetworkCredential(connectionConfiguration.UserName, connectionConfiguration.Password);
+        var defaultCredential = new NetworkCredential(username ?? connectionConfiguration.UserName, password ?? connectionConfiguration.Password);
 
         services.AddSingleton<IQueueInformationProvider>(new RabbitMQHelper(connectionConfiguration.VirtualHost, managementApi, defaultCredential));
-        services.AddTransient<TransportDefinition>(sp => new RabbitMQTransport(
+        services.AddTransient<TransportDefinition>(_ => new RabbitMQTransport(
             RoutingTopology.Conventional(QueueType.Quorum),
             connectionString,
             enableDelayedDelivery: false
