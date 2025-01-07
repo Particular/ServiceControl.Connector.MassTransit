@@ -36,6 +36,7 @@ public static class AdapterRabbitMqConfiguration
         services.AddSingleton<MassTransitFailureAdapter, RabbitMQMassTransitFailureAdapter>();
     }
 
+    // Copied from the NServiceBus.Rabbit repository - https://github.com/Particular/NServiceBus.RabbitMQ/blob/master/src/NServiceBus.Transport.RabbitMQ/Configuration/ConnectionConfiguration.cs
     class ConnectionConfiguration
     {
         const bool defaultUseTls = false;
