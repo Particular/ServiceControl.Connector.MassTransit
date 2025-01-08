@@ -32,7 +32,8 @@ static class HostApplicationBuilderExtensions
             .AddSingleton<MassTransitConverter>()
             .AddSingleton<MassTransitFailureAdapter>()
             .AddSingleton<ReceiverFactory>()
-            .AddSingleton<IProvisionQueues, ProvisionQueues>();
+            .AddSingleton<IProvisionQueues, ProvisionQueues>()
+            .AddSingleton(TimeProvider.System);
 
         if (command != Command.Setup)
         {

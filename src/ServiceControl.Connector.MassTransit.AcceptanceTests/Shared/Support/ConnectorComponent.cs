@@ -39,6 +39,7 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
                     services.AddSingleton<ReceiverFactory>();
                     services.AddHostedService<Service>();
                     services.AddSingleton<IProvisionQueues, ProvisionQueues>();
+                    services.AddSingleton(TimeProvider.System);
                     transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
                 });
 
