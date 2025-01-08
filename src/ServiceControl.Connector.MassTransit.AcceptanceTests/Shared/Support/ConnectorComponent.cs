@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -13,7 +14,13 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
 
     class StaticQueueNames(string[] queueNames) : IFileBasedQueueInformationProvider
     {
-        public Task<IEnumerable<string>> GetQueues(CancellationToken cancellationToken) => Task.FromResult<IEnumerable<string>>(queueNames);
+        public async IAsyncEnumerable<string> GetQueues([EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            foreach (var queueName in queueNames)
+            {
+                yield return queueName;
+            }
+        }
     }
 
     class Runner(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor,

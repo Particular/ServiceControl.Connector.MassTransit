@@ -23,8 +23,22 @@ public class Service(
     {
         try
         {
-            var queues = await fileBasedQueueInformationProvider.GetQueues(cancellationToken);
-            return queues.ToHashSet();
+            var queues = fileBasedQueueInformationProvider.GetQueues(cancellationToken);
+            var resultList = new HashSet<string>();
+            var enumerator = queues.GetAsyncEnumerator(cancellationToken);
+            try
+            {
+                while (await enumerator.MoveNextAsync())
+                {
+                    resultList.Add(enumerator.Current);
+                }
+            }
+            finally
+            {
+                await enumerator.DisposeAsync();
+            }
+
+            return resultList;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
