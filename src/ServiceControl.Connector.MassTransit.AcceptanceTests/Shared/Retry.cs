@@ -10,13 +10,12 @@ using NUnit.Framework;
 using RetryTest;
 using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
 
-public class Retry : ConnectorAcceptanceTest
+public class Retry
 {
-    [Test]
-    public async Task Should_forward_error_messages_by_not_modify_message()
+    public async Task Should_forward_error_messages_by_not_modify_message(string queueName)
     {
         var ctx = await Scenario.Define<Context>()
-            .WithConnector("Connector", Conventions.EndpointNamingConvention(typeof(ErrorSpy)), "Retry.Return", [])
+            .WithConnector("Connector", Conventions.EndpointNamingConvention(typeof(ErrorSpy)), "Retry.Return", [queueName])
             .WithMassTransit("Receiver", bus =>
             {
                 bus.AddConsumer<FailingConsumer>();
@@ -54,7 +53,7 @@ public class Retry : ConnectorAcceptanceTest
         }
     }
 
-    public class FailingConsumer : IConsumer<FaultyMessage>
+    class FailingConsumer : IConsumer<FaultyMessage>
     {
         readonly Context testContext;
         readonly IServiceProvider serviceProvider;
@@ -85,7 +84,7 @@ public class Retry : ConnectorAcceptanceTest
         }
     }
 
-    public class ErrorSpy : EndpointConfigurationBuilder
+    class ErrorSpy : EndpointConfigurationBuilder
     {
         public ErrorSpy()
         {

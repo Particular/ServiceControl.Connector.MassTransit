@@ -16,9 +16,11 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
     {
         public async IAsyncEnumerable<string> GetQueues([EnumeratorCancellation] CancellationToken cancellationToken)
         {
+            await Task.Yield();
+
             foreach (var queueName in queueNames)
             {
-                yield return queueName;
+                yield return $"{queueName}_error";
             }
         }
     }
