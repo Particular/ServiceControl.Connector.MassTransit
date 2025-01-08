@@ -1,4 +1,4 @@
-using System.Text;
+using System.Net;
 using System.Text.Json;
 
 class RabbitMQHelper : IQueueInformationProvider
@@ -7,16 +7,17 @@ class RabbitMQHelper : IQueueInformationProvider
     readonly HttpClient _httpClient;
     readonly string _vhost;
 
-    public RabbitMQHelper(string vhost, Uri apiBaseUrl)
+    public RabbitMQHelper(string vhost, Uri apiBaseUrl, ICredentials credentials)
     {
         _vhost = vhost;
         _url = apiBaseUrl + "api/queues";
 
-        var auth = Convert.ToBase64String(Encoding.ASCII.GetBytes(apiBaseUrl.UserInfo));
-
-        _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", auth);
+        _httpClient = new HttpClient(new SocketsHttpHandler
+        {
+            Credentials = credentials,
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2)
+        })
+        { BaseAddress = apiBaseUrl };
     }
 
     public async Task<IEnumerable<string>> GetQueues(CancellationToken cancellationToken)

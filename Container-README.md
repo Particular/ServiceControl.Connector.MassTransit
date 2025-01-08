@@ -40,7 +40,9 @@ Run with setup entry point to create message queues, then exit the container.
 docker run \
 -e TRANSPORTTYPE=RabbitMQ.QuorumConventionalRouting \
 -e CONNECTIONSTRING=host=host.docker.internal \
--e MANAGEMENTAPI=http://guest:guest@host.docker.internal:15672 \
+-e MANAGEMENT_API_URL=http://host.docker.internal:15672 \
+-e MANAGEMENT_API_USERNAME=guest \
+-e MANAGEMENT_API_PASSWORD=guest \
 --rm particular/servicecontrol-connector-masstransit:latest \
 --setup
 ```
@@ -53,22 +55,26 @@ Run the connector and bridge MassTransit errors queues with the Particular Platf
 docker run \
 -e TRANSPORTTYPE=RabbitMQ.QuorumConventionalRouting \
 -e CONNECTIONSTRING=host=host.docker.internal \
--e MANAGEMENTAPI=http://guest:guest@host.docker.internal:15672 \
---rm particular/servicecontrol-connector-masstransit:latest \
+-e MANAGEMENT_API_URL=http://host.docker.internal:15672 \
+-e MANAGEMENT_API_USERNAME=guest \
+-e MANAGEMENT_API_PASSWORD=guest \
+--rm particular/servicecontrol-connector-masstransit:latest
 ```
 
 ## Configuration
 
-| Key                  | Description                                                                                         | Default                                                  |
-|----------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------------------------|
-| TRANSPORTTYPE        | The transport type                                                                                  | None                                                     |
-| CONNECTIONSTRING     | The NServiceBus connection string for the specified transport                                       | None                                                     |
-| RETURNQUEUE          | The intermediate queue used by the connector to which ServiceControl will send its retried messages | `Particular.ServiceControl.Connector.MassTransit_return` |
-| ERRORQUEUE           | The error queue ServiceControl ingests                                                              | `error`                                                  |
-| MANAGEMENTAPI        | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
-| QUEUES_FILE          | File that contains each error queue to monitor as a seperate line                                   | None                                                     |
-| RECEIVEMODE          | Azure Service Bus: By default ingest `*_error` but can ingest from dead-letter queues               | `Queue`                                                  |
-| QUEUENAMEREGEXFILTER | Queue name regular expression filter                                                                | None
+| Key                | Description                                                                                         | Default                                                  |
+|--------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------------------------|
+| TRANSPORTTYPE      | The transport type                                                                                  | None                                                     |
+| CONNECTIONSTRING   | The NServiceBus connection string for the specified transport                                       | None                                                     |
+| RETURNQUEUE        | The intermediate queue used by the connector to which ServiceControl will send its retried messages | `Particular.ServiceControl.Connector.MassTransit_return` |
+| ERRORQUEUE         | The error queue ServiceControl ingests                                                              | `error`                                                  |
+| MANAGEMENT_API_URL | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
+| MANAGEMENT_API_USERNAME | RabbitMQ management API username                                                                    | `guest`                                                    |
+| MANAGEMENT_API_PASSWORD | RabbitMQ management API password                                                                    | `guest`                                                      |
+| QUEUES_FILE        | File that contains each error queue to monitor as a seperate line                                   | None                                                     |
+| RECEIVEMODE        | Azure Service Bus: By default ingest `*_error` but can ingest from dead-letter queues               | `Queue`                                                  |
+| QUEUENAMEREGEXFILTER | Queue name regular expression filter                                                                | None                                                     
 
 ### TRANSPORTTYPE
 
@@ -100,20 +106,38 @@ Default: `error`
 
 ServiceControl by default listens to the `error` queue but it this value is overriden in ServiceControl this configuration setting must be set to the same value.
 
-### MANAGEMENTAPI
+### MANAGEMENT_API_URL
 
 Default: None
 
 > [!NOTE]
 > Only applies to RabbitMQ
 
-Required when using RabbitMQ and error queues need to be dynamically resolved as queue information is queried on the broker to determine which error queues to listen to. The url needs to contain the username and password used to authenticate.
+Required when using RabbitMQ and error queues need to be dynamically resolved as queue information is queried on the broker to determine which error queues to listen to.
 
 Example:
 
 ```txt
-http://guest:guest@localhost:15672
+http://localhost:15672
 ```
+
+### MANAGEMENT_API_USERNAME
+
+Default: `guest`
+
+> [!NOTE]
+> Only applies to RabbitMQ
+
+The management api username.
+
+### MANAGEMENT_API_PASSWORD
+
+Default: `guest`
+
+> [!NOTE]
+> Only applies to RabbitMQ
+
+The management api username.
 
 ### QUEUES_FILE
 
