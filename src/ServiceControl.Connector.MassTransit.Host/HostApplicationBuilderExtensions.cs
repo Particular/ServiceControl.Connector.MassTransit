@@ -35,12 +35,20 @@ static class HostApplicationBuilderExtensions
             .AddSingleton<IProvisionQueues, ProvisionQueues>()
             .AddSingleton(TimeProvider.System);
 
+        var configuration = builder.Configuration;
+        var staticQueueList = string.Empty;
+
         if (command != Command.Setup)
         {
+            staticQueueList = configuration.GetValue<string>("QUEUES_FILE");
+
+            if (staticQueueList == null)
+            {
+                throw new Exception("QUEUES_FILE not specified");
+            }
+
             services.AddHostedService<Service>();
         }
-
-        var configuration = builder.Configuration;
 
         var transporttype = configuration.GetValue<string>("TRANSPORTTYPE");
         var connectionstring = configuration.GetValue<string>("CONNECTIONSTRING");
@@ -76,13 +84,6 @@ static class HostApplicationBuilderExtensions
                 break;
             default:
                 throw new NotSupportedException($"Transport type {transporttype} is not supported");
-        }
-
-        var staticQueueList = configuration.GetValue<string>("QUEUES_FILE");
-
-        if (staticQueueList == null)
-        {
-            throw new Exception("QUEUES_FILE not specified");
         }
 
         services.AddSingleton<IFileBasedQueueInformationProvider>(new FileBasedQueueInformationProvider(staticQueueList));
