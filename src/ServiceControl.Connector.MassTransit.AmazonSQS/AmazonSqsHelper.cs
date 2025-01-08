@@ -3,9 +3,7 @@ using Amazon.SQS.Model;
 
 sealed class AmazonSqsHelper(string? queueNamePrefix = null) : IQueueInformationProvider
 {
-#pragma warning disable PS0018
-    public async Task<IEnumerable<string>> GetQueues()
-#pragma warning restore PS0018
+    public async Task<IEnumerable<string>> GetQueues(CancellationToken cancellationToken)
     {
         var client = new AmazonSQSClient();
 
@@ -15,7 +13,7 @@ sealed class AmazonSqsHelper(string? queueNamePrefix = null) : IQueueInformation
         ListQueuesResponse response;
         do
         {
-            response = await client.ListQueuesAsync(request);
+            response = await client.ListQueuesAsync(request, cancellationToken);
             foreach (var queueUrl in response.QueueUrls)
             {
                 var queue = queueUrl.Substring(queueUrl.LastIndexOf('/') + 1);

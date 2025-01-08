@@ -44,9 +44,7 @@ public class Retry : ConnectorAcceptanceTest
             this.testContext = testContext;
         }
 
-#pragma warning disable PS0003
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
-#pragma warning restore PS0003
         {
             while (!testContext.FirstMessageReceived && !cancellationToken.IsCancellationRequested)
             {

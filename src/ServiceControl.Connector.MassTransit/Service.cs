@@ -22,17 +22,19 @@ public class Service(
     TransportInfrastructure? infrastructure;
     HashSet<string>? massTransitErrorQueues;
 
-#pragma warning disable PS0018
-    async Task<HashSet<string>> GetReceiveQueues()
-#pragma warning restore PS0018
+    async Task<HashSet<string>> GetReceiveQueues(CancellationToken cancellationToken)
     {
         try
         {
-            var queues = await queueInformationProvider.GetQueues();
+            var queues = await queueInformationProvider.GetQueues(cancellationToken);
             return queues
                 .Where(queueFilter.IsMatch)
                 .Where(userQueueNameFilter.IsMatch)
                 .ToHashSet();
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            logger.LogInformation("Cancelled queue query request");
         }
         catch (Exception e)
         {
@@ -50,7 +52,7 @@ public class Service(
         //Perform setup
         if (configuration.IsSetup)
         {
-            massTransitErrorQueues = await GetReceiveQueues();
+            massTransitErrorQueues = await GetReceiveQueues(cancellationToken);
 
             await Setup(cancellationToken);
 
@@ -72,7 +74,7 @@ public class Service(
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var newData = await GetReceiveQueues();
+                var newData = await GetReceiveQueues(cancellationToken);
 
                 var errorQueuesAreNotTheSame = !newData.SetEquals(massTransitErrorQueues!);
 
