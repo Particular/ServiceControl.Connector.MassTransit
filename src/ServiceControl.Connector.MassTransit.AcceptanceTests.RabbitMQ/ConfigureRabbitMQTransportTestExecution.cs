@@ -39,7 +39,7 @@ class ConfigureRabbitMQTransportTestExecution : IConfigureTransportTestExecution
 
     public void ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration)
     {
-        services.UsingRabbitMQ("host=localhost", new Uri("http://guest:guest@localhost:15672/"));
+        services.UsingRabbitMQ("host=localhost", new Uri("http://localhost:15672/"), "guest", "guest");
         services.AddSingleton<IQueueFilter>(new AcceptanceTestQueueFilter());
     }
 
