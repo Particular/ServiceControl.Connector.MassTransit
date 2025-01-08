@@ -175,7 +175,6 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
 
         // TODO: Currently using FaultConsumerType as fallback as MT does not have a processing machine equivalent
         headers[NsbHeaders.ProcessingMachine] = headers.GetValueOrDefault(MessageHeaders.Host.MachineName, "❌");
-#pragma warning restore PS0018
     }
 
     static MessageEnvelope DeserializeEnvelope(MessageContext messageContext)
