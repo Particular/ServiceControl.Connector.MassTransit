@@ -1,4 +1,5 @@
-﻿using MassTransit;
+﻿using Amazon.Runtime;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NServiceBus.AcceptanceTesting.Support;
@@ -15,16 +16,13 @@ class ConfigureAmazonSQSTransportTestExecution : IConfigureTransportTestExecutio
 
     public void ConfigureTransportForMassTransitEndpoint(IBusRegistrationConfigurator configurator)
     {
-        var accessKeyId = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
-        var secretAccessKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
-        var region = Environment.GetEnvironmentVariable("AWS_REGION");
+        var region = FallbackRegionFactory.GetRegionEndpoint().SystemName;
 
         configurator.UsingAmazonSqs((context, cfg) =>
         {
             cfg.Host(region, h =>
             {
-                h.AccessKey(accessKeyId);
-                h.SecretKey(secretAccessKey);
+                h.Credentials(FallbackCredentialsFactory.GetCredentials());
 
                 h.Scope(NamePrefixGenerator.GetNamePrefix(), true);
             });
