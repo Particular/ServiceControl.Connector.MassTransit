@@ -1,4 +1,5 @@
 public interface IQueueInformationProvider
 {
-    Task<IEnumerable<string>> GetQueues(CancellationToken cancellationToken);
+    IAsyncEnumerable<string> GetQueues(CancellationToken cancellationToken);
+    Task<bool> QueueExists(string queueName, CancellationToken cancellationToken);
 }

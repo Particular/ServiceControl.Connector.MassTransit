@@ -1,24 +1,36 @@
+using System.Runtime.CompilerServices;
 using Amazon.SQS;
 using Amazon.SQS.Model;
 
 sealed class AmazonSqsHelper(IAmazonSQS client, string? queueNamePrefix = null) : IQueueInformationProvider
 {
-    public async Task<IEnumerable<string>> GetQueues(CancellationToken cancellationToken)
+    public async IAsyncEnumerable<string> GetQueues([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var list = new List<string>();
-
         var request = new ListQueuesRequest { QueueNamePrefix = queueNamePrefix, MaxResults = 1000 };
         ListQueuesResponse response;
+
         do
         {
             response = await client.ListQueuesAsync(request, cancellationToken);
-            foreach (var queueUrl in response.QueueUrls)
+            foreach (var queue in response.QueueUrls.Select(url => url.Split('/')[4]))
             {
-                var queue = queueUrl.Substring(queueUrl.LastIndexOf('/') + 1);
-                list.Add(queue);
+                yield return queue;
             }
-        } while (null != (request.NextToken = response.NextToken));
+        } while ((request.NextToken = response.NextToken) is not null);
 
-        return list;
+    }
+
+    public async Task<bool> QueueExists(string queueName, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await client.GetQueueUrlAsync(queueName, cancellationToken);
+            return true;
+        }
+        catch (QueueDoesNotExistException)
+        {
+            // Nothing to be done here
+        }
+        return false;
     }
 }

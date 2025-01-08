@@ -78,12 +78,13 @@ static class HostApplicationBuilderExtensions
                 throw new NotSupportedException($"Transport type {transporttype} is not supported");
         }
 
-        // Override any transport specific implementation
-        var staticQueueList = configuration.GetValue<string?>("QUEUES_FILE");
+        var staticQueueList = configuration.GetValue<string>("QUEUES_FILE");
 
-        if (staticQueueList != null)
+        if (staticQueueList == null)
         {
-            services.AddSingleton<IQueueInformationProvider>(new FileBasedQueueInformationProvider(staticQueueList));
+            throw new Exception("QUEUES_FILE not specified");
         }
+
+        services.AddSingleton<IFileBasedQueueInformationProvider>(new FileBasedQueueInformationProvider(staticQueueList));
     }
 }
