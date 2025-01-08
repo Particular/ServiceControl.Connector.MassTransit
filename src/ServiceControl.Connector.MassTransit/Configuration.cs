@@ -9,7 +9,4 @@ public record Configuration
     public string? UserProvidedQueueNameFilter { get; init; }
     public TimeSpan QueueScanInterval { get; set; } = TimeSpan.FromSeconds(60);
     public int MaxRetries => 15;
-
-    public bool IsSetup => Command is Command.Setup or Command.SetupAndRun;
-    public bool IsRun => Command is Command.Run or Command.SetupAndRun;
 }

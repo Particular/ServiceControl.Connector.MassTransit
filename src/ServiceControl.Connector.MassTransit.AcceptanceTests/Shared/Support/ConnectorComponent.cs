@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.AcceptanceTesting;
@@ -34,15 +34,19 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
                         Command = Command.SetupAndRun
                     });
                     services.AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(null));
-                    services.AddSingleton<Service>();
                     services.AddSingleton<MassTransitConverter>();
                     services.AddSingleton<MassTransitFailureAdapter>();
                     services.AddSingleton<ReceiverFactory>();
-                    services.AddHostedService(p => p.GetRequiredService<Service>());
+                    services.AddHostedService<Service>();
+                    services.AddSingleton<IProvisionQueues, ProvisionQueues>();
                     transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
                 });
 
             host = builder.Build();
+
+            var provisionQueues = host.Services.GetRequiredService<IProvisionQueues>();
+            await provisionQueues.TryProvision(cancellationToken);
+
             await host.StartAsync(cancellationToken).ConfigureAwait(false);
         }
 
