@@ -58,11 +58,10 @@ public class ConnectorAcceptanceTest
             TestContext.WriteLine("--- Start log entries ---------------------------------------------------");
             foreach (var logEntry in scenarioContext.Logs)
             {
-                TestContext.WriteLine($"{logEntry.Timestamp:T} {logEntry.Level} {logEntry.Endpoint ?? TestContext.CurrentContext.Test.Name}: {logEntry.Message}");
+                TestContext.WriteLine($"{logEntry.Timestamp:HH:mm:ss:ffff} {logEntry.Level} {logEntry.Endpoint ?? TestContext.CurrentContext.Test.Name}: {logEntry.Message}");
             }
             TestContext.WriteLine("--- End log entries ---------------------------------------------------");
 #pragma warning restore NUnit1033
-
         }
     }
 }

@@ -4,47 +4,25 @@ using Microsoft.Extensions.Logging;
 using NServiceBus.AcceptanceTesting;
 using NServiceBus.AcceptanceTesting.Support;
 using ServiceControl.Connector.MassTransit;
+using ServiceControl.Connector.MassTransit.AcceptanceTesting;
 
-public class ConnectorComponent<TContext> : IComponentBehavior
+public class ConnectorComponent<TContext>(string name, string errorQueue, string returnQueue) : IComponentBehavior
     where TContext : ScenarioContext
 {
-    public ConnectorComponent(string name, string errorQueue, string returnQueue)
+    public Task<ComponentRunner> CreateRunner(RunDescriptor run) => Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, run.ScenarioContext, new ScenarioContextLoggerProvider(run.ScenarioContext)));
+
+    class Runner(string name, string errorQueue, string returnQueue,
+        ScenarioContext scenarioContext,
+        ScenarioContextLoggerProvider loggerProvider) : ComponentRunner
     {
-        this.name = name;
-        this.errorQueue = errorQueue;
-        this.returnQueue = returnQueue;
-    }
-
-    public Task<ComponentRunner> CreateRunner(RunDescriptor run)
-    {
-        return Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, run.ScenarioContext, new AcceptanceTestLoggerFactory(run.ScenarioContext)));
-    }
-
-    readonly string name;
-    readonly string errorQueue;
-    readonly string returnQueue;
-
-    class Runner : ComponentRunner
-    {
-        public Runner(string name, string errorQueue, string returnQueue,
-            ScenarioContext scenarioContext,
-            AcceptanceTestLoggerFactory loggerFactory)
-        {
-            this.errorQueue = errorQueue;
-            this.returnQueue = returnQueue;
-            this.scenarioContext = scenarioContext;
-            this.loggerFactory = loggerFactory;
-            Name = name;
-        }
-
-        public override string Name { get; }
+        public override string Name { get; } = name;
 
         public override async Task Start(CancellationToken cancellationToken = default)
         {
             var transportConfig = TestSuiteConfiguration.Current.CreateTransportConfiguration();
 
             var builder = Host.CreateDefaultBuilder()
-                .ConfigureLogging(cfg => cfg.ClearProviders())
+                .ConfigureLogging(cfg => cfg.ClearProviders().AddProvider(loggerProvider))
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddSingleton((TContext)scenarioContext);
@@ -60,7 +38,6 @@ public class ConnectorComponent<TContext> : IComponentBehavior
                     services.AddSingleton<MassTransitConverter>();
                     services.AddSingleton<MassTransitFailureAdapter>();
                     services.AddSingleton<ReceiverFactory>();
-                    services.AddSingleton(loggerFactory);
                     services.AddHostedService(p => p.GetRequiredService<Service>());
                     transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
                 });
@@ -87,10 +64,5 @@ public class ConnectorComponent<TContext> : IComponentBehavior
         }
 
         IHost? host;
-
-        readonly string errorQueue;
-        readonly string returnQueue;
-        readonly ScenarioContext scenarioContext;
-        readonly AcceptanceTestLoggerFactory loggerFactory;
     }
 }
