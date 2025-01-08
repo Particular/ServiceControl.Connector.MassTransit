@@ -20,7 +20,7 @@ public class Service(
     Task? loopTask;
 
     TransportInfrastructure? infrastructure;
-    HashSet<string>? massTransitErrorQueues;
+    HashSet<string>? massTransitErrorQueues = [];
 
     async Task<HashSet<string>> GetReceiveQueues(CancellationToken cancellationToken)
     {
@@ -44,28 +44,14 @@ public class Service(
         return [];
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken = default)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         var version = System.Diagnostics.FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly()!.Location).ProductVersion!;
         logger.LogInformation("ServiceControl.Connector.MassTransit {Version}", version);
 
-        //Perform setup
-        if (configuration.IsSetup)
-        {
-            massTransitErrorQueues = await GetReceiveQueues(cancellationToken);
-
-            await Setup(cancellationToken);
-
-            if (!configuration.IsRun)
-            {
-                logger.LogInformation("Signaling stop as only run in setup mode");
-                hostApplicationLifetime.StopApplication();
-                return;
-            }
-        }
-
-        massTransitErrorQueues = [];
         loopTask = Loop(StopCancellationTokenSource.Token);
+
+        return Task.CompletedTask;
     }
 
     async Task Loop(CancellationToken cancellationToken)
@@ -100,7 +86,7 @@ public class Service(
         }
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken = default)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
         await StopCancellationTokenSource.CancelAsync();
         if (loopTask != null)
@@ -109,37 +95,6 @@ public class Service(
         }
         await StopReceiving(cancellationToken);
     }
-
-    async Task Setup(CancellationToken cancellationToken)
-    {
-        var hostSettings = new HostSettings(
-            name: configuration.ReturnQueue,
-            hostDisplayName: configuration.ReturnQueue,
-            startupDiagnostic: new StartupDiagnosticEntries(),
-            criticalErrorAction: (_, exception, _) =>
-            {
-                logger.LogCritical(exception, "Critical error, signaling to stop host");
-                hostApplicationLifetime.StopApplication();
-            },
-            true
-        );
-
-        var receiveSettings = new List<ReceiveSettings>
-        {
-            new(
-                id: "Return",
-                receiveAddress: new QueueAddress(configuration.ReturnQueue),
-                usePublishSubscribe: false,
-                purgeOnStartup: false,
-                errorQueue: configuration.PoisonQueue
-            )
-        };
-
-        var receiverSettings = receiveSettings.ToArray();
-
-        infrastructure = await transportInfrastructureFactory.CreateTransportInfrastructure(hostSettings, receiverSettings, [], cancellationToken);
-    }
-
 
     async Task StartReceiving(CancellationToken cancellationToken)
     {

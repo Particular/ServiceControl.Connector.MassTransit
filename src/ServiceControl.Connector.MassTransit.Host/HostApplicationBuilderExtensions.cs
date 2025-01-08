@@ -25,15 +25,19 @@ static class HostApplicationBuilderExtensions
         {
             ReturnQueue = returnQueue,
             ErrorQueue = errorQueue,
-            Command = command,
+            Command = command
         })
-        .AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(queueFilter))
-        .AddSingleton<IQueueFilter, ErrorAndSkippedQueueFilter>()
-        .AddSingleton<Service>()
-        .AddSingleton<MassTransitConverter>()
-        .AddSingleton<MassTransitFailureAdapter>()
-        .AddSingleton<ReceiverFactory>()
-        .AddHostedService(p => p.GetRequiredService<Service>());
+            .AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(queueFilter))
+            .AddSingleton<IQueueFilter, ErrorAndSkippedQueueFilter>()
+            .AddSingleton<MassTransitConverter>()
+            .AddSingleton<MassTransitFailureAdapter>()
+            .AddSingleton<ReceiverFactory>()
+            .AddSingleton<IProvisionQueues, ProvisionQueues>();
+
+        if (command != Command.Setup)
+        {
+            services.AddHostedService<Service>();
+        }
 
         var configuration = builder.Configuration;
 
