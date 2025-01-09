@@ -17,8 +17,6 @@ static class HostApplicationBuilderExtensions
                           "Particular.ServiceControl.Connector.MassTransit_return";
         var errorQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "error";
 
-        var queueFilter = builder.Configuration.GetValue<string?>("QUEUENAMEREGEXFILTER");
-
         var services = builder.Services;
 
         services.AddSingleton(new Configuration
@@ -27,20 +25,26 @@ static class HostApplicationBuilderExtensions
             ErrorQueue = errorQueue,
             Command = command
         })
-            .AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(queueFilter))
-            .AddSingleton<IQueueFilter, ErrorAndSkippedQueueFilter>()
             .AddSingleton<MassTransitConverter>()
             .AddSingleton<MassTransitFailureAdapter>()
             .AddSingleton<ReceiverFactory>()
             .AddSingleton<IProvisionQueues, ProvisionQueues>()
             .AddSingleton(TimeProvider.System);
 
+        var configuration = builder.Configuration;
+        var staticQueueList = string.Empty;
+
         if (command != Command.Setup)
         {
+            staticQueueList = configuration.GetValue<string>("QUEUES_FILE");
+
+            if (staticQueueList == null)
+            {
+                throw new Exception("QUEUES_FILE not specified");
+            }
+
             services.AddHostedService<Service>();
         }
-
-        var configuration = builder.Configuration;
 
         var transporttype = configuration.GetValue<string>("TRANSPORTTYPE");
         var connectionstring = configuration.GetValue<string>("CONNECTIONSTRING");
@@ -78,12 +82,6 @@ static class HostApplicationBuilderExtensions
                 throw new NotSupportedException($"Transport type {transporttype} is not supported");
         }
 
-        // Override any transport specific implementation
-        var staticQueueList = configuration.GetValue<string?>("QUEUES_FILE");
-
-        if (staticQueueList != null)
-        {
-            services.AddSingleton<IQueueInformationProvider>(new FileBasedQueueInformationProvider(staticQueueList));
-        }
+        services.AddSingleton<IFileBasedQueueInformationProvider>(new FileBasedQueueInformationProvider(staticQueueList));
     }
 }

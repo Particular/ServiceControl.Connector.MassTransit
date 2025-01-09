@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -6,12 +7,25 @@ using NServiceBus.AcceptanceTesting.Support;
 using ServiceControl.Connector.MassTransit;
 using ServiceControl.Connector.MassTransit.AcceptanceTesting;
 
-public class ConnectorComponent<TContext>(string name, string errorQueue, string returnQueue) : IComponentBehavior
+public class ConnectorComponent<TContext>(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor) : IComponentBehavior
     where TContext : ScenarioContext
 {
-    public Task<ComponentRunner> CreateRunner(RunDescriptor run) => Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, run.ScenarioContext, new ScenarioContextLoggerProvider(run.ScenarioContext)));
+    public Task<ComponentRunner> CreateRunner(RunDescriptor run) => Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, queueNamesToMonitor, run.ScenarioContext, new ScenarioContextLoggerProvider(run.ScenarioContext)));
 
-    class Runner(string name, string errorQueue, string returnQueue,
+    class StaticQueueNames(string[] queueNames) : IFileBasedQueueInformationProvider
+    {
+        public async IAsyncEnumerable<string> GetQueues([EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            await Task.Yield();
+
+            foreach (var queueName in queueNames)
+            {
+                yield return $"{queueName}_error";
+            }
+        }
+    }
+
+    class Runner(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor,
         ScenarioContext scenarioContext,
         ScenarioContextLoggerProvider loggerProvider) : ComponentRunner
     {
@@ -33,13 +47,13 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
                         QueueScanInterval = TimeSpan.FromSeconds(5),
                         Command = Command.SetupAndRun
                     });
-                    services.AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(null));
                     services.AddSingleton<MassTransitConverter>();
                     services.AddSingleton<MassTransitFailureAdapter>();
                     services.AddSingleton<ReceiverFactory>();
                     services.AddHostedService<Service>();
                     services.AddSingleton<IProvisionQueues, ProvisionQueues>();
                     services.AddSingleton(TimeProvider.System);
+                    services.AddSingleton<IFileBasedQueueInformationProvider>(new StaticQueueNames(queueNamesToMonitor));
                     transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
                 });
 
