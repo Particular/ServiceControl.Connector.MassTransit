@@ -26,7 +26,6 @@ class ConfigureAzureServiceBusTransportTestExecution : IConfigureTransportTestEx
     public void ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration)
     {
         services.UsingAzureServiceBus(configuration, connectionString);
-        services.AddSingleton<IQueueFilter>(new AcceptanceTestQueueFilter());
     }
 
     Task Cleanup(CancellationToken cancellationToken)

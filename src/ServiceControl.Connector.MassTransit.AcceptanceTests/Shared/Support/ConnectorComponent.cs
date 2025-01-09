@@ -47,7 +47,6 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
                         QueueScanInterval = TimeSpan.FromSeconds(5),
                         Command = Command.SetupAndRun
                     });
-                    services.AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(null));
                     services.AddSingleton<MassTransitConverter>();
                     services.AddSingleton<MassTransitFailureAdapter>();
                     services.AddSingleton<ReceiverFactory>();

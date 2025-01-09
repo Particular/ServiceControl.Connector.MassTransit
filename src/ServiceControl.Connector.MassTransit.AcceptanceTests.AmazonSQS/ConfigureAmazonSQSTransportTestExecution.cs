@@ -39,6 +39,5 @@ class ConfigureAmazonSQSTransportTestExecution : IConfigureTransportTestExecutio
             transport.TopicNamePrefix = NamePrefixGenerator.GetNamePrefix();
             transport.QueueNameGenerator = TestNameHelper.GetSqsQueueName;
         });
-        services.AddSingleton<IQueueFilter>(new AcceptanceTestQueueFilter());
     }
 }
