@@ -1,60 +1,44 @@
 {
   "profiles": {
-    "RabbitMQ.QuorumConventionalRouting - SETUP": {
+    "RabbitMQ": {
       "commandName": "Project",
-      "launchBrowser": false,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "TRANSPORT_TYPE": "RabbitMQ",
+        "QUEUES_FILE": "queues.txt",
+        "CONNECTION_STRING": "host=localhost",
+        "RABBITMQ_MANAGEMENT_API_URL": "http://localhost:15672",
+        "RABBITMQ_MANAGEMENT_API_USERNAME": "guest",
+        "RABBITMQ_MANAGEMENT_API_PASSWORD": "guest"
       },
-      "commandLineArgs": "--TransportType=RabbitMQ.QuorumConventionalRouting --ConnectionString=host=localhost --ManagementAPI=http://guest:guest@localhost:15672 --setup --console"
-    },
-    "RabbitMQ.QuorumConventionalRouting": {
-      "commandName": "Project",
-      "launchBrowser": false,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "commandLineArgs": "--TransportType=RabbitMQ.QuorumConventionalRouting --ConnectionString=host=localhost --ManagementAPI=http://guest:guest@localhost:15672 --console"
+      "commandLineArgs": "--setup-and-run --console"
     },
     "AmazonSQS": {
       "commandName": "Project",
-      "launchBrowser": false,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "TRANSPORT_TYPE": "AmazonSQS",
+        "QUEUES_FILE": "queues.txt"
       },
-      "commandLineArgs": "--TransportType=AmazonSQS --console"
+      "commandLineArgs": "--setup-and-run --console"
     },
-    "AmazonSQS - SETUP": {
+    "AzureServiceBus": {
       "commandName": "Project",
-      "launchBrowser": false,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "TRANSPORT_TYPE": "AzureServiceBus",
+        "QUEUES_FILE": "queues.txt"
       },
-      "commandLineArgs": "--TransportType=AmazonSQS --setup --console"
+      "commandLineArgs": "--Connection_String=%CONNECTIONSTRING_AZURESERVICEBUS% --setup-and-run --console"
     },
-    "NetStandardAzureServiceBus": {
+    "AzureServiceBusWithDeadLetter": {
       "commandName": "Project",
-      "launchBrowser": false,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "TRANSPORT_TYPE": "AzureServiceBusWithDeadLetter",
+        "QUEUES_FILE": "queues.txt"
       },
-      "commandLineArgs": "--TransportType=NetStandardAzureServiceBus --ConnectionString=%CONNECTIONSTRING_AZURESERVICEBUS% --console"
-    },
-    "NetStandardAzureServiceBus - SETUP": {
-      "commandName": "Project",
-      "launchBrowser": false,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "commandLineArgs": "--TransportType=NetStandardAzureServiceBus --ConnectionString=%CONNECTIONSTRING_AZURESERVICEBUS% --setup --console"
-    },
-    "NetStandardAzureServiceBus Dead-letter queues": {
-      "commandName": "Project",
-      "launchBrowser": false,
-      "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "commandLineArgs": "--TransportType=NetStandardAzureServiceBus --ConnectionString=%CONNECTIONSTRING_AZURESERVICEBUS% --ReceiveMode=DeadLetterQueue --console"
+      "commandLineArgs": "--Connection_String=%CONNECTIONSTRING_AZURESERVICEBUS% --setup-and-run --console"
     }
   }
 }
