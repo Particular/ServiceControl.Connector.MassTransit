@@ -14,9 +14,9 @@ static class HostApplicationBuilderExtensions
                 ? Command.Setup
                 : commandLineArgs.Contains("--setup-and-run") ? Command.SetupAndRun : Command.Run;
 
-        var returnQueue = builder.Configuration.GetValue<string?>("ReturnQueue") ??
+        var returnQueue = builder.Configuration.GetValue<string?>("RETURN_QUEUE") ??
                           "Particular.ServiceControl.Connector.MassTransit_return";
-        var errorQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "error";
+        var errorQueue = builder.Configuration.GetValue<string?>("ERROR_QUEUE") ?? "error";
 
         var customChecksQueue = builder.Configuration.GetValue<string?>("CUSTOM_CHECK_QUEUE") ?? "Particular.ServiceControl";
         var services = builder.Services;
@@ -57,8 +57,8 @@ static class HostApplicationBuilderExtensions
                         provider.GetRequiredService<IHostApplicationLifetime>()));
         }
 
-        var transporttype = configuration.GetValue<string>("TRANSPORTTYPE");
-        var connectionstring = configuration.GetValue<string>("CONNECTIONSTRING");
+        var transporttype = configuration.GetValue<string>("TRANSPORT_TYPE");
+        var connectionstring = configuration.GetValue<string>("CONNECTION_STRING");
 
         if (string.IsNullOrEmpty(connectionstring))
         {
@@ -68,7 +68,7 @@ static class HostApplicationBuilderExtensions
             }
             catch (Exception)
             {
-                throw new Exception("CONNECTIONSTRING contains invalid value");
+                throw new Exception("CONNECTION_STRING contains invalid value");
             }
         }
 
@@ -77,17 +77,21 @@ static class HostApplicationBuilderExtensions
             case "AmazonSQS":
                 services.UsingAmazonSqs();
                 break;
-            case "NetStandardAzureServiceBus":
+            case "AzureServiceBus":
                 services.UsingAzureServiceBus(configuration,
-                    connectionstring ?? throw new Exception("CONNECTIONSTRING not specified"));
+                    connectionstring ?? throw new Exception("CONNECTION_STRING not specified"));
                 break;
-            case "RabbitMQ.QuorumConventionalRouting":
-                var managementApiValue = configuration.GetValue<string>("MANAGEMENT_API_URL") ?? throw new Exception("MANAGEMENT_API_URL not specified");
+            case "AzureServiceBusWithDeadLetter":
+                services.UsingAzureServiceBus(configuration,
+                    connectionstring ?? throw new Exception("CONNECTION_STRING not specified"), true);
+                break;
+            case "RabbitMQ":
+                var managementApiValue = configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_URL") ?? throw new Exception("RABBITMQ_MANAGEMENT_API_URL not specified");
                 if (!Uri.TryCreate(managementApiValue, UriKind.Absolute, out var managementApi))
                 {
-                    throw new Exception("MANAGEMENT_API_URL is invalid. Ensure the value is a valid url without any quotes i.e. http://localhost:15672");
+                    throw new Exception("RABBITMQ_MANAGEMENT_API_URL is invalid. Ensure the value is a valid url without any quotes i.e. http://localhost:15672");
                 }
-                services.UsingRabbitMQ(connectionstring ?? throw new Exception("CONNECTIONSTRING not specified"), managementApi, configuration.GetValue<string>("MANAGEMENT_API_USERNAME"), configuration.GetValue<string>("MANAGEMENT_API_PASSWORD"));
+                services.UsingRabbitMQ(connectionstring ?? throw new Exception("CONNECTION_STRING not specified"), managementApi, configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_USERNAME"), configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_PASSWORD"));
                 break;
             default:
                 throw new NotSupportedException($"Transport type {transporttype} is not supported");

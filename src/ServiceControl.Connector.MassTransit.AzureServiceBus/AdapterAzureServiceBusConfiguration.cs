@@ -6,13 +6,13 @@ using NServiceBus.Transport;
 
 public static class AdapterAzureServiceBusConfiguration
 {
-    public static void UsingAzureServiceBus(this IServiceCollection services, IConfiguration configuration, string connectionString)
+    public static void UsingAzureServiceBus(this IServiceCollection services, IConfiguration configuration, string connectionString, bool useDeadLetterQueue = false)
     {
-        var receiveMode = configuration.GetValue<SubQueue?>(nameof(SubQueue)) ?? SubQueue.None;
+        var receiveMode = useDeadLetterQueue ? SubQueue.DeadLetter : SubQueue.None;
 
         services.AddSingleton<IQueueInformationProvider>(b => new AzureServiceBusHelper(b.GetRequiredService<ILogger<AzureServiceBusHelper>>(), connectionString));
         services.AddSingleton<IQueueLengthProvider>(b => new AzureServiceBusHelper(b.GetRequiredService<ILogger<AzureServiceBusHelper>>(), connectionString));
-        services.AddTransient<TransportDefinition>(sp => new AzureServiceBusTransport(connectionString)
+        services.AddTransient<TransportDefinition>(_ => new AzureServiceBusTransport(connectionString)
         {
             TransportTransactionMode = TransportTransactionMode.ReceiveOnly,
             OutgoingNativeMessageCustomization = OutgoingNativeMessageCustomization,
