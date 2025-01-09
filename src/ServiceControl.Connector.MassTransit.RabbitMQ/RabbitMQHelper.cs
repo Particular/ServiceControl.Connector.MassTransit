@@ -63,7 +63,7 @@ class RabbitMQHelper(string vhost, Uri apiBaseUrl, ICredentials credentials) : I
     {
         // It is not possible to directly operated on the JsonNode. When the JsonNode is a JObject
         // and the indexer is access the internal dictionary is initialized which can cause key not found exceptions
-        // when the payload contains the same key multiple times (which happened in the past).
+        // if the payload contains the same key multiple times (which happened in the past).
         var queues = items.Select(item => item.Deserialize<JsonElement>().GetProperty("name").GetString()).Where(name => name is not null).ToArray();
         return queues!;
     }
