@@ -12,12 +12,20 @@ sealed class AmazonSqsHelper(IAmazonSQS client, string? queueNamePrefix = null) 
         do
         {
             response = await client.ListQueuesAsync(request, cancellationToken);
-            foreach (var queue in response.QueueUrls.Select(url => url.Split('/')[4]))
+
+            foreach (var queue in response.QueueUrls.Select(GetQueueNameFromUrl))
             {
                 yield return queue;
             }
         } while ((request.NextToken = response.NextToken) is not null);
 
+        yield break;
+
+        static string GetQueueNameFromUrl(string url)
+        {
+            // Example of a queue url, https://sqs.us-east-1.amazonaws.com/123456789012/my-queue-name
+            return url.Split('/').Last();
+        }
     }
 
     public async Task<bool> QueueExists(string queueName, CancellationToken cancellationToken)

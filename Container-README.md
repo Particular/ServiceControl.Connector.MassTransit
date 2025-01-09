@@ -151,7 +151,7 @@ Failed message by default (mode `None`) will be ingested from queues matching `*
 
 ## Support
 
-The MassTransit connector is currently in preivew and currently consider a "community extension". If you plan to use this in a production environment we would appreciate it if you let us know at <https://discuss.particular.net/>!
+The MassTransit connector is currently in early access. If you have any queries or feedback, please let us know at <https://discuss.particular.net/>.
 
 ## Feedback
 
