@@ -46,10 +46,10 @@ public class Service(
         }
         catch (Exception e)
         {
-            logger.LogWarning(e, "Failed to read the queue names from the file");
+            logger.LogWarning(e, "Failed to read the queue names from the file. Returning the previous list of queues.");
         }
 
-        return [];
+        return massTransitErrorQueues;
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
