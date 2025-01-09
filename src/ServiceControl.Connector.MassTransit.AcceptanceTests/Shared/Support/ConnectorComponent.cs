@@ -21,7 +21,7 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
 
             foreach (var queueName in queueNames)
             {
-                yield return $"{queueName}_error";
+                yield return queueName;
             }
         }
     }

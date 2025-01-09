@@ -4,14 +4,14 @@ using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
 
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class | AttributeTargets.Assembly)]
-public class AzureStorageQueueTestAttribute : Attribute, IApplyToContext
+public class AzureServiceBusDeadLetterTestAttribute : Attribute, IApplyToContext
 {
     public void ApplyToContext(TestExecutionContext context)
     {
-        var connectionString = Environment.GetEnvironmentVariable("AzureStorageQueueTransport_ConnectionString");
+        var connectionString = Environment.GetEnvironmentVariable("AzureServiceBusDeadLetter_ConnectionString_ConnectionString");
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            Assert.Ignore("Ignoring because environment variable AzureStorageQueueTransport_ConnectionString is not available");
+            Assert.Ignore("Ignoring because environment variable AzureServiceBusDeadLetter_ConnectionString_ConnectionString is not available");
         }
     }
 }

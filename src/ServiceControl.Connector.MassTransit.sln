@@ -38,6 +38,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\Container-README.md = ..\Container-README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBusDeadLetter", "ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBusDeadLetter\ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBusDeadLetter.csproj", "{B76A74EB-2FA7-4052-8CB9-96AAFDAD5AC9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -88,6 +90,10 @@ Global
 		{D1335BCA-C2A5-415D-8877-61FA146391AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1335BCA-C2A5-415D-8877-61FA146391AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1335BCA-C2A5-415D-8877-61FA146391AC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B76A74EB-2FA7-4052-8CB9-96AAFDAD5AC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B76A74EB-2FA7-4052-8CB9-96AAFDAD5AC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B76A74EB-2FA7-4052-8CB9-96AAFDAD5AC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B76A74EB-2FA7-4052-8CB9-96AAFDAD5AC9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -102,6 +108,7 @@ Global
 		{9FD1F088-00D2-4FE7-9424-72BF6D38E98A} = {F5A3D35F-95A6-41F6-857F-866CA96E06FD}
 		{2A84EF27-9F36-4EF3-BCC6-6213C725FC9D} = {F5A3D35F-95A6-41F6-857F-866CA96E06FD}
 		{D1335BCA-C2A5-415D-8877-61FA146391AC} = {F5A3D35F-95A6-41F6-857F-866CA96E06FD}
+		{B76A74EB-2FA7-4052-8CB9-96AAFDAD5AC9} = {F5A3D35F-95A6-41F6-857F-866CA96E06FD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E5F2F88-CFD8-439C-98E9-52803B9F4641}
