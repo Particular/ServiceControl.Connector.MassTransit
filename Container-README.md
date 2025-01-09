@@ -73,7 +73,7 @@ docker run \
 | MANAGEMENT_API_URL | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
 | MANAGEMENT_API_USERNAME | RabbitMQ management API username                                                                    | `guest`                                                  |
 | MANAGEMENT_API_PASSWORD | RabbitMQ management API password                                                                    | `guest`                                                  |
-| SUBQUEUE        | Azure Service Bus: By default ingest `*_error` but can ingest from dead-letter queues               | `None`                                                   |
+| SUBQUEUE        | Azure Service Bus: By default ingest `*_error` but can be configured to ingest from dead-letter queues               | `None`                                                   |
 
 ### TRANSPORTTYPE
 
