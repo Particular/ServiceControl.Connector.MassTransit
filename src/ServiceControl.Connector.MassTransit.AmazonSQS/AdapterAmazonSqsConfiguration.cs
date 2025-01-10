@@ -7,8 +7,9 @@ public static class AdapterAmazonSqsConfiguration
 {
     public static void UsingAmazonSqs(this IServiceCollection services, Action<SqsTransport>? transportConfig = null)
     {
-        services.AddSingleton<IQueueInformationProvider>(sp => new AmazonSqsHelper(sp.GetRequiredService<SqsTransport>()));
-        services.AddSingleton<IQueueLengthProvider>(sp => new AmazonSqsHelper(sp.GetRequiredService<SqsTransport>()));
+        services.AddSingleton(provider => new AmazonSqsHelper(provider.GetRequiredService<IAmazonSQS>(), provider.GetRequiredService<SqsTransport>(), string.Empty));
+        services.AddSingleton<IQueueInformationProvider>(provider => provider.GetRequiredService<AmazonSqsHelper>());
+        services.AddSingleton<IQueueLengthProvider>(provider => provider.GetRequiredService<AmazonSqsHelper>());
         services.AddSingleton<IAmazonSQS, AmazonSQSClient>();
         services.AddSingleton<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
         services.AddTransient<SqsTransport>(sp =>

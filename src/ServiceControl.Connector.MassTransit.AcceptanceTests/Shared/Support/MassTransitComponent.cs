@@ -4,49 +4,27 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.AcceptanceTesting;
 using NServiceBus.AcceptanceTesting.Support;
+using ServiceControl.Connector.MassTransit.AcceptanceTesting;
 
-public class MassTransitComponent<TContext> : IComponentBehavior
+public class MassTransitComponent<TContext>(string name, Action<IBusRegistrationConfigurator> busConfig, Action<HostBuilderContext, IServiceCollection> hostConfig) : IComponentBehavior
     where TContext : ScenarioContext
 {
-    public MassTransitComponent(string name, Action<IBusRegistrationConfigurator> busConfig, Action<HostBuilderContext, IServiceCollection> hostConfig)
+    public Task<ComponentRunner> CreateRunner(RunDescriptor run) => Task.FromResult<ComponentRunner>(new Runner(name, busConfig, hostConfig, run.ScenarioContext, new ScenarioContextLoggerProvider(run.ScenarioContext)));
+
+    class Runner(string name,
+        Action<IBusRegistrationConfigurator> busConfig,
+        Action<HostBuilderContext, IServiceCollection> hostConfig,
+        ScenarioContext scenarioContext,
+        ScenarioContextLoggerProvider loggerProvider) : ComponentRunner
     {
-        this.name = name;
-        this.busConfig = busConfig;
-        this.hostConfig = hostConfig;
-    }
-
-    public Task<ComponentRunner> CreateRunner(RunDescriptor run)
-    {
-        return Task.FromResult<ComponentRunner>(new Runner(name, busConfig, hostConfig, run.ScenarioContext, new AcceptanceTestLoggerFactory(run.ScenarioContext)));
-    }
-
-    readonly string name;
-    readonly Action<IBusRegistrationConfigurator> busConfig;
-    readonly Action<HostBuilderContext, IServiceCollection> hostConfig;
-
-    class Runner : ComponentRunner
-    {
-        public Runner(string name,
-            Action<IBusRegistrationConfigurator> busConfig,
-            Action<HostBuilderContext, IServiceCollection> hostConfig,
-            ScenarioContext scenarioContext,
-            ILoggerFactory loggerFactory)
-        {
-            this.busConfig = busConfig;
-            this.hostConfig = hostConfig;
-            this.scenarioContext = scenarioContext;
-            this.loggerFactory = loggerFactory;
-            Name = name;
-        }
-
-        public override string Name { get; }
+        public override string Name { get; } = name;
 
         public override async Task Start(CancellationToken cancellationToken = default)
         {
             var transportConfig = TestSuiteConfiguration.Current.CreateTransportConfiguration();
 
             var builder = Host.CreateDefaultBuilder()
-                .ConfigureLogging(cfg => cfg.ClearProviders().SetMinimumLevel(LogLevel.Debug))
+                .ConfigureLogging(cfg => cfg.ClearProviders().SetMinimumLevel(LogLevel.Debug).AddProvider(loggerProvider))
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddMassTransit(x =>
@@ -56,7 +34,6 @@ public class MassTransitComponent<TContext> : IComponentBehavior
                     });
                     hostConfig(hostContext, services);
                     services.AddSingleton((TContext)scenarioContext);
-                    services.AddSingleton(loggerFactory);
                 });
 
             host = builder.Build();
@@ -81,13 +58,5 @@ public class MassTransitComponent<TContext> : IComponentBehavior
         }
 
         IHost? host;
-
-        readonly Action<IBusRegistrationConfigurator> busConfig;
-        readonly Action<HostBuilderContext, IServiceCollection> hostConfig;
-        readonly ScenarioContext scenarioContext;
-        //TODO: Figure out how to do logging?
-#pragma warning disable IDE0052
-        readonly ILoggerFactory loggerFactory;
-#pragma warning restore IDE0052
     }
 }

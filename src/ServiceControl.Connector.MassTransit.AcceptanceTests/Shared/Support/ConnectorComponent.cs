@@ -1,77 +1,62 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using System.Runtime.CompilerServices;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.AcceptanceTesting;
 using NServiceBus.AcceptanceTesting.Support;
 using NServiceBus.Transport;
 using ServiceControl.Connector.MassTransit;
+using ServiceControl.Connector.MassTransit.AcceptanceTesting;
 
-public class ConnectorComponent<TContext> : IComponentBehavior
+public class ConnectorComponent<TContext>(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor, string? customCheckQueue) : IComponentBehavior
     where TContext : ScenarioContext
 {
-    public ConnectorComponent(string name, string errorQueue, string returnQueue, string? customCheckQueue)
-    {
-        this.name = name;
-        this.errorQueue = errorQueue;
-        this.returnQueue = returnQueue;
-        this.customCheckQueue = customCheckQueue;
-    }
+    public Task<ComponentRunner> CreateRunner(RunDescriptor run) => Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, queueNamesToMonitor, customCheckQueue, run.ScenarioContext, new ScenarioContextLoggerProvider(run.ScenarioContext)));
 
-    public Task<ComponentRunner> CreateRunner(RunDescriptor run)
+    class StaticQueueNames(string[] queueNames) : IFileBasedQueueInformationProvider
     {
-        return Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, customCheckQueue, run.ScenarioContext, new AcceptanceTestLoggerFactory(run.ScenarioContext)));
-    }
-
-    readonly string name;
-    readonly string errorQueue;
-    readonly string returnQueue;
-    readonly string? customCheckQueue;
-
-    class Runner : ComponentRunner
-    {
-        public Runner(string name,
-            string errorQueue,
-            string returnQueue,
-            string? customCheckQueue,
-            ScenarioContext scenarioContext,
-            AcceptanceTestLoggerFactory loggerFactory)
+        public async IAsyncEnumerable<string> GetQueues([EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            this.errorQueue = errorQueue;
-            this.returnQueue = returnQueue;
-            this.customCheckQueue = customCheckQueue;
-            this.scenarioContext = scenarioContext;
-            this.loggerFactory = loggerFactory;
-            Name = name;
-        }
+            await Task.Yield();
 
-        public override string Name { get; }
+            foreach (var queueName in queueNames)
+            {
+                yield return $"{queueName}_error";
+            }
+        }
+    }
+
+    class Runner(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor, string? customCheckQueue,
+        ScenarioContext scenarioContext,
+        ScenarioContextLoggerProvider loggerProvider) : ComponentRunner
+    {
+        public override string Name { get; } = name;
 
         public override async Task Start(CancellationToken cancellationToken = default)
         {
             var transportConfig = TestSuiteConfiguration.Current.CreateTransportConfiguration();
 
             var builder = Host.CreateDefaultBuilder()
-                .ConfigureLogging(cfg => cfg.ClearProviders())
+                .ConfigureLogging(cfg => cfg.ClearProviders().AddProvider(loggerProvider))
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.AddSingleton((TContext)scenarioContext);
                     var configuration = new Configuration
                     {
                         ReturnQueue = returnQueue,
                         ErrorQueue = errorQueue,
-                        CustomChecksQueue = customCheckQueue ?? "Particular.ServiceControl",
-                        Command = Command.SetupAndRun,
                         QueueScanInterval = TimeSpan.FromSeconds(5),
-                        CustomChecksInterval = TimeSpan.FromSeconds(5)
+                        CustomChecksQueue = customCheckQueue ?? "Particular.ServiceControl",
+                        Command = Command.SetupAndRun
                     };
+                    services.AddSingleton((TContext)scenarioContext);
                     services.AddSingleton(configuration);
-                    services.AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(null));
-                    services.AddSingleton<Service>();
                     services.AddSingleton<MassTransitConverter>();
                     services.AddSingleton<MassTransitFailureAdapter>();
                     services.AddSingleton<ReceiverFactory>();
-                    services.AddSingleton(loggerFactory);
-                    services.AddHostedService(p => p.GetRequiredService<Service>());
+                    services.AddHostedService<Service>();
+                    services.AddSingleton<IProvisionQueues, ProvisionQueues>();
+                    services.AddSingleton(TimeProvider.System);
+                    services.AddSingleton<IFileBasedQueueInformationProvider>(new StaticQueueNames(queueNamesToMonitor));
                     if (customCheckQueue != null)
                     {
                         services.AddHostedService<CustomCheckReporter>(provider =>
@@ -85,6 +70,10 @@ public class ConnectorComponent<TContext> : IComponentBehavior
                 });
 
             host = builder.Build();
+
+            var provisionQueues = host.Services.GetRequiredService<IProvisionQueues>();
+            await provisionQueues.TryProvision(cancellationToken);
+
             await host.StartAsync(cancellationToken).ConfigureAwait(false);
         }
 
@@ -106,11 +95,5 @@ public class ConnectorComponent<TContext> : IComponentBehavior
         }
 
         IHost? host;
-
-        readonly string errorQueue;
-        readonly string returnQueue;
-        readonly string? customCheckQueue;
-        readonly ScenarioContext scenarioContext;
-        readonly AcceptanceTestLoggerFactory loggerFactory;
     }
 }

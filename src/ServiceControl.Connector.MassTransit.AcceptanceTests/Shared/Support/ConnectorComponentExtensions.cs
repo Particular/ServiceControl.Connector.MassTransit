@@ -1,4 +1,4 @@
-﻿using NServiceBus.AcceptanceTesting;
+using NServiceBus.AcceptanceTesting;
 using NServiceBus.AcceptanceTesting.Support;
 
 public static class ConnectorComponentExtensions
@@ -8,9 +8,10 @@ public static class ConnectorComponentExtensions
         string name,
         string errorQueue,
         string returnQueue,
+        string[] queueNamesToMonitor,
         string? customCheckQueue = null)
         where TContext : ScenarioContext
     {
-        return scenario.WithComponent(new ConnectorComponent<TContext>(name, errorQueue, returnQueue, customCheckQueue));
+        return scenario.WithComponent(new ConnectorComponent<TContext>(name, errorQueue, returnQueue, queueNamesToMonitor, customCheckQueue));
     }
 }

@@ -40,7 +40,9 @@ Run with setup entry point to create message queues, then exit the container.
 docker run \
 -e TRANSPORTTYPE=RabbitMQ.QuorumConventionalRouting \
 -e CONNECTIONSTRING=host=host.docker.internal \
--e MANAGEMENTAPI=http://guest:guest@host.docker.internal:15672 \
+-e MANAGEMENT_API_URL=http://host.docker.internal:15672 \
+-e MANAGEMENT_API_USERNAME=guest \
+-e MANAGEMENT_API_PASSWORD=guest \
 --rm particular/servicecontrol-connector-masstransit:latest \
 --setup
 ```
@@ -53,22 +55,25 @@ Run the connector and bridge MassTransit errors queues with the Particular Platf
 docker run \
 -e TRANSPORTTYPE=RabbitMQ.QuorumConventionalRouting \
 -e CONNECTIONSTRING=host=host.docker.internal \
--e MANAGEMENTAPI=http://guest:guest@host.docker.internal:15672 \
---rm particular/servicecontrol-connector-masstransit:latest \
+-e MANAGEMENT_API_URL=http://host.docker.internal:15672 \
+-e MANAGEMENT_API_USERNAME=guest \
+-e MANAGEMENT_API_PASSWORD=guest \
+-v [local_path_to_queues_file]:/app/queues.txt:ro \
+--rm particular/servicecontrol-connector-masstransit:latest
 ```
 
 ## Configuration
 
-| Key                  | Description                                                                                         | Default                                                  |
-|----------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------------------------|
-| TRANSPORTTYPE        | The transport type                                                                                  | None                                                     |
-| CONNECTIONSTRING     | The NServiceBus connection string for the specified transport                                       | None                                                     |
-| RETURNQUEUE          | The intermediate queue used by the connector to which ServiceControl will send its retried messages | `Particular.ServiceControl.Connector.MassTransit_return` |
-| ERRORQUEUE           | The error queue ServiceControl ingests                                                              | `error`                                                  |
-| MANAGEMENTAPI        | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
-| QUEUES_FILE          | File that contains each error queue to monitor as a seperate line                                   | None                                                     |
-| RECEIVEMODE          | Azure Service Bus: By default ingest `*_error` but can ingest from dead-letter queues               | `Queue`                                                  |
-| QUEUENAMEREGEXFILTER | Queue name regular expression filter                                                                | None
+| Key                | Description                                                                                         | Default                                                  |
+|--------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------------------------|
+| TRANSPORTTYPE      | The transport type                                                                                  | None                                                     |
+| CONNECTIONSTRING   | The NServiceBus connection string for the specified transport                                       | None                                                     |
+| RETURNQUEUE        | The intermediate queue used by the connector to which ServiceControl will send its retried messages | `Particular.ServiceControl.Connector.MassTransit_return` |
+| ERRORQUEUE         | The error queue ServiceControl ingests                                                              | `error`                                                  |
+| MANAGEMENT_API_URL | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
+| MANAGEMENT_API_USERNAME | RabbitMQ management API username                                                                    | `guest`                                                  |
+| MANAGEMENT_API_PASSWORD | RabbitMQ management API password                                                                    | `guest`                                                  |
+| SUBQUEUE        | Azure Service Bus: By default ingest `*_error` but can be configured to ingest from dead-letter queues               | `None`                                                   |
 
 ### TRANSPORTTYPE
 
@@ -100,83 +105,53 @@ Default: `error`
 
 ServiceControl by default listens to the `error` queue but it this value is overriden in ServiceControl this configuration setting must be set to the same value.
 
-### MANAGEMENTAPI
+### MANAGEMENT_API_URL
 
 Default: None
 
 > [!NOTE]
 > Only applies to RabbitMQ
 
-Required when using RabbitMQ and error queues need to be dynamically resolved as queue information is queried on the broker to determine which error queues to listen to. The url needs to contain the username and password used to authenticate.
+Required when using RabbitMQ and error queues need to be dynamically resolved as queue information is queried on the broker to determine which error queues to listen to.
 
 Example:
 
 ```txt
-http://guest:guest@localhost:15672
+http://localhost:15672
 ```
 
-### QUEUES_FILE
+### MANAGEMENT_API_USERNAME
 
-Default: None
+Default: `guest`
 
-Path that contains a static list of queues. If no value is specified the connector will run in dynamic mode.
+> [!NOTE]
+> Only applies to RabbitMQ
 
-Example:
+The management api username.
 
-```txt
-/queues.txt
-```
+### MANAGEMENT_API_PASSWORD
+
+Default: `guest`
+
+> [!NOTE]
+> Only applies to RabbitMQ
+
+The management api username.
 
 ### SUBQUEUE
 
-Default: Queue
+Default: `None`
 
 Values: None | DeadLetter
 
 > [!NOTE]
 > Only applies to Azure Service Bus
 
-Failed message by default (mode `Queue`) will be ingested from queues matching `*_error` but by specifying `DeadLetter` the connector will ingest messages from the [Service Bus dead-letter (sub) queues](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dead-letter-queues).
-
-### QUEUENAMEREGEXFILTER
-
-Specifying a value for `QUEUENAMEREGEXFILTER` allows the list of queues that are monitored to be filtered by the provided Regular Expression. This can be useful in scenarios where only part of a system must have the failed messages managed by the Particular Platform.
-
-Examples:
-
-Match queues that **start** with `Dev`:
-```env
-QUEUENAMEREGEXFILTER=^Dev
-```
-
-Match queues the **end** with `Dev`:
-```env
-QUEUENAMEREGEXFILTER=Dev$
-```
-Match queues that **contain** `Dev`:
-```env
-QUEUENAMEREGEXFILTER=Dev
-```
-
-If the broker had the following queues:
-```txt
-SalesReport
-SalesDevReport
-Orders
-OrdersReport
-OrdersDev
-```
-
-When specifying `QUEUENAMEREGEXFILTER=Dev`, then the following queues would be monitored for failures:
-
-```txt
-SalesDevReport
-OrdersDev
-```
+Failed message by default (mode `None`) will be ingested from queues matching `*_error` but by specifying `DeadLetter` the connector will ingest messages from the [Service Bus dead-letter (sub) queues](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dead-letter-queues).
 
 ## Support
 
-The MassTransit connector is currently in preivew and currently consider a "community extension". If you plan to use this in a production environment we would appreciate it if you let us know at <https://discuss.particular.net/>!
+The MassTransit connector is currently in early access. If you have any queries or feedback, please let us know at <https://discuss.particular.net/>.
 
 ## Feedback
 

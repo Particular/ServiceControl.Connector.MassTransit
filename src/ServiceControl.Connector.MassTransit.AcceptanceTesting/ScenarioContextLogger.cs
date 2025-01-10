@@ -2,15 +2,9 @@
 using Microsoft.Extensions.Logging;
 using NServiceBus.AcceptanceTesting;
 
-public class ScenarioContextLogger : ILogger
+public class ScenarioContextLogger(string categoryName, ScenarioContext scenarioContext) : ILogger
 {
-    public ScenarioContextLogger(string categoryName, ScenarioContext scenarioContext)
-    {
-        this.categoryName = categoryName;
-        this.scenarioContext = scenarioContext;
-    }
-
-    public IDisposable BeginScope<TState>(TState state) => throw new NotImplementedException();
+    public IDisposable BeginScope<TState>(TState state) => NullScope.Instance;
     public bool IsEnabled(LogLevel logLevel) => true;
     public void Log<TState>(
         LogLevel logLevel,
@@ -22,6 +16,16 @@ public class ScenarioContextLogger : ILogger
         scenarioContext.AddTrace($"{categoryName}: {formatter(state, exception)} - {exception}");
     }
 
-    readonly string categoryName;
-    readonly ScenarioContext scenarioContext;
+    sealed class NullScope : IDisposable
+    {
+        public static NullScope Instance { get; } = new();
+
+        NullScope()
+        {
+        }
+
+        public void Dispose()
+        {
+        }
+    }
 }

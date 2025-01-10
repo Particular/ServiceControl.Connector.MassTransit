@@ -10,11 +10,6 @@ public static class AdapterAzureServiceBusConfiguration
     {
         var receiveMode = configuration.GetValue<SubQueue?>(nameof(SubQueue)) ?? SubQueue.None;
 
-        if (receiveMode == SubQueue.DeadLetter)
-        {
-            services.AddSingleton<IQueueFilter, AllQueueFilter>();
-        }
-
         services.AddSingleton<IQueueInformationProvider>(b => new AzureServiceBusHelper(b.GetRequiredService<ILogger<AzureServiceBusHelper>>(), connectionString));
         services.AddSingleton<IQueueLengthProvider>(b => new AzureServiceBusHelper(b.GetRequiredService<ILogger<AzureServiceBusHelper>>(), connectionString));
         services.AddTransient<TransportDefinition>(sp => new AzureServiceBusTransport(connectionString)

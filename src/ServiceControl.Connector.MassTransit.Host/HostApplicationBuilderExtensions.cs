@@ -18,11 +18,7 @@ static class HostApplicationBuilderExtensions
                           "Particular.ServiceControl.Connector.MassTransit_return";
         var errorQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "error";
 
-        var customChecksQueue = builder.Configuration.GetValue<string?>("CustomChecksQueue") ??
-                          "Particular.ServiceControl";
-
-        var queueFilter = builder.Configuration.GetValue<string?>("QUEUENAMEREGEXFILTER");
-
+        var customChecksQueue = builder.Configuration.GetValue<string?>("CUSTOM_CHECK_QUEUE") ?? "Particular.ServiceControl";
         var services = builder.Services;
 
         var config = new Configuration
@@ -32,22 +28,34 @@ static class HostApplicationBuilderExtensions
             CustomChecksQueue = customChecksQueue,
             Command = command
         };
-        services.AddSingleton(config)
-        .AddSingleton<IUserProvidedQueueNameFilter>(new UserProvidedQueueNameFilter(queueFilter))
-        .AddSingleton<IQueueFilter, ErrorAndSkippedQueueFilter>()
-        .AddSingleton<Service>()
-        .AddSingleton<MassTransitConverter>()
-        .AddSingleton<MassTransitFailureAdapter>()
-        .AddSingleton<ReceiverFactory>()
-        .AddHostedService(p => p.GetRequiredService<Service>())
-        .AddHostedService<CustomCheckReporter>(provider =>
-            new CustomCheckReporter(
-                provider.GetRequiredService<TransportDefinition>(),
-                provider.GetRequiredService<IQueueLengthProvider>(),
-                config,
-                provider.GetRequiredService<IHostApplicationLifetime>()));
+        services
+            .AddSingleton<MassTransitConverter>()
+            .AddSingleton<MassTransitFailureAdapter>()
+            .AddSingleton<ReceiverFactory>()
+            .AddSingleton<IProvisionQueues, ProvisionQueues>()
+            .AddSingleton(TimeProvider.System);
 
         var configuration = builder.Configuration;
+        var staticQueueList = string.Empty;
+
+        if (command != Command.Setup)
+        {
+            staticQueueList = configuration.GetValue<string>("QUEUES_FILE");
+
+            if (staticQueueList == null)
+            {
+                throw new Exception("QUEUES_FILE not specified");
+            }
+
+            services
+                .AddHostedService<Service>()
+                .AddHostedService<CustomCheckReporter>(provider =>
+                    new CustomCheckReporter(
+                        provider.GetRequiredService<TransportDefinition>(),
+                        provider.GetRequiredService<IQueueLengthProvider>(),
+                        config,
+                        provider.GetRequiredService<IHostApplicationLifetime>()));
+        }
 
         var transporttype = configuration.GetValue<string>("TRANSPORTTYPE");
         var connectionstring = configuration.GetValue<string>("CONNECTIONSTRING");
@@ -74,27 +82,17 @@ static class HostApplicationBuilderExtensions
                     connectionstring ?? throw new Exception("CONNECTIONSTRING not specified"));
                 break;
             case "RabbitMQ.QuorumConventionalRouting":
-                var managementApiValue = configuration.GetValue<string>("MANAGEMENTAPI") ?? throw new Exception("MANAGEMENTAPI not specified");
+                var managementApiValue = configuration.GetValue<string>("MANAGEMENT_API_URL") ?? throw new Exception("MANAGEMENT_API_URL not specified");
                 if (!Uri.TryCreate(managementApiValue, UriKind.Absolute, out var managementApi))
                 {
-                    throw new Exception("MANAGEMENTAPI is invalid. Ensure the value is a valid url without any quotes i.e. http://guest:guest@localhost:15672");
+                    throw new Exception("MANAGEMENT_API_URL is invalid. Ensure the value is a valid url without any quotes i.e. http://localhost:15672");
                 }
-                if (string.IsNullOrEmpty(managementApi.UserInfo))
-                {
-                    throw new Exception("MANAGEMENTAPI must contain username and password i.e. http://guest:guest@localhost:15672");
-                }
-                services.UsingRabbitMQ(connectionstring ?? throw new Exception("CONNECTIONSTRING not specified"), managementApi);
+                services.UsingRabbitMQ(connectionstring ?? throw new Exception("CONNECTIONSTRING not specified"), managementApi, configuration.GetValue<string>("MANAGEMENT_API_USERNAME"), configuration.GetValue<string>("MANAGEMENT_API_PASSWORD"));
                 break;
             default:
                 throw new NotSupportedException($"Transport type {transporttype} is not supported");
         }
 
-        // Override any transport specific implementation
-        var staticQueueList = configuration.GetValue<string?>("QUEUES_FILE");
-
-        if (staticQueueList != null)
-        {
-            services.AddSingleton<IQueueInformationProvider>(new FileBasedQueueInformationProvider(staticQueueList));
-        }
+        services.AddSingleton<IFileBasedQueueInformationProvider>(new FileBasedQueueInformationProvider(staticQueueList));
     }
 }
