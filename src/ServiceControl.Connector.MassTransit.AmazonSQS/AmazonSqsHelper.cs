@@ -1,9 +1,12 @@
+using System.Collections.Concurrent;
 using System.Runtime.CompilerServices;
 using Amazon.SQS;
 using Amazon.SQS.Model;
 
-sealed class AmazonSqsHelper(IAmazonSQS client, string? queueNamePrefix = null) : IQueueInformationProvider
+sealed class AmazonSqsHelper(IAmazonSQS client, SqsTransport transportDefinition, string? queueNamePrefix = null) : IQueueInformationProvider, IQueueLengthProvider
 {
+    readonly ConcurrentDictionary<string, Task<string>> queueUrlCache = new();
+
     public async IAsyncEnumerable<string> GetQueues([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         var request = new ListQueuesRequest { QueueNamePrefix = queueNamePrefix, MaxResults = 1000 };
@@ -40,5 +43,23 @@ sealed class AmazonSqsHelper(IAmazonSQS client, string? queueNamePrefix = null) 
             // Nothing to be done here
         }
         return false;
+    }
+
+    public async Task<long> GetQueueLength(string name, CancellationToken cancellationToken)
+    {
+        var queueUrl = await queueUrlCache.GetOrAdd(name, async (k) =>
+        {
+            var queueName = transportDefinition.QueueNameGenerator(name, transportDefinition.QueueNamePrefix);
+            var getQueueUrlResponse = await client.GetQueueUrlAsync(queueName, cancellationToken);
+            return getQueueUrlResponse.QueueUrl;
+        });
+
+        var attReq = new GetQueueAttributesRequest { QueueUrl = queueUrl };
+        attReq.AttributeNames.Add("ApproximateNumberOfMessages");
+
+        var attResponse = await client.GetQueueAttributesAsync(attReq, cancellationToken);
+        var value = attResponse.ApproximateNumberOfMessages;
+
+        return value;
     }
 }

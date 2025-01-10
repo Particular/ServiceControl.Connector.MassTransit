@@ -4,13 +4,14 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.AcceptanceTesting;
 using NServiceBus.AcceptanceTesting.Support;
+using NServiceBus.Transport;
 using ServiceControl.Connector.MassTransit;
 using ServiceControl.Connector.MassTransit.AcceptanceTesting;
 
-public class ConnectorComponent<TContext>(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor) : IComponentBehavior
+public class ConnectorComponent<TContext>(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor, string? customCheckQueue) : IComponentBehavior
     where TContext : ScenarioContext
 {
-    public Task<ComponentRunner> CreateRunner(RunDescriptor run) => Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, queueNamesToMonitor, run.ScenarioContext, new ScenarioContextLoggerProvider(run.ScenarioContext)));
+    public Task<ComponentRunner> CreateRunner(RunDescriptor run) => Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, queueNamesToMonitor, customCheckQueue, run.ScenarioContext, new ScenarioContextLoggerProvider(run.ScenarioContext)));
 
     class StaticQueueNames(string[] queueNames) : IFileBasedQueueInformationProvider
     {
@@ -25,7 +26,7 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
         }
     }
 
-    class Runner(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor,
+    class Runner(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor, string? customCheckQueue,
         ScenarioContext scenarioContext,
         ScenarioContextLoggerProvider loggerProvider) : ComponentRunner
     {
@@ -39,14 +40,16 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
                 .ConfigureLogging(cfg => cfg.ClearProviders().AddProvider(loggerProvider))
                 .ConfigureServices((hostContext, services) =>
                 {
-                    services.AddSingleton((TContext)scenarioContext);
-                    services.AddSingleton(new Configuration
+                    var configuration = new Configuration
                     {
                         ReturnQueue = returnQueue,
                         ErrorQueue = errorQueue,
                         QueueScanInterval = TimeSpan.FromSeconds(5),
+                        CustomChecksQueue = customCheckQueue ?? "Particular.ServiceControl",
                         Command = Command.SetupAndRun
-                    });
+                    };
+                    services.AddSingleton((TContext)scenarioContext);
+                    services.AddSingleton(configuration);
                     services.AddSingleton<MassTransitConverter>();
                     services.AddSingleton<MassTransitFailureAdapter>();
                     services.AddSingleton<ReceiverFactory>();
@@ -54,6 +57,15 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
                     services.AddSingleton<IProvisionQueues, ProvisionQueues>();
                     services.AddSingleton(TimeProvider.System);
                     services.AddSingleton<IFileBasedQueueInformationProvider>(new StaticQueueNames(queueNamesToMonitor));
+                    if (customCheckQueue != null)
+                    {
+                        services.AddHostedService<CustomCheckReporter>(provider =>
+                            new CustomCheckReporter(
+                                provider.GetRequiredService<TransportDefinition>(),
+                                provider.GetRequiredService<IQueueLengthProvider>(),
+                                configuration,
+                                provider.GetRequiredService<IHostApplicationLifetime>()));
+                    }
                     transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
                 });
 

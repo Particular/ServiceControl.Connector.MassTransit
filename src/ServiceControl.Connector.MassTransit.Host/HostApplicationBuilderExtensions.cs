@@ -2,6 +2,7 @@ using System.Data.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NServiceBus.Transport;
 using ServiceControl.Connector.MassTransit;
 
 static class HostApplicationBuilderExtensions
@@ -17,14 +18,17 @@ static class HostApplicationBuilderExtensions
                           "Particular.ServiceControl.Connector.MassTransit_return";
         var errorQueue = builder.Configuration.GetValue<string?>("ErrorQueue") ?? "error";
 
+        var customChecksQueue = builder.Configuration.GetValue<string?>("CUSTOM_CHECK_QUEUE") ?? "Particular.ServiceControl";
         var services = builder.Services;
 
-        services.AddSingleton(new Configuration
+        var config = new Configuration
         {
             ReturnQueue = returnQueue,
             ErrorQueue = errorQueue,
+            CustomChecksQueue = customChecksQueue,
             Command = command
-        })
+        };
+        services
             .AddSingleton<MassTransitConverter>()
             .AddSingleton<MassTransitFailureAdapter>()
             .AddSingleton<ReceiverFactory>()
@@ -43,7 +47,14 @@ static class HostApplicationBuilderExtensions
                 throw new Exception("QUEUES_FILE not specified");
             }
 
-            services.AddHostedService<Service>();
+            services
+                .AddHostedService<Service>()
+                .AddHostedService<CustomCheckReporter>(provider =>
+                    new CustomCheckReporter(
+                        provider.GetRequiredService<TransportDefinition>(),
+                        provider.GetRequiredService<IQueueLengthProvider>(),
+                        config,
+                        provider.GetRequiredService<IHostApplicationLifetime>()));
         }
 
         var transporttype = configuration.GetValue<string>("TRANSPORTTYPE");

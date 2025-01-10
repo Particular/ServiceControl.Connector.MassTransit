@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Web;
 
-class RabbitMQHelper(string vhost, Uri apiBaseUrl, ICredentials credentials) : IQueueInformationProvider
+class RabbitMQHelper(string vhost, Uri apiBaseUrl, ICredentials credentials) : IQueueInformationProvider, IQueueLengthProvider
 {
     readonly HttpClient httpClient = new(new SocketsHttpHandler
     {
@@ -74,5 +74,35 @@ class RabbitMQHelper(string vhost, Uri apiBaseUrl, ICredentials credentials) : I
         // /api/queues/vhost/name
         using var response = await httpClient.GetAsync(url, cancellationToken);
         return response.StatusCode == HttpStatusCode.OK;
+    }
+
+    public async Task<long> GetQueueLength(string queueName, CancellationToken cancellationToken)
+    {
+        var url = $"{apiBaseUrl}api/queues/{HttpUtility.UrlEncode(vhost)}/{HttpUtility.UrlEncode(queueName)}";
+        try
+        {
+            using var response = await httpClient.GetAsync(url, cancellationToken);
+
+            response.EnsureSuccessStatusCode();
+
+            await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            var jsonDoc = await JsonDocument.ParseAsync(stream, new JsonDocumentOptions(), cancellationToken);
+
+            if (jsonDoc.RootElement.TryGetProperty("messages", out var value))
+            {
+                return value.GetInt64();
+            }
+
+            return 0; //No value available yet shortly after queue has been created
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            //Shutting down
+            return 0;
+        }
+        catch (Exception e)
+        {
+            throw new Exception($"Failed to check the length of the queue {queueName} via URL {url}.", e);
+        }
     }
 }

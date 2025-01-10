@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using Azure.Messaging.ServiceBus.Administration;
 using Microsoft.Extensions.Logging;
 
-class AzureServiceBusHelper(ILogger<AzureServiceBusHelper> logger, string connectionstring) : IQueueInformationProvider
+class AzureServiceBusHelper(ILogger<AzureServiceBusHelper> logger, string connectionstring) : IQueueInformationProvider, IQueueLengthProvider
 {
     readonly ServiceBusAdministrationClient client = new(connectionstring);
 
@@ -24,4 +24,10 @@ class AzureServiceBusHelper(ILogger<AzureServiceBusHelper> logger, string connec
     }
 
     public async Task<bool> QueueExists(string queueName, CancellationToken cancellationToken) => (await client.QueueExistsAsync(queueName, cancellationToken)).Value;
+
+    public async Task<long> GetQueueLength(string name, CancellationToken cancellationToken)
+    {
+        var queuesRuntimeProperties = await client.GetQueueRuntimePropertiesAsync(name, cancellationToken);
+        return queuesRuntimeProperties.Value.ActiveMessageCount;
+    }
 }

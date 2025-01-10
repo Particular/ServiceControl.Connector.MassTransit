@@ -173,7 +173,12 @@ public class Service(
 
         var receiverSettings = receiveSettings.ToArray();
 
-        infrastructure = await transportInfrastructureFactory.CreateTransportInfrastructure(hostSettings, receiverSettings, [], cancellationToken);
+        infrastructure = await transportInfrastructureFactory.CreateTransportInfrastructure(
+            hostSettings,
+            receiverSettings,
+            [configuration.PoisonQueue, configuration.CustomChecksQueue],
+            cancellationToken
+        );
 
         var messageDispatcher = infrastructure.Dispatcher;
 

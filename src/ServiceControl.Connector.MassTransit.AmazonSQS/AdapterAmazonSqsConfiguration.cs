@@ -7,10 +7,12 @@ public static class AdapterAmazonSqsConfiguration
 {
     public static void UsingAmazonSqs(this IServiceCollection services, Action<SqsTransport>? transportConfig = null)
     {
-        services.AddSingleton<IQueueInformationProvider>(provider => new AmazonSqsHelper(provider.GetRequiredService<IAmazonSQS>(), string.Empty));
+        services.AddSingleton(provider => new AmazonSqsHelper(provider.GetRequiredService<IAmazonSQS>(), provider.GetRequiredService<SqsTransport>(), string.Empty));
+        services.AddSingleton<IQueueInformationProvider>(provider => provider.GetRequiredService<AmazonSqsHelper>());
+        services.AddSingleton<IQueueLengthProvider>(provider => provider.GetRequiredService<AmazonSqsHelper>());
         services.AddSingleton<IAmazonSQS, AmazonSQSClient>();
         services.AddSingleton<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
-        services.AddTransient<TransportDefinition>(sp =>
+        services.AddTransient<SqsTransport>(sp =>
         {
             var sqs = sp.GetRequiredService<IAmazonSQS>();
             var sns = sp.GetRequiredService<IAmazonSimpleNotificationService>();
@@ -23,9 +25,10 @@ public static class AdapterAmazonSqsConfiguration
             transportConfig?.Invoke(transport);
             return transport;
         });
+        services.AddTransient<TransportDefinition>(sp => sp.GetRequiredService<SqsTransport>());
         services.AddSingleton(sp => new TransportInfrastructureFactory(async (hostSettings, receivers, sendingAddresses, cancellationToken) =>
         {
-            var transport = sp.GetRequiredService<TransportDefinition>();
+            var transport = sp.GetRequiredService<SqsTransport>();
             var configuration = sp.GetRequiredService<Configuration>();
             var client = sp.GetRequiredService<IAmazonSQS>();
 
@@ -37,6 +40,7 @@ public static class AdapterAmazonSqsConfiguration
             );
 
             var dispatcher = new CustomSqsDispatcher(
+                transport,
                 client,
                 infrastructure.Dispatcher,
                 configuration.ErrorQueue
