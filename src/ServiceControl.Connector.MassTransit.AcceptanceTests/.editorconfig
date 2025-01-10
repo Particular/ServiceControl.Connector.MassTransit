@@ -7,3 +7,6 @@ dotnet_diagnostic.PS0018.severity = none  # Add a CancellationToken parameter
 
 # Justification: Tests don't support cancellation and don't need to forward IMessageHandlerContext.CancellationToken
 dotnet_diagnostic.NSB0002.severity = suggestion
+
+# Cancellation tokens in apps don't need to be optional
+dotnet_diagnostic.PS0003.severity = none

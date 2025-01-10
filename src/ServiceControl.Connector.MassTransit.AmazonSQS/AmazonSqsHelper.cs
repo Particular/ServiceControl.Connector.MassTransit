@@ -1,40 +1,52 @@
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using Amazon.SQS;
 using Amazon.SQS.Model;
-using NServiceBus.Transport;
 
-sealed class AmazonSqsHelper(SqsTransport transportDefinition) : IQueueInformationProvider, IQueueLengthProvider
+sealed class AmazonSqsHelper(IAmazonSQS client, SqsTransport transportDefinition, string? queueNamePrefix = null) : IQueueInformationProvider, IQueueLengthProvider
 {
-    readonly SqsTransport transportDefinition = transportDefinition;
     readonly ConcurrentDictionary<string, Task<string>> queueUrlCache = new();
 
-#pragma warning disable PS0018
-    public async Task<IEnumerable<string>> GetQueues()
-#pragma warning restore PS0018
+    public async IAsyncEnumerable<string> GetQueues([EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var client = new AmazonSQSClient();
-
-        var list = new List<string>();
-
-        var request = new ListQueuesRequest { QueueNamePrefix = transportDefinition.QueueNamePrefix, MaxResults = 1000 };
+        var request = new ListQueuesRequest { QueueNamePrefix = queueNamePrefix, MaxResults = 1000 };
         ListQueuesResponse response;
+
         do
         {
-            response = await client.ListQueuesAsync(request);
-            foreach (var queueUrl in response.QueueUrls)
-            {
-                var queue = queueUrl.Substring(queueUrl.LastIndexOf('/') + 1);
-                list.Add(queue);
-            }
-        } while (null != (request.NextToken = response.NextToken));
+            response = await client.ListQueuesAsync(request, cancellationToken);
 
-        return list;
+            foreach (var queue in response.QueueUrls.Select(GetQueueNameFromUrl))
+            {
+                yield return queue;
+            }
+        } while ((request.NextToken = response.NextToken) is not null);
+
+        yield break;
+
+        static string GetQueueNameFromUrl(string url)
+        {
+            // Example of a queue url, https://sqs.us-east-1.amazonaws.com/123456789012/my-queue-name
+            return url.Split('/').Last();
+        }
     }
 
-    public async Task<long> GetQueueLength(string name, CancellationToken cancellationToken = default)
+    public async Task<bool> QueueExists(string queueName, CancellationToken cancellationToken)
     {
-        var client = new AmazonSQSClient();
+        try
+        {
+            await client.GetQueueUrlAsync(queueName, cancellationToken);
+            return true;
+        }
+        catch (QueueDoesNotExistException)
+        {
+            // Nothing to be done here
+        }
+        return false;
+    }
 
+    public async Task<long> GetQueueLength(string name, CancellationToken cancellationToken)
+    {
         var queueUrl = await queueUrlCache.GetOrAdd(name, async (k) =>
         {
             var queueName = transportDefinition.QueueNameGenerator(name, transportDefinition.QueueNamePrefix);

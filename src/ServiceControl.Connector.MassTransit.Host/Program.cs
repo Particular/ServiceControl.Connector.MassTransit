@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.Extensions.Logging;
+using ServiceControl.Connector.MassTransit;
 
 Console.OutputEncoding = Encoding.UTF8;
 
@@ -29,4 +30,23 @@ using var host = builder.Build();
 var loggerFactory = host.Services.GetRequiredService<ILoggerFactory>();
 NServiceBus.Logging.LogManager.UseFactory(new ExtensionsLoggerFactory(loggerFactory));
 
-await host.RunAsync();
+var provisionQueues = host.Services.GetRequiredService<IProvisionQueues>();
+var configure = host.Services.GetRequiredService<Configuration>();
+var provisionQueuesResult = true;
+
+if (configure.Command != Command.Run)
+{
+    provisionQueuesResult = await provisionQueues.TryProvision(CancellationToken.None);
+}
+
+if (!provisionQueuesResult)
+{
+    return 1;
+}
+
+if (configure.Command != Command.Setup)
+{
+    await host.RunAsync();
+}
+
+return 0;

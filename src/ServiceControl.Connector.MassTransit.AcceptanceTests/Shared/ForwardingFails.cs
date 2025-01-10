@@ -8,13 +8,12 @@ using NUnit.Framework;
 using ServiceControl.Plugin.CustomChecks.Messages;
 using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
 
-public class ForwardingFails : ConnectorAcceptanceTest
+public class ForwardingFails
 {
-    [Test]
-    public async Task Should_forward_error_messages_by_not_modify_message()
+    public async Task Should_forward_error_messages_by_not_modify_message(string queueName)
     {
         var ctx = await Scenario.Define<Context>()
-            .WithConnector("Connector", Conventions.EndpointNamingConvention(typeof(ErrorSpy)), "Retry.Return", Conventions.EndpointNamingConvention(typeof(CustomCheckSpy)))
+            .WithConnector("Connector", Conventions.EndpointNamingConvention(typeof(ErrorSpy)), "Retry.Return", [queueName], Conventions.EndpointNamingConvention(typeof(CustomCheckSpy)))
             .WithEndpoint<InvalidMessageSender>()
             .WithEndpoint<CustomCheckSpy>()
             .Done(c => c.Failed)
