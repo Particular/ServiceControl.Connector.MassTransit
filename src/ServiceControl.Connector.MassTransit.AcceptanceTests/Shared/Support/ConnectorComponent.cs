@@ -45,8 +45,7 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
                         ReturnQueue = returnQueue,
                         ErrorQueue = errorQueue,
                         QueueScanInterval = TimeSpan.FromSeconds(5),
-                        CustomChecksQueue = customCheckQueue ?? "Particular.ServiceControl",
-                        Command = Command.SetupAndRun
+                        CustomChecksQueue = customCheckQueue ?? "Particular.ServiceControl"
                     };
                     services.AddSingleton((TContext)scenarioContext);
                     services.AddSingleton(configuration);

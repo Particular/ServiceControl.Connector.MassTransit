@@ -1,6 +1,6 @@
 ﻿namespace ServiceControl.Connector.MassTransit;
 
-public enum Command
+public enum RunMode
 {
     Run,
     Setup,

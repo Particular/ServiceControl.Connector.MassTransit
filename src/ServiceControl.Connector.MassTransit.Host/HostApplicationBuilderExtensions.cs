@@ -2,32 +2,25 @@ using System.Data.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NServiceBus.Transport;
 using ServiceControl.Connector.MassTransit;
 
 static class HostApplicationBuilderExtensions
 {
-    public static void UseMassTransitConnector(this HostApplicationBuilder builder)
+    public static void UseMassTransitConnector(this HostApplicationBuilder builder, bool isSetupOnly)
     {
-        var commandLineArgs = Environment.GetCommandLineArgs();
-        var command = commandLineArgs.Contains("--setup")
-                ? Command.Setup
-                : commandLineArgs.Contains("--setup-and-run") ? Command.SetupAndRun : Command.Run;
-
         var returnQueue = builder.Configuration.GetValue<string?>("RETURN_QUEUE") ??
                           "Particular.ServiceControl.Connector.MassTransit_return";
         var errorQueue = builder.Configuration.GetValue<string?>("ERROR_QUEUE") ?? "error";
         var customChecksQueue = builder.Configuration.GetValue<string?>("CUSTOM_CHECK_QUEUE") ?? "Particular.ServiceControl";
         var services = builder.Services;
 
-        var config = new Configuration
-        {
-            ReturnQueue = returnQueue,
-            ErrorQueue = errorQueue,
-            CustomChecksQueue = customChecksQueue,
-            Command = command
-        };
         services
+            .AddSingleton(new Configuration
+            {
+                ReturnQueue = returnQueue,
+                ErrorQueue = errorQueue,
+                CustomChecksQueue = customChecksQueue
+            })
             .AddSingleton<MassTransitConverter>()
             .AddSingleton<MassTransitFailureAdapter>()
             .AddSingleton<ReceiverFactory>()
@@ -37,7 +30,7 @@ static class HostApplicationBuilderExtensions
         var configuration = builder.Configuration;
         var staticQueueList = string.Empty;
 
-        if (command != Command.Setup)
+        if (!isSetupOnly)
         {
             staticQueueList = configuration.GetValue<string>("QUEUES_FILE");
 
@@ -48,12 +41,7 @@ static class HostApplicationBuilderExtensions
 
             services
                 .AddHostedService<Service>()
-                .AddHostedService<CustomCheckReporter>(provider =>
-                    new CustomCheckReporter(
-                        provider.GetRequiredService<TransportDefinition>(),
-                        provider.GetRequiredService<IQueueLengthProvider>(),
-                        config,
-                        provider.GetRequiredService<IHostApplicationLifetime>()));
+                .AddHostedService<CustomCheckReporter>();
         }
 
         var transporttype = configuration.GetValue<string>("TRANSPORT_TYPE");

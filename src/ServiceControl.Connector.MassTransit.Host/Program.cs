@@ -1,52 +1,75 @@
-﻿using System.Text;
+﻿using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.Extensions.Logging;
 using ServiceControl.Connector.MassTransit;
 
-Console.OutputEncoding = Encoding.UTF8;
+var consoleOption = new Option<bool>(
+    "--console",
+    "Run in console mode.");
+consoleOption.AddAlias("-c");
 
-var builder = Host.CreateApplicationBuilder(args);
-builder.UseMassTransitConnector();
+var runModeOption = new Option<RunMode>(
+    "--run-mode",
+    () => RunMode.SetupAndRun,
+    "Mode to run in.")
+{ Arity = ArgumentArity.ExactlyOne };
 
-var isConsole = args.Contains("-c") || args.Contains("--console");
+var rootCommand = new RootCommand("Particular Software ServiceControl Masstransit Connector");
+rootCommand.AddOption(consoleOption);
+rootCommand.AddOption(runModeOption);
 
-if (isConsole)
+async Task<int> Handler(RunMode runMode, bool isConsole)
 {
-    builder.Logging.AddSimpleConsole(o =>
+    var builder = Host.CreateApplicationBuilder(args);
+    builder.UseMassTransitConnector(runMode == RunMode.Setup);
+
+    if (isConsole)
     {
-        o.SingleLine = true;
-        o.IncludeScopes = true;
-    });
+        builder.Logging.AddSimpleConsole(o =>
+        {
+            o.SingleLine = true;
+            o.IncludeScopes = true;
+        });
+    }
+    else
+    {
+        builder.Logging.AddSystemdConsole();
+    }
+
+    using var host = builder.Build();
+
+    var loggerFactory = host.Services.GetRequiredService<ILoggerFactory>();
+    NServiceBus.Logging.LogManager.UseFactory(new ExtensionsLoggerFactory(loggerFactory));
+
+    var provisionQueues = host.Services.GetRequiredService<IProvisionQueues>();
+    var provisionQueuesResult = true;
+
+    if (runMode != RunMode.Run)
+    {
+        provisionQueuesResult = await provisionQueues.TryProvision(CancellationToken.None);
+    }
+
+    if (!provisionQueuesResult)
+    {
+        return 1;
+    }
+
+    if (runMode != RunMode.Setup)
+    {
+        await host.RunAsync();
+    }
+
+    return 0;
 }
-else
+
+rootCommand.SetHandler(async context =>
 {
-    builder.Logging.AddSystemdConsole();
-}
+    var isConsole = context.ParseResult.GetValueForOption(consoleOption);
+    var runMode = context.ParseResult.GetValueForOption(runModeOption);
 
-using var host = builder.Build();
+    context.ExitCode = await Handler(runMode, isConsole);
+});
 
-var loggerFactory = host.Services.GetRequiredService<ILoggerFactory>();
-NServiceBus.Logging.LogManager.UseFactory(new ExtensionsLoggerFactory(loggerFactory));
-
-var provisionQueues = host.Services.GetRequiredService<IProvisionQueues>();
-var configure = host.Services.GetRequiredService<Configuration>();
-var provisionQueuesResult = true;
-
-if (configure.Command != Command.Run)
-{
-    provisionQueuesResult = await provisionQueues.TryProvision(CancellationToken.None);
-}
-
-if (!provisionQueuesResult)
-{
-    return 1;
-}
-
-if (configure.Command != Command.Setup)
-{
-    await host.RunAsync();
-}
-
-return 0;
+return await rootCommand.InvokeAsync(args);
