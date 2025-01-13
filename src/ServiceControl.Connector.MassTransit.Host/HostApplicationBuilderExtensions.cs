@@ -2,7 +2,6 @@ using System.Data.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NServiceBus.Transport;
 using ServiceControl.Connector.MassTransit;
 
 static class HostApplicationBuilderExtensions
@@ -42,12 +41,7 @@ static class HostApplicationBuilderExtensions
 
             services
                 .AddHostedService<Service>()
-                .AddHostedService<CustomCheckReporter>(provider =>
-                    new CustomCheckReporter(
-                        provider.GetRequiredService<TransportDefinition>(),
-                        provider.GetRequiredService<IQueueLengthProvider>(),
-                        config,
-                        provider.GetRequiredService<IHostApplicationLifetime>()));
+                .AddHostedService<CustomCheckReporter>();
         }
 
         var transporttype = configuration.GetValue<string>("TRANSPORT_TYPE");
