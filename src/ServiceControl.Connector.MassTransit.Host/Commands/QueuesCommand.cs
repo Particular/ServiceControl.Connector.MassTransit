@@ -15,24 +15,32 @@ public class QueuesCommand : Command
 
         this.SetHandler(async context =>
         {
-            var builder = Host.CreateEmptyApplicationBuilder(null);
-            builder.Configuration.AddEnvironmentVariables();
-            builder.UseMassTransitConnector(true);
-
-            var host = builder.Build();
-
-            var queueInformationProvider = host.Services.GetRequiredService<IQueueInformationProvider>();
-            var queues = queueInformationProvider.GetQueues(CancellationToken.None);
-
             var filter = context.ParseResult.GetValueForOption(filterOption);
-            await foreach (string queue in queues)
-            {
-                var regEx = new Regex(filter!);
-                if (regEx.IsMatch(queue))
-                {
-                    Console.WriteLine(queue);
-                }
-            }
+
+            context.ExitCode = await InternalHandler(filter!, context.GetCancellationToken());
         });
+    }
+
+    async Task<int> InternalHandler(string filter, CancellationToken cancellationToken)
+    {
+        var builder = Host.CreateEmptyApplicationBuilder(null);
+        builder.Configuration.AddEnvironmentVariables();
+        builder.UseMassTransitConnector(true);
+
+        var host = builder.Build();
+
+        var queueInformationProvider = host.Services.GetRequiredService<IQueueInformationProvider>();
+        var queues = queueInformationProvider.GetQueues(cancellationToken);
+
+        await foreach (string queue in queues)
+        {
+            var regEx = new Regex(filter);
+            if (regEx.IsMatch(queue))
+            {
+                Console.WriteLine(queue);
+            }
+        }
+
+        return 0;
     }
 }

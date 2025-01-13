@@ -26,50 +26,55 @@ public class StartupCommand : RootCommand
         AddOption(runModeOption);
 
         this.SetHandler(async context =>
+        {
+            var isConsole = context.ParseResult.GetValueForOption(consoleOption);
+            var runMode = context.ParseResult.GetValueForOption(runModeOption);
+
+            context.ExitCode = await InternalHandler(runMode, isConsole, args, context.GetCancellationToken());
+        });
+    }
+
+    async Task<int> InternalHandler(RunMode runMode, bool isConsole, string[] args, CancellationToken cancellationToken)
+    {
+        var builder = Host.CreateApplicationBuilder(args);
+        builder.UseMassTransitConnector(runMode == RunMode.Setup);
+
+        if (isConsole)
+        {
+            builder.Logging.AddSimpleConsole(o =>
             {
-                var isConsole = context.ParseResult.GetValueForOption(consoleOption);
-                var runMode = context.ParseResult.GetValueForOption(runModeOption);
-
-                var builder = Host.CreateApplicationBuilder(args);
-                builder.UseMassTransitConnector(runMode == RunMode.Setup);
-
-                if (isConsole)
-                {
-                    builder.Logging.AddSimpleConsole(o =>
-                    {
-                        o.SingleLine = true;
-                        o.IncludeScopes = true;
-                    });
-                }
-                else
-                {
-                    builder.Logging.AddSystemdConsole();
-                }
-
-                using var host = builder.Build();
-
-                var loggerFactory = host.Services.GetRequiredService<ILoggerFactory>();
-                NServiceBus.Logging.LogManager.UseFactory(new ExtensionsLoggerFactory(loggerFactory));
-                var provisionQueues = host.Services.GetRequiredService<IProvisionQueues>();
-                var provisionQueuesResult = true;
-
-                if (runMode != RunMode.Run)
-                {
-                    provisionQueuesResult = await provisionQueues.TryProvision(CancellationToken.None);
-                }
-
-                if (!provisionQueuesResult)
-                {
-                    context.ExitCode = 1;
-                    return;
-                }
-
-                if (runMode != RunMode.Setup)
-                {
-                    await host.RunAsync();
-                }
-
-                context.ExitCode = 0;
+                o.SingleLine = true;
+                o.IncludeScopes = true;
             });
+        }
+        else
+        {
+            builder.Logging.AddSystemdConsole();
+        }
+
+        using var host = builder.Build();
+
+        var loggerFactory = host.Services.GetRequiredService<ILoggerFactory>();
+        NServiceBus.Logging.LogManager.UseFactory(new ExtensionsLoggerFactory(loggerFactory));
+
+        var provisionQueues = host.Services.GetRequiredService<IProvisionQueues>();
+        var provisionQueuesResult = true;
+
+        if (runMode != RunMode.Run)
+        {
+            provisionQueuesResult = await provisionQueues.TryProvision(cancellationToken);
+        }
+
+        if (!provisionQueuesResult)
+        {
+            return 1;
+        }
+
+        if (runMode != RunMode.Setup)
+        {
+            await host.RunAsync(cancellationToken);
+        }
+
+        return 0;
     }
 }

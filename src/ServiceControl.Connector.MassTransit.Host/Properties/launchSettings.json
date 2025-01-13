@@ -11,7 +11,7 @@
         "RABBITMQ_MANAGEMENT_API_USERNAME": "guest",
         "RABBITMQ_MANAGEMENT_API_PASSWORD": "guest"
       },
-      "commandLineArgs": "--setup-and-run --console"
+      "commandLineArgs": "--console"
     },
     "AmazonSQS": {
       "commandName": "Project",
@@ -20,7 +20,7 @@
         "TRANSPORT_TYPE": "AmazonSQS",
         "QUEUES_FILE": "queues.txt"
       },
-      "commandLineArgs": "--setup-and-run --console"
+      "commandLineArgs": "--console"
     },
     "AzureServiceBus": {
       "commandName": "Project",
@@ -29,7 +29,7 @@
         "TRANSPORT_TYPE": "AzureServiceBus",
         "QUEUES_FILE": "queues.txt"
       },
-      "commandLineArgs": "--Connection_String=%CONNECTIONSTRING_AZURESERVICEBUS% --setup-and-run --console"
+      "commandLineArgs": "--Connection_String=%CONNECTIONSTRING_AZURESERVICEBUS% --console"
     },
     "AzureServiceBusWithDeadLetter": {
       "commandName": "Project",
@@ -38,7 +38,7 @@
         "TRANSPORT_TYPE": "AzureServiceBusWithDeadLetter",
         "QUEUES_FILE": "queues.txt"
       },
-      "commandLineArgs": "--Connection_String=%CONNECTIONSTRING_AZURESERVICEBUS% --setup-and-run --console"
+      "commandLineArgs": "--Connection_String=%CONNECTIONSTRING_AZURESERVICEBUS% --console"
     }
   }
 }
