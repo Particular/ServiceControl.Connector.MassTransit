@@ -38,11 +38,11 @@ Run with setup entry point to create message queues, then exit the container.
 
 ```shell
 docker run \
--e TRANSPORTTYPE=RabbitMQ.QuorumConventionalRouting \
--e CONNECTIONSTRING=host=host.docker.internal \
--e MANAGEMENT_API_URL=http://host.docker.internal:15672 \
--e MANAGEMENT_API_USERNAME=guest \
--e MANAGEMENT_API_PASSWORD=guest \
+-e TRANSPORT_TYPE=RabbitMQ \
+-e CONNECTION_STRING=host=host.docker.internal \
+-e RABBITMQ_MANAGEMENT_API_URL=http://host.docker.internal:15672 \
+-e RABBITMQ_MANAGEMENT_API_USERNAME=guest \
+-e RABBITMQ_MANAGEMENT_API_PASSWORD=guest \
 --rm particular/servicecontrol-connector-masstransit:latest \
 --setup
 ```
@@ -53,39 +53,41 @@ Run the connector and bridge MassTransit errors queues with the Particular Platf
 
 ```shell
 docker run \
--e TRANSPORTTYPE=RabbitMQ.QuorumConventionalRouting \
--e CONNECTIONSTRING=host=host.docker.internal \
--e MANAGEMENT_API_URL=http://host.docker.internal:15672 \
--e MANAGEMENT_API_USERNAME=guest \
--e MANAGEMENT_API_PASSWORD=guest \
+-e TRANSPORT_TYPE=RabbitMQ \
+-e CONNECTION_STRING=host=host.docker.internal \
+-e RABBITMQ_MANAGEMENT_API_URL=http://host.docker.internal:15672 \
+-e RABBITMQ_MANAGEMENT_API_USERNAME=guest \
+-e RABBITMQ_MANAGEMENT_API_PASSWORD=guest \
 -v [local_path_to_queues_file]:/app/queues.txt:ro \
 --rm particular/servicecontrol-connector-masstransit:latest
 ```
 
 ## Configuration
 
-| Key                | Description                                                                                         | Default                                                  |
-|--------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------------------------|
-| TRANSPORTTYPE      | The transport type                                                                                  | None                                                     |
-| CONNECTIONSTRING   | The NServiceBus connection string for the specified transport                                       | None                                                     |
-| RETURNQUEUE        | The intermediate queue used by the connector to which ServiceControl will send its retried messages | `Particular.ServiceControl.Connector.MassTransit_return` |
-| ERRORQUEUE         | The error queue ServiceControl ingests                                                              | `error`                                                  |
-| MANAGEMENT_API_URL | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
-| MANAGEMENT_API_USERNAME | RabbitMQ management API username                                                                    | `guest`                                                  |
-| MANAGEMENT_API_PASSWORD | RabbitMQ management API password                                                                    | `guest`                                                  |
-| SUBQUEUE        | Azure Service Bus: By default ingest `*_error` but can be configured to ingest from dead-letter queues               | `None`                                                   |
+| Key                              | Description                                                                                         | Default                                                  |
+|----------------------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------------------------|
+| TRANSPORT_TYPE                   | The transport type                                                                                  | None                                                     |
+| CONNECTION_STRING                | The NServiceBus connection string for the specified transport                                       | None                                                     |
+| RETURN_QUEUE                     | The intermediate queue used by the connector to which ServiceControl will send its retried messages | `Particular.ServiceControl.Connector.MassTransit_return` |
+| ERROR_QUEUE                      | The error queue ServiceControl ingests                                                              | `error`                                                  |
+| CUSTOM_CHECK_QUEUE               | The ServiceControl endpoint queue                                                                   | `Particular.ServiceControl`                                                  |
+| RABBITMQ_MANAGEMENT_API_URL      | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
+| RABBITMQ_MANAGEMENT_API_USERNAME | RabbitMQ management API username                                                                    | `guest`                                                  |
+| RABBITMQ_MANAGEMENT_API_PASSWORD | RabbitMQ management API password                                                                    | `guest`                                                  |
 
-### TRANSPORTTYPE
+### TRANSPORT_TYPE
 
 Currently support as the most used MassTransit transports: Amazon SQS, Azure Service Bus and RabbitMQ.
 
-| Description       | Key                                  |
-|-------------------|--------------------------------------|
-| Amazon SQS        | `AmazonSQS`                          |
-| Azure Service Bus | `NetStandardAzureServiceBus`         |
-| RabbitMQ          | `RabbitMQ.QuorumConventionalRouting` |
+| Description       | Key                                  | Notes |
+|-------------------|--------------------------------------| --- |
+| Amazon SQS        | `AmazonSQS`                          | |
+| Azure Service Bus | `AzureServiceBus`         | |
+| Azure Service Bus with Dead Letter | `AzureServiceBusDeadLetter`         | Azure Service Bus configured to ingest from [dead-letter queues](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dead-letter-queues). | 
+| RabbitMQ          | `RabbitMQ` | |
 
-### CONNECTIONSTRING
+
+### CONNECTION_STRING
 
 The connection string format used is the same for all ServiceControl components.
 
@@ -93,24 +95,28 @@ The connection string format used is the same for all ServiceControl components.
 - RabbitMQ: <https://docs.particular.net/servicecontrol/transports#rabbitmq>
 - AmazonSQS: <https://docs.particular.net/servicecontrol/transports#amazon-sqs>
 
-### RETURNQUEUE
+### RETURN_QUEUE
 
 Default: `Particular.ServiceControl.Connector.MassTransit_return`
 
 The return queue used by the connector that is passed to ServiceControl as the intermediate queue before returning the message back to the actual queue that MassTransit listens to.
 
-### ERRORQUEUE
+### ERROR_QUEUE
 
 Default: `error`
 
-ServiceControl by default listens to the `error` queue but it this value is overriden in ServiceControl this configuration setting must be set to the same value.
+ServiceControl by default listens to the `error` queue but if this value is overriden in ServiceControl this configuration setting must be set to the same value.
 
-### MANAGEMENT_API_URL
+### CUSTOM_CHECK_QUEUE
+
+Default: `Particular.ServiceControl`
+
+ServiceControl primary queue by default listens to `Particular.ServiceControl` queue but if this value is overriden in ServiceControl this configuration setting must be set to the same value.
+
+
+### RABBITMQ_MANAGEMENT_API_URL
 
 Default: None
-
-> [!NOTE]
-> Only applies to RabbitMQ
 
 Required when using RabbitMQ and error queues need to be dynamically resolved as queue information is queried on the broker to determine which error queues to listen to.
 
@@ -120,34 +126,18 @@ Example:
 http://localhost:15672
 ```
 
-### MANAGEMENT_API_USERNAME
+### RABBITMQ_MANAGEMENT_API_USERNAME
 
 Default: `guest`
 
-> [!NOTE]
-> Only applies to RabbitMQ
-
 The management api username.
 
-### MANAGEMENT_API_PASSWORD
+### RABBITMQ_MANAGEMENT_API_PASSWORD
 
 Default: `guest`
 
-> [!NOTE]
-> Only applies to RabbitMQ
-
 The management api username.
 
-### SUBQUEUE
-
-Default: `None`
-
-Values: None | DeadLetter
-
-> [!NOTE]
-> Only applies to Azure Service Bus
-
-Failed message by default (mode `None`) will be ingested from queues matching `*_error` but by specifying `DeadLetter` the connector will ingest messages from the [Service Bus dead-letter (sub) queues](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dead-letter-queues).
 
 ## Support
 
