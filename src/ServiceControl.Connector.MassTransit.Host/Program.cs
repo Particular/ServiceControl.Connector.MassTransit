@@ -20,52 +20,56 @@ var rootCommand = new RootCommand("Particular Software ServiceControl Masstransi
 rootCommand.AddOption(consoleOption);
 rootCommand.AddOption(runModeOption);
 
-rootCommand.SetHandler(async context =>
+async Task<int> Handler(RunMode runMode, bool isConsole)
+{
+    var builder = Host.CreateApplicationBuilder(args);
+    builder.UseMassTransitConnector(runMode == RunMode.Setup);
+
+    if (isConsole)
     {
-        var isConsole = context.ParseResult.GetValueForOption(consoleOption);
-        var runMode = context.ParseResult.GetValueForOption(runModeOption);
-
-        var builder = Host.CreateApplicationBuilder(args);
-        builder.UseMassTransitConnector(runMode == RunMode.Setup);
-
-        if (isConsole)
+        builder.Logging.AddSimpleConsole(o =>
         {
-            builder.Logging.AddSimpleConsole(o =>
-            {
-                o.SingleLine = true;
-                o.IncludeScopes = true;
-            });
-        }
-        else
-        {
-            builder.Logging.AddSystemdConsole();
-        }
+            o.SingleLine = true;
+            o.IncludeScopes = true;
+        });
+    }
+    else
+    {
+        builder.Logging.AddSystemdConsole();
+    }
 
-        using var host = builder.Build();
+    using var host = builder.Build();
 
-        var loggerFactory = host.Services.GetRequiredService<ILoggerFactory>();
-        NServiceBus.Logging.LogManager.UseFactory(new ExtensionsLoggerFactory(loggerFactory));
+    var loggerFactory = host.Services.GetRequiredService<ILoggerFactory>();
+    NServiceBus.Logging.LogManager.UseFactory(new ExtensionsLoggerFactory(loggerFactory));
 
-        var provisionQueues = host.Services.GetRequiredService<IProvisionQueues>();
-        var provisionQueuesResult = true;
+    var provisionQueues = host.Services.GetRequiredService<IProvisionQueues>();
+    var provisionQueuesResult = true;
 
-        if (runMode != RunMode.Run)
-        {
-            provisionQueuesResult = await provisionQueues.TryProvision(CancellationToken.None);
-        }
+    if (runMode != RunMode.Run)
+    {
+        provisionQueuesResult = await provisionQueues.TryProvision(CancellationToken.None);
+    }
 
-        if (!provisionQueuesResult)
-        {
-            context.ExitCode = 1;
-            return;
-        }
+    if (!provisionQueuesResult)
+    {
+        return 1;
+    }
 
-        if (runMode != RunMode.Setup)
-        {
-            await host.RunAsync();
-        }
+    if (runMode != RunMode.Setup)
+    {
+        await host.RunAsync();
+    }
 
-        context.ExitCode = 0;
-    });
+    return 0;
+}
+
+rootCommand.SetHandler(async context =>
+{
+    var isConsole = context.ParseResult.GetValueForOption(consoleOption);
+    var runMode = context.ParseResult.GetValueForOption(runModeOption);
+
+    context.ExitCode = await Handler(runMode, isConsole);
+});
 
 return await rootCommand.InvokeAsync(args);
