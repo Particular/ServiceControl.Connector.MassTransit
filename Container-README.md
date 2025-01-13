@@ -64,13 +64,14 @@ docker run \
 
 ## Configuration
 
-| Key                | Description                                                                                         | Default                                                  |
-|--------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------------------------|
-| TRANSPORT_TYPE      | The transport type                                                                                  | None                                                     |
-| CONNECTION_STRING   | The NServiceBus connection string for the specified transport                                       | None                                                     |
-| RETURN_QUEUE        | The intermediate queue used by the connector to which ServiceControl will send its retried messages | `Particular.ServiceControl.Connector.MassTransit_return` |
-| ERROR_QUEUE         | The error queue ServiceControl ingests                                                              | `error`                                                  |
-| RABBITMQ_MANAGEMENT_API_URL | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
+| Key                              | Description                                                                                         | Default                                                  |
+|----------------------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------------------------|
+| TRANSPORT_TYPE                   | The transport type                                                                                  | None                                                     |
+| CONNECTION_STRING                | The NServiceBus connection string for the specified transport                                       | None                                                     |
+| RETURN_QUEUE                     | The intermediate queue used by the connector to which ServiceControl will send its retried messages | `Particular.ServiceControl.Connector.MassTransit_return` |
+| ERROR_QUEUE                      | The error queue ServiceControl ingests                                                              | `error`                                                  |
+| CUSTOM_CHECK_QUEUE               | The ServiceControl endpoint queue                                                                   | `Particular.ServiceControl`                                                  |
+| RABBITMQ_MANAGEMENT_API_URL      | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
 | RABBITMQ_MANAGEMENT_API_USERNAME | RabbitMQ management API username                                                                    | `guest`                                                  |
 | RABBITMQ_MANAGEMENT_API_PASSWORD | RabbitMQ management API password                                                                    | `guest`                                                  |
 
@@ -104,7 +105,14 @@ The return queue used by the connector that is passed to ServiceControl as the i
 
 Default: `error`
 
-ServiceControl by default listens to the `error` queue but it this value is overriden in ServiceControl this configuration setting must be set to the same value.
+ServiceControl by default listens to the `error` queue but if this value is overriden in ServiceControl this configuration setting must be set to the same value.
+
+### CUSTOM_CHECK_QUEUE
+
+Default: `Particular.ServiceControl`
+
+ServiceControl primary queue by default listens to `Particular.ServiceControl` queue but if this value is overriden in ServiceControl this configuration setting must be set to the same value.
+
 
 ### RABBITMQ_MANAGEMENT_API_URL
 
