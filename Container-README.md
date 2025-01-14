@@ -86,7 +86,7 @@ particular/servicecontrol-connector-masstransit:latest \
 | Key                              | Description                                                                                          | Default                                                  |
 |----------------------------------|------------------------------------------------------------------------------------------------------|----------------------------------------------------------|
 | TRANSPORT_TYPE                   | The transport type.                                                                                  | None                                                     |
-| CONNECTION_STRING                | The NServiceBus connection string for the specified transport.                                        | None                                                     |
+| CONNECTION_STRING                | The connection string for the specified transport.                                                    | None                                                     |
 | RETURN_QUEUE                     | The intermediate queue used by the connector to which ServiceControl will send its retried messages. | `Particular.ServiceControl.Connector.MassTransit_return` |
 | ERROR_QUEUE                      | The error queue ServiceControl ingests.                                                              | `error`                                                  |
 | SERVICECONTROL_QUEUE             | The ServiceControl endpoint queue.                                                                   | `Particular.ServiceControl`                              |
