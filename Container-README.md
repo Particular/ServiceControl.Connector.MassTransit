@@ -83,16 +83,17 @@ particular/servicecontrol-connector-masstransit:latest \
 
 ## Configuration
 
-| Key                              | Description                                                                                         | Default                                                  |
-|----------------------------------|-----------------------------------------------------------------------------------------------------|----------------------------------------------------------|
-| TRANSPORT_TYPE                   | The transport type                                                                                  | None                                                     |
-| CONNECTION_STRING                | The NServiceBus connection string for the specified transport                                       | None                                                     |
-| RETURN_QUEUE                     | The intermediate queue used by the connector to which ServiceControl will send its retried messages | `Particular.ServiceControl.Connector.MassTransit_return` |
-| ERROR_QUEUE                      | The error queue ServiceControl ingests                                                              | `error`                                                  |
-| SERVICECONTROL_QUEUE             | The ServiceControl endpoint queue                                                                   | `Particular.ServiceControl`                                                  |
-| RABBITMQ_MANAGEMENT_API_URL      | RabbitMQ management API url when RabbitMQ is selected as transport                                  | None                                                     |
-| RABBITMQ_MANAGEMENT_API_USERNAME | RabbitMQ management API username                                                                    | `guest`                                                  |
-| RABBITMQ_MANAGEMENT_API_PASSWORD | RabbitMQ management API password                                                                    | `guest`                                                  |
+| Key                              | Description                                                                                          | Default                                                  |
+|----------------------------------|------------------------------------------------------------------------------------------------------|----------------------------------------------------------|
+| TRANSPORT_TYPE                   | The transport type.                                                                                  | None                                                     |
+| CONNECTION_STRING                | The NServiceBus connection string for the specified transport.                                        | None                                                     |
+| RETURN_QUEUE                     | The intermediate queue used by the connector to which ServiceControl will send its retried messages. | `Particular.ServiceControl.Connector.MassTransit_return` |
+| ERROR_QUEUE                      | The error queue ServiceControl ingests.                                                              | `error`                                                  |
+| SERVICECONTROL_QUEUE             | The ServiceControl endpoint queue.                                                                   | `Particular.ServiceControl`                              |
+| RABBITMQ_MANAGEMENT_API_URL      | RabbitMQ management API url when RabbitMQ is selected as transport.                                  | None                                                     |
+| RABBITMQ_MANAGEMENT_API_USERNAME | RabbitMQ management API username.                                                                    | `guest`                                                  |
+| RABBITMQ_MANAGEMENT_API_PASSWORD | RabbitMQ management API password.                                                                    | `guest`                                                  |
+| PARTICULARSOFTWARE_LICENSE       | The Particular Software license.                                                                     |                                                          |
 
 ### TRANSPORT_TYPE
 
@@ -156,6 +157,11 @@ The management api username.
 Default: `guest`
 
 The management api username.
+
+### PARTICULARSOFTWARE_LICENSE
+
+The Particular Software license, the environment variable should contain the full multi-line contents of the license file.  
+A license file can also be volume-mounted to the container `-v license.xml:/usr/share/ParticularSoftware/license.xml`.
 
 
 ## Support
