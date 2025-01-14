@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using NServiceBus.Routing;
 using NServiceBus.Transport;
@@ -16,15 +15,11 @@ public class MassTransitFailureAdapter(
     public const string ContentTypeKey = "Content-Type"; // As MIME spec
     public const string MessageIdKey = "Message-ID"; // As MIME spec
 
-    long forwardCount;
-    long returnCount;
     protected virtual string QueuePrefix => "queue:";
 
     public virtual TransportOperation ForwardMassTransitErrorToServiceControl(MessageContext messageContext)
     {
-        var md5 = Convert.ToHexString(MD5.HashData(messageContext.Body.Span));
-
-        logger.LogInformation("Forwarding failure: {NativeMessageId}, md5: {MD5}, length: {PayloadLength:N0}b (#{ForwardCount:N0})", messageContext.NativeMessageId, md5, messageContext.Body.Length, Interlocked.Increment(ref forwardCount));
+        logger.LogInformation("Forwarding failure with {NativeMessageId} native message id from {SourceAddress} to {ServiceControlErrorQueue}", messageContext.NativeMessageId, messageContext.ReceiveAddress, configuration.ErrorQueue);
 
         mtConverter.From(messageContext);
 
@@ -48,9 +43,6 @@ public class MassTransitFailureAdapter(
 
     public virtual TransportOperation ReturnMassTransitFailure(MessageContext messageContext)
     {
-        var md5 = Convert.ToHexString(MD5.HashData(messageContext.Body.Span));
-        logger.LogInformation("Forward back to original MT queue {NativeMessageId}, md5: {MD5}, length: {PayloadLength:N0}b (#{ReturnCount:N0})", messageContext.NativeMessageId, md5, messageContext.Body.Length, Interlocked.Increment(ref returnCount));
-
         var headers = messageContext.Headers;
 
         if (!headers.TryGetValue(Headers.MessageId, out var messageId))
@@ -60,7 +52,7 @@ public class MassTransitFailureAdapter(
 
         if (!headers.TryGetValue(TargetEndpointAddress, out var targetEndpointAddress))
         {
-            throw new InvalidOperationException($"Header {TargetEndpointAddress} is not set");
+            throw new InvalidOperationException($"Header '{TargetEndpointAddress}' is not set.");
         }
 
         string originalQueue;
@@ -77,7 +69,7 @@ public class MassTransitFailureAdapter(
             originalQueue = targetEndpointAddress;
         }
 
-        logger.LogInformation("{FaultInputAddress} => {Queue}", targetEndpointAddress, originalQueue);
+        logger.LogInformation("Forwarding failure with {NativeMessageId} native message id from {FaultInputAddress} back to original MassTransit queue {MassTransitQueue}.", messageContext.NativeMessageId, targetEndpointAddress, originalQueue);
 
         messageContext.Headers.TryGetValue(Headers.ContentType, out var contentType);
 
@@ -106,7 +98,7 @@ public class MassTransitFailureAdapter(
         var h = operation.Message.Headers;
         if (!h.TryGetValue(RetryConfirmationQueueHeaderKey, out var ackQueue))
         {
-            throw new InvalidOperationException($"Messages is expected to have '{RetryConfirmationQueueHeaderKey};  header");
+            throw new InvalidOperationException($"Messages is expected to have '{RetryConfirmationQueueHeaderKey}' header.");
         }
 
         ackQueue = QueuePrefix + ackQueue;
