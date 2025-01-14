@@ -28,13 +28,13 @@ The multi-architecture image supports `linux/arm64` and `linux/amd64`.
 
 ## Usage
 
-This is an extension to  ServiceControl. Usage information ServiceControl containers is available at: <https://hub.docker.com/r/particular/servicecontrol>
+This is an extension to ServiceControl. Usage information ServiceControl containers is available at: <https://hub.docker.com/r/particular/servicecontrol>
 
 The following is the most basic way to create ServiceControl containers using [Docker](https://www.docker.com/), assuming a RabbitMQ message broker also hosted in a Docker container using default `guest`/`guest` credentials:
 
-### Setup
+### Create infrastructure queue
 
-Run with setup entry point to create message queues, then exit the container.
+Run in setup to create message queues, then exit the container.
 
 ```shell
 docker run \
@@ -44,8 +44,26 @@ docker run \
 -e RABBITMQ_MANAGEMENT_API_USERNAME=guest \
 -e RABBITMQ_MANAGEMENT_API_PASSWORD=guest \
 --rm particular/servicecontrol-connector-masstransit:latest \
---setup
+--run-mode setup
 ```
+### Configure error queues
+
+To run the connector you need to have a queues list in a text file and map that file to the docker container `-v [local_path_to_queues_file]:/app/queues.txt:ro`.
+To aid populating the queue list, run the following:
+
+```shell
+docker run \
+-e TRANSPORT_TYPE=RabbitMQ \
+-e CONNECTION_STRING=host=host.docker.internal \
+-e RABBITMQ_MANAGEMENT_API_URL=http://host.docker.internal:15672 \
+-e RABBITMQ_MANAGEMENT_API_USERNAME=guest \
+-e RABBITMQ_MANAGEMENT_API_PASSWORD=guest \
+--rm particular/servicecontrol-connector-masstransit:latest \
+queues-list
+```
+
+This will output the list of all queues that end with `_error` (you can specify a different filter by using `--filter "a regex"`).
+Save the error queues that you want the connector to monitor in a text file, and then use that file in the next step.
 
 ### Run
 
@@ -59,7 +77,8 @@ docker run \
 -e RABBITMQ_MANAGEMENT_API_USERNAME=guest \
 -e RABBITMQ_MANAGEMENT_API_PASSWORD=guest \
 -v [local_path_to_queues_file]:/app/queues.txt:ro \
---rm particular/servicecontrol-connector-masstransit:latest
+particular/servicecontrol-connector-masstransit:latest \
+--run-mode run
 ```
 
 ## Configuration
