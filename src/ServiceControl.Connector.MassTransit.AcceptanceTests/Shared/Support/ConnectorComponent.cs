@@ -8,10 +8,10 @@ using NServiceBus.Transport;
 using ServiceControl.Connector.MassTransit;
 using ServiceControl.Connector.MassTransit.AcceptanceTesting;
 
-public class ConnectorComponent<TContext>(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor, string? customCheckQueue) : IComponentBehavior
+public class ConnectorComponent<TContext>(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor, string? serviceControlQueue) : IComponentBehavior
     where TContext : ScenarioContext
 {
-    public Task<ComponentRunner> CreateRunner(RunDescriptor run) => Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, queueNamesToMonitor, customCheckQueue, run.ScenarioContext, new ScenarioContextLoggerProvider(run.ScenarioContext)));
+    public Task<ComponentRunner> CreateRunner(RunDescriptor run) => Task.FromResult<ComponentRunner>(new Runner(name, errorQueue, returnQueue, queueNamesToMonitor, serviceControlQueue, run.ScenarioContext, new ScenarioContextLoggerProvider(run.ScenarioContext)));
 
     class StaticQueueNames(string[] queueNames) : IFileBasedQueueInformationProvider
     {
@@ -26,7 +26,7 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
         }
     }
 
-    class Runner(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor, string? customCheckQueue,
+    class Runner(string name, string errorQueue, string returnQueue, string[] queueNamesToMonitor, string? serviceControlQueue,
         ScenarioContext scenarioContext,
         ScenarioContextLoggerProvider loggerProvider) : ComponentRunner
     {
@@ -45,7 +45,7 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
                         ReturnQueue = returnQueue,
                         ErrorQueue = errorQueue,
                         QueueScanInterval = TimeSpan.FromSeconds(5),
-                        CustomChecksQueue = customCheckQueue ?? "Particular.ServiceControl"
+                        ServiceControlQueue = serviceControlQueue ?? "Particular.ServiceControl"
                     };
                     services.AddSingleton((TContext)scenarioContext);
                     services.AddSingleton(configuration);
@@ -56,8 +56,9 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
                     services.AddSingleton<IProvisionQueues, ProvisionQueues>();
                     services.AddSingleton(TimeProvider.System);
                     services.AddSingleton<IFileBasedQueueInformationProvider>(new StaticQueueNames(queueNamesToMonitor));
-                    if (customCheckQueue != null)
+                    if (serviceControlQueue != null)
                     {
+                        services.AddHostedService<Heartbeat>();
                         services.AddHostedService<CustomCheckReporter>(provider =>
                             new CustomCheckReporter(
                                 provider.GetRequiredService<TransportDefinition>(),

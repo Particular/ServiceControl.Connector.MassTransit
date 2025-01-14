@@ -36,7 +36,7 @@ public class ProvisionQueues(Configuration configuration, TransportInfrastructur
         logger.LogInformation("Creating queues if they don't already exist.");
 
         var infrastructure = await transportInfrastructureFactory.CreateTransportInfrastructure(hostSettings,
-            receiverSettings, [configuration.PoisonQueue, configuration.CustomChecksQueue], cancellationToken);
+            receiverSettings, [configuration.PoisonQueue, configuration.ServiceControlQueue], cancellationToken);
         await infrastructure.Shutdown(cancellationToken);
 
         return result;
