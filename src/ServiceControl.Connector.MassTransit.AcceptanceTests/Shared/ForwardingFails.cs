@@ -88,6 +88,14 @@ public class ForwardingFails
                 return Task.CompletedTask;
             }
         }
+
+        class MassTransitConnectorHeartbeatHandler : IHandleMessages<Heartbeat.MassTransitConnectorHeartbeat>
+        {
+            public Task Handle(Heartbeat.MassTransitConnectorHeartbeat message, IMessageHandlerContext context)
+            {
+                return Task.CompletedTask;
+            }
+        }
     }
 
     public class ErrorSpy : EndpointConfigurationBuilder

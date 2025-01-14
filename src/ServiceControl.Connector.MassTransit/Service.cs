@@ -176,7 +176,7 @@ public class Service(
         infrastructure = await transportInfrastructureFactory.CreateTransportInfrastructure(
             hostSettings,
             receiverSettings,
-            [configuration.PoisonQueue, configuration.CustomChecksQueue],
+            [configuration.PoisonQueue, configuration.ServiceControlQueue],
             cancellationToken
         );
 

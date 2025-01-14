@@ -11,7 +11,7 @@ static class HostApplicationBuilderExtensions
         var returnQueue = builder.Configuration.GetValue<string?>("RETURN_QUEUE") ??
                           "Particular.ServiceControl.Connector.MassTransit_return";
         var errorQueue = builder.Configuration.GetValue<string?>("ERROR_QUEUE") ?? "error";
-        var customChecksQueue = builder.Configuration.GetValue<string?>("CUSTOM_CHECK_QUEUE") ?? "Particular.ServiceControl";
+        var customChecksQueue = builder.Configuration.GetValue<string?>("SERVICECONTROL_QUEUE") ?? "Particular.ServiceControl";
         var services = builder.Services;
 
         services
@@ -19,7 +19,7 @@ static class HostApplicationBuilderExtensions
             {
                 ReturnQueue = returnQueue,
                 ErrorQueue = errorQueue,
-                CustomChecksQueue = customChecksQueue
+                ServiceControlQueue = customChecksQueue
             })
             .AddSingleton<MassTransitConverter>()
             .AddSingleton<MassTransitFailureAdapter>()
@@ -41,6 +41,7 @@ static class HostApplicationBuilderExtensions
 
             services
                 .AddHostedService<Service>()
+                .AddHostedService<Heartbeat>()
                 .AddHostedService<CustomCheckReporter>();
         }
 

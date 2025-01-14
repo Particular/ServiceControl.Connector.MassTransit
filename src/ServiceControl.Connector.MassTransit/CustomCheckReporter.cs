@@ -23,11 +23,11 @@ public class CustomCheckReporter : IHostedService
         this.queueLengthProvider = queueLengthProvider;
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken = default)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
-        var endpointConfig = new EndpointConfiguration("CustomCheckReporter");
+        var endpointConfig = new EndpointConfiguration(nameof(CustomCheckReporter));
         endpointConfig.SendOnly();
-        endpointConfig.ReportCustomChecksTo(config.CustomChecksQueue);
+        endpointConfig.ReportCustomChecksTo(config.ServiceControlQueue);
         endpointConfig.UseSerialization<SystemJsonSerializer>();
         endpointConfig.RegisterComponents(collection =>
         {
@@ -40,7 +40,7 @@ public class CustomCheckReporter : IHostedService
         endpoint = await Endpoint.Start(endpointConfig, cancellationToken);
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken = default)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
         if (endpoint != null)
         {
