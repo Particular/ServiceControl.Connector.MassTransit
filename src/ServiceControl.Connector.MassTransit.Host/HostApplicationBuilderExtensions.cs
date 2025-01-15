@@ -36,7 +36,18 @@ static class HostApplicationBuilderExtensions
 
             if (staticQueueList == null)
             {
-                throw new Exception("QUEUES_FILE not specified");
+                throw new Exception("QUEUES_FILE environment variable not set. Please set this to the path of a file containing a list of queues to bridge. You can use the `queues-list` cli command to populate this file.");
+            }
+
+            if (!File.Exists(staticQueueList))
+            {
+                throw new Exception($"Queues file ({staticQueueList}) specified does not exist.");
+            }
+
+            var content = File.ReadAllText(staticQueueList);
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                throw new Exception($"Queues file ({staticQueueList}) specified is empty. In order for the connector to bridge error queues, you need to specify some queues! You can use the `queues-list` cli command to populate this file.");
             }
 
             services
@@ -45,44 +56,44 @@ static class HostApplicationBuilderExtensions
                 .AddHostedService<CustomCheckReporter>();
         }
 
-        var transporttype = configuration.GetValue<string>("TRANSPORT_TYPE");
-        var connectionstring = configuration.GetValue<string>("CONNECTION_STRING");
+        var transportType = configuration.GetValue<string>("TRANSPORT_TYPE");
+        var connectionString = configuration.GetValue<string>("CONNECTION_STRING");
 
-        if (string.IsNullOrEmpty(connectionstring))
+        if (string.IsNullOrEmpty(connectionString))
         {
             try
             {
-                new DbConnectionStringBuilder { ConnectionString = connectionstring };
+                new DbConnectionStringBuilder { ConnectionString = connectionString };
             }
             catch (Exception)
             {
-                throw new Exception("CONNECTION_STRING contains invalid value");
+                throw new Exception("CONNECTION_STRING environment variable contains an invalid connection string. Please check the value and try again.");
             }
         }
 
-        switch (transporttype)
+        switch (transportType)
         {
             case "AmazonSQS":
                 services.UsingAmazonSqs();
                 break;
             case "AzureServiceBus":
                 services.UsingAzureServiceBus(configuration,
-                    connectionstring ?? throw new Exception("CONNECTION_STRING not specified"));
+                    connectionString ?? throw new Exception("CONNECTION_STRING environment variable not set."));
                 break;
             case "AzureServiceBusWithDeadLetter":
                 services.UsingAzureServiceBus(configuration,
-                    connectionstring ?? throw new Exception("CONNECTION_STRING not specified"), true);
+                    connectionString ?? throw new Exception("CONNECTION_STRING environment variable not set."), true);
                 break;
             case "RabbitMQ":
-                var managementApiValue = configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_URL") ?? throw new Exception("RABBITMQ_MANAGEMENT_API_URL not specified");
+                var managementApiValue = configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_URL") ?? throw new Exception("RABBITMQ_MANAGEMENT_API_URL environment variable not set.");
                 if (!Uri.TryCreate(managementApiValue, UriKind.Absolute, out var managementApi))
                 {
-                    throw new Exception("RABBITMQ_MANAGEMENT_API_URL is invalid. Ensure the value is a valid url without any quotes i.e. http://localhost:15672");
+                    throw new Exception("RABBITMQ_MANAGEMENT_API_URL is invalid. Ensure the value is a valid url without any quotes i.e. http://localhost:15672.");
                 }
-                services.UsingRabbitMQ(connectionstring ?? throw new Exception("CONNECTION_STRING not specified"), managementApi, configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_USERNAME"), configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_PASSWORD"));
+                services.UsingRabbitMQ(connectionString ?? throw new Exception("CONNECTION_STRING environment variable not set."), managementApi, configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_USERNAME"), configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_PASSWORD"));
                 break;
             default:
-                throw new NotSupportedException($"Transport type {transporttype} is not supported");
+                throw new NotSupportedException($"TRANSPORT_TYPE environment variable specified has an invalid value ({transportType}). Please use one of the following: AmazonSQS, AzureServiceBus, AzureServiceBusWithDeadLetter, RabbitMQ.");
         }
 
         services.AddSingleton<IFileBasedQueueInformationProvider>(new FileBasedQueueInformationProvider(staticQueueList));
