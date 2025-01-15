@@ -5,7 +5,7 @@ An extension to [ServiceControl](https://docs.particular.net/servicecontrol) tha
 ## How to use this image
 
 This extension currently supports both RabbitMQ and Azure Service Bus brokers.  
-In order to successfully run this extension, you need to first run the ServiceControl container, read more about the ServiceControl [image](https://hub.docker.com/r/particular/servicecontrol). 
+In order to successfully run this extension, you need to first run the ServiceControl container. Read more about the ServiceControl [image](https://hub.docker.com/r/particular/servicecontrol). 
 
 ### 1. Setup the connector
 
