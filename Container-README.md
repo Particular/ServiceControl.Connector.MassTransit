@@ -46,7 +46,7 @@ docker run -e TRANSPORT_TYPE=AzureServiceBusDeadLetter -e CONNECTION_STRING=Endp
 
 ### 2. Configure error queues to monitor
 
-The connector won't startup unless a list of error queues is specified.  
+The connector won't start unless a list of error queues to monitor have been specified.  
 From the previous step, you should have a list of error queues output to the console. If the console did not return any queues, it may be because MassTransit only creates the error queue for a consumer on demand, in this case you need to specify the list of queues manually.  
 
 **It is important to review the list of queues and ensure that the connector is only monitoring the error queues that you want.**  
