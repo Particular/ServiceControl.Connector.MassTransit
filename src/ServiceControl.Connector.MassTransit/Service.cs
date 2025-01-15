@@ -30,7 +30,10 @@ public class Service(
             {
                 while (await enumerator.MoveNextAsync())
                 {
-                    resultList.Add(enumerator.Current);
+                    if (!string.IsNullOrWhiteSpace(enumerator.Current))
+                    {
+                        resultList.Add(enumerator.Current);
+                    }
                 }
             }
             finally
