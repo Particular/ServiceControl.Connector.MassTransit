@@ -27,7 +27,7 @@ By default, we only list the queues that end with `_error` (the default naming c
 Assuming a RabbitMQ message broker is also hosted in a Docker container. Replace the <port>, <username> and <password> sections with their respective values.
 
 ```shell
-docker run -e TRANSPORT_TYPE=RabbitMQ -e CONNECTION_STRING=host=host.docker.internal -e RABBITMQ_MANAGEMENT_API_URL=http://host.docker.internal:15672 -e RABBITMQ_MANAGEMENT_API_USERNAME=guest -e RABBITMQ_MANAGEMENT_API_PASSWORD=guest --rm particular/servicecontrol-connector-masstransit:latest setup
+docker run -e TRANSPORT_TYPE=RabbitMQ -e CONNECTION_STRING=host=host.docker.internal -e RABBITMQ_MANAGEMENT_API_URL=http://host.docker.internal:<port> -e RABBITMQ_MANAGEMENT_API_USERNAME=<username> -e RABBITMQ_MANAGEMENT_API_PASSWORD=<password> --rm particular/servicecontrol-connector-masstransit:latest setup
 ```
 
 #### Example of an Azure Service Bus setup
