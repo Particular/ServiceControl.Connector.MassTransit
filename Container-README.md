@@ -14,7 +14,7 @@ Before the connector can be run, the connector needs:
 - some infrastructure queues created in the broker
 - a text file with a list of error queues to monitor
 
-To do this you need to run the `--run-mode setup` option:
+To do this you need to run the container with the `--run-mode setup` option:
 ```shell
 docker run -e TRANSPORT_TYPE=<RabbitMQ|AzureServiceBus|AzureServiceBusDeadLetter> -e CONNECTION_STRING=<connection string> --rm particular/servicecontrol-connector-masstransit:latest --run-mode setup
 ```
@@ -54,7 +54,7 @@ docker run -e TRANSPORT_TYPE=AzureServiceBusDeadLetter -e CONNECTION_STRING=Endp
 ### 2. Configure error queues to monitor
 
 The connector won't start unless a list of error queues to monitor have been specified.  
-From the previous step, we have piped a list of error queues output to the console to the `queues.txt` file. If the console did not return any queues, it may be because MassTransit only creates the error queue for a consumer on demand, in this case you need to specify the list of queues manually.  
+From the previous step, we have piped the list of error queues output to the console to the `queues.txt` file. If the console did not return any queues, it may be because MassTransit only creates the error queue for a consumer on demand, in this case you need to specify the list of queues manually.  
 
 **It is important to review the list of queues in this file and ensure that the connector is only monitoring the error queues that you want.**  
 
@@ -82,8 +82,6 @@ docker run -e TRANSPORT_TYPE=AzureServiceBus -e CONNECTION_STRING=Endpoint=sb://
 
 #### Example of running with Azure Service Bus with Dead Letter enabled
 
-Using the `--filter` option.
-
 ```shell
 docker run -e TRANSPORT_TYPE=AzureServiceBusDeadLetter -e CONNECTION_STRING=Endpoint=sb://[NAMESPACE].servicebus.windows.net/;SharedAccessKeyName=[KEYNAME];SharedAccessKey=[KEY] -v $(pwd)/queues.txt:/app/queues.txt:ro --rm particular/servicecontrol-connector-masstransit:latest --run-mode run
 ```
@@ -97,7 +95,7 @@ The text file containing queue names can be updated without bringing down the co
 docker run -e TRANSPORT_TYPE=<RabbitMQ|AzureServiceBus|AzureServiceBusDeadLetter> -e CONNECTION_STRING=<connection string> --rm particular/servicecontrol-connector-masstransit:latest queues-list
 ```
 
-This will output the list of all queues that end with `_error` (you can specify a different filter by using `--filter "a regular expression"`).
+This will output the list of all queues that end with `_error` (you can specify a different filter by using `--filter <regular expression>`).
 
 **It is important to review the list of queues and ensure that the connector is only monitoring the error queues that you want.**  
 
@@ -109,11 +107,11 @@ By default the connector can run in "trial" mode for up to 14 days, and after th
 Once you have received a license from Particular, there are two options to install it to be used by the connector container.
 
 - Using a volume map
-   
+
   ```shell
   -v [local_path_to_license_xml_file]:/usr/share/ParticularSoftware/license.xml
   ```
-- or using an environment variable
+- Or using an environment variable
 
   ```shell
   -e PARTICULARSOFTWARE_LICENSE=[the full multi-line contents of the license file]
