@@ -194,7 +194,7 @@ The management api username.
 ### PARTICULARSOFTWARE_LICENSE
 
 The Particular Software license. This environment variable should contain the full multi-line contents of the license file.  
-A license file can also be volume-mounted to the container `-v license.xml:/usr/share/ParticularSoftware/license.xml`.
+Alternatively, a license file can also be volume-mounted to the container `-v license.xml:/usr/share/ParticularSoftware/license.xml`.
 
 ## Support
 
