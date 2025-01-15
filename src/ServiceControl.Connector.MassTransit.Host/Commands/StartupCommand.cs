@@ -57,6 +57,8 @@ public class StartupCommand : RootCommand
         var loggerFactory = host.Services.GetRequiredService<ILoggerFactory>();
         NServiceBus.Logging.LogManager.UseFactory(new ExtensionsLoggerFactory(loggerFactory));
 
+        RecordStartup(host.Services.GetRequiredService<Configuration>(), loggerFactory);
+
         var provisionQueues = host.Services.GetRequiredService<IProvisionQueues>();
         var provisionQueuesResult = true;
 
@@ -76,5 +78,20 @@ public class StartupCommand : RootCommand
         }
 
         return 0;
+    }
+
+    static void RecordStartup(Configuration settings, ILoggerFactory loggerFactory)
+    {
+        var logger = loggerFactory.CreateLogger("Diagnostics");
+        logger.LogInformation("-------------------------------------------------------------------------------------------");
+        logger.LogInformation($"Connector Version:                  {ConnectorVersion.Version}");
+        logger.LogInformation($"Error Queue:                        {settings.ErrorQueue}");
+        logger.LogInformation($"Service Control Queue:              {settings.ServiceControlQueue}");
+        logger.LogInformation($"Poison Queue:                       {settings.PoisonQueue}");
+        logger.LogInformation($"Return Queue:                       {settings.ReturnQueue}");
+        logger.LogInformation($"Queue Scan Interval:                {settings.QueueScanInterval}");
+        logger.LogInformation($"Custom Checks Interval:             {settings.CustomChecksInterval}");
+        logger.LogInformation($"Heartbeat Interval:                 {settings.HeartbeatInterval}");
+        logger.LogInformation("-------------------------------------------------------------------------------------------");
     }
 }
