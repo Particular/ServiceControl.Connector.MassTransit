@@ -132,7 +132,7 @@ Once you have received a license from Particular, there are two options to insta
 
 ### TRANSPORT_TYPE
 
-Currently support as the most used MassTransit transports: Amazon SQS, Azure Service Bus and RabbitMQ.
+Currently supported are the most used MassTransit transports: RabbitMQ and Azure Service Bus.
 
 | Description       | Key                                  | Notes |
 |-------------------|--------------------------------------| --- |
