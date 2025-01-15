@@ -86,7 +86,7 @@ docker run -e TRANSPORT_TYPE=AzureServiceBusDeadLetter -e CONNECTION_STRING=Endp
 ## Refreshing the errors queue text file
 
 The `queues-list` command can be run when you need to update the list of error queues.  
-The text file can be updated anytime, without bringing down the container.  
+The text file containing queue names can be updated without bringing down the container.  
 
 ```shell
 docker run -e TRANSPORT_TYPE=<RabbitMQ|AzureServiceBus|AzureServiceBusDeadLetter> -e CONNECTION_STRING=<connection string> --rm particular/servicecontrol-connector-masstransit:latest queues-list
