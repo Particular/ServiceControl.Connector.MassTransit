@@ -14,26 +14,32 @@ Before the connector can be run, the connector needs:
 - some infrastructure queues created in the broker
 - a text file with a list of error queues to monitor
 
-To do this you need to run the `setup` command:
+To do this you need to run the `--run-mode setup` option:
 ```shell
-docker run -e TRANSPORT_TYPE=<RabbitMQ|AzureServiceBus|AzureServiceBusDeadLetter> -e CONNECTION_STRING=<connection string> --rm particular/servicecontrol-connector-masstransit:latest setup
+docker run -e TRANSPORT_TYPE=<RabbitMQ|AzureServiceBus|AzureServiceBusDeadLetter> -e CONNECTION_STRING=<connection string> --rm particular/servicecontrol-connector-masstransit:latest --run-mode setup
+```
+Followed by the `queues-list` command:
+```shell
+docker run -e TRANSPORT_TYPE=<RabbitMQ|AzureServiceBus|AzureServiceBusDeadLetter> -e CONNECTION_STRING=<connection string> --rm particular/servicecontrol-connector-masstransit:latest queues-list
 ```
 
-The `setup` command will output onto the console a list of applicable queues that have been found in the broker.
+The `queues-list` command will output onto the console a list of applicable queues that have been found in the broker.  
 By default, we only list the queues that end with `_error` (the default naming convention for MassTransit error queues), if you need to specify a different filter add `--filter <regular expression>`.
 
 #### Example of a RabbitMQ setup
 
-Assuming a RabbitMQ message broker is also hosted in a Docker container. Replace the <port>, <username> and <password> sections with their respective values.
+Assuming a RabbitMQ message broker is also hosted in a Docker container. Replace the &lt;port&gt;, &lt;username&gt; and &lt;password&gt; sections with their respective values.
 
 ```shell
-docker run -e TRANSPORT_TYPE=RabbitMQ -e CONNECTION_STRING=host=host.docker.internal -e RABBITMQ_MANAGEMENT_API_URL=http://host.docker.internal:<port> -e RABBITMQ_MANAGEMENT_API_USERNAME=<username> -e RABBITMQ_MANAGEMENT_API_PASSWORD=<password> --rm particular/servicecontrol-connector-masstransit:latest setup
+docker run -e TRANSPORT_TYPE=RabbitMQ -e CONNECTION_STRING=host=host.docker.internal -e RABBITMQ_MANAGEMENT_API_URL=http://host.docker.internal:<port> -e RABBITMQ_MANAGEMENT_API_USERNAME=<username> -e RABBITMQ_MANAGEMENT_API_PASSWORD=<password> --rm particular/servicecontrol-connector-masstransit:latest --run-mode setup
+docker run -e TRANSPORT_TYPE=RabbitMQ -e CONNECTION_STRING=host=host.docker.internal -e RABBITMQ_MANAGEMENT_API_URL=http://host.docker.internal:<port> -e RABBITMQ_MANAGEMENT_API_USERNAME=<username> -e RABBITMQ_MANAGEMENT_API_PASSWORD=<password> --rm particular/servicecontrol-connector-masstransit:latest queues-list > queues.txt
 ```
 
 #### Example of an Azure Service Bus setup
 
 ```shell
-docker run -e TRANSPORT_TYPE=AzureServiceBus -e CONNECTION_STRING=Endpoint=sb://[NAMESPACE].servicebus.windows.net/;SharedAccessKeyName=[KEYNAME];SharedAccessKey=[KEY] --rm particular/servicecontrol-connector-masstransit:latest setup
+docker run -e TRANSPORT_TYPE=AzureServiceBus -e CONNECTION_STRING=Endpoint=sb://[NAMESPACE].servicebus.windows.net/;SharedAccessKeyName=[KEYNAME];SharedAccessKey=[KEY] --rm particular/servicecontrol-connector-masstransit:latest --run-mode setup
+docker run -e TRANSPORT_TYPE=AzureServiceBus -e CONNECTION_STRING=Endpoint=sb://[NAMESPACE].servicebus.windows.net/;SharedAccessKeyName=[KEYNAME];SharedAccessKey=[KEY] --rm particular/servicecontrol-connector-masstransit:latest queues-list > queues.txt
 ```
 
 #### Example of an Azure Service Bus with Dead Letter enabled setup
@@ -41,38 +47,37 @@ docker run -e TRANSPORT_TYPE=AzureServiceBus -e CONNECTION_STRING=Endpoint=sb://
 Using the `--filter` option.
 
 ```shell
-docker run -e TRANSPORT_TYPE=AzureServiceBusDeadLetter -e CONNECTION_STRING=Endpoint=sb://[NAMESPACE].servicebus.windows.net/;SharedAccessKeyName=[KEYNAME];SharedAccessKey=[KEY] --rm particular/servicecontrol-connector-masstransit:latest setup --filter "^production_.*"
+docker run -e TRANSPORT_TYPE=AzureServiceBusDeadLetter -e CONNECTION_STRING=Endpoint=sb://[NAMESPACE].servicebus.windows.net/;SharedAccessKeyName=[KEYNAME];SharedAccessKey=[KEY] --rm particular/servicecontrol-connector-masstransit:latest --run-mode setup
+docker run -e TRANSPORT_TYPE=AzureServiceBusDeadLetter -e CONNECTION_STRING=Endpoint=sb://[NAMESPACE].servicebus.windows.net/;SharedAccessKeyName=[KEYNAME];SharedAccessKey=[KEY] --rm particular/servicecontrol-connector-masstransit:latest queues-list --filter "^production_.*" > queues.txt
 ```
 
 ### 2. Configure error queues to monitor
 
 The connector won't start unless a list of error queues to monitor have been specified.  
-From the previous step, you should have a list of error queues output to the console. If the console did not return any queues, it may be because MassTransit only creates the error queue for a consumer on demand, in this case you need to specify the list of queues manually.  
+From the previous step, we have piped a list of error queues output to the console to the `queues.txt` file. If the console did not return any queues, it may be because MassTransit only creates the error queue for a consumer on demand, in this case you need to specify the list of queues manually.  
 
-**It is important to review the list of queues and ensure that the connector is only monitoring the error queues that you want.**  
-
-Save the list to a text file in your host OS, e.g. `queues.txt`.
+**It is important to review the list of queues in this file and ensure that the connector is only monitoring the error queues that you want.**  
 
 ### 3. Run the connector
 
 The last step is to map the queues text file to the docker container `-v [local_path_to_queues_file]:/app/queues.txt:ro`, then run the connector to bridge MassTransit errors queues with the Particular Platform.
 
 ```shell
-docker run -e TRANSPORT_TYPE=<RabbitMQ|AzureServiceBus|AzureServiceBusDeadLetter> -e CONNECTION_STRING=<connection string> -v [local_path_to_queues_file]:/app/queues.txt:ro particular/servicecontrol-connector-masstransit:latest run
+docker run -e TRANSPORT_TYPE=<RabbitMQ|AzureServiceBus|AzureServiceBusDeadLetter> -e CONNECTION_STRING=<connection string> -v [local_path_to_queues_file]:/app/queues.txt:ro particular/servicecontrol-connector-masstransit:latest --run-mode run
 ```
 
 #### Example of running with RabbitMQ
 
-Assuming a RabbitMQ message broker is also hosted in a Docker container. Replace the <port>, <username> and <password> sections with their respective values.
+Assuming a RabbitMQ message broker is also hosted in a Docker container. Replace the &lt;port&gt;, &lt;username&gt; and &lt;password&gt; sections with their respective values.
 
 ```shell
-docker run -e TRANSPORT_TYPE=RabbitMQ -e CONNECTION_STRING=host=host.docker.internal -e RABBITMQ_MANAGEMENT_API_URL=http://host.docker.internal:<port> -e RABBITMQ_MANAGEMENT_API_USERNAME=<username> -e RABBITMQ_MANAGEMENT_API_PASSWORD=<password> -v $(pwd)/queues.txt:/app/queues.txt:ro particular/servicecontrol-connector-masstransit:latest run
+docker run -e TRANSPORT_TYPE=RabbitMQ -e CONNECTION_STRING=host=host.docker.internal -e RABBITMQ_MANAGEMENT_API_URL=http://host.docker.internal:<port> -e RABBITMQ_MANAGEMENT_API_USERNAME=<username> -e RABBITMQ_MANAGEMENT_API_PASSWORD=<password> -v $(pwd)/queues.txt:/app/queues.txt:ro particular/servicecontrol-connector-masstransit:latest --run-mode run
 ```
 
 #### Example of running with Azure Service Bus
 
 ```shell
-docker run -e TRANSPORT_TYPE=AzureServiceBus -e CONNECTION_STRING=Endpoint=sb://[NAMESPACE].servicebus.windows.net/;SharedAccessKeyName=[KEYNAME];SharedAccessKey=[KEY] -v $(pwd)/queues.txt:/app/queues.txt:ro --rm particular/servicecontrol-connector-masstransit:latest run
+docker run -e TRANSPORT_TYPE=AzureServiceBus -e CONNECTION_STRING=Endpoint=sb://[NAMESPACE].servicebus.windows.net/;SharedAccessKeyName=[KEYNAME];SharedAccessKey=[KEY] -v $(pwd)/queues.txt:/app/queues.txt:ro --rm particular/servicecontrol-connector-masstransit:latest --run-mode run
 ```
 
 #### Example of running with Azure Service Bus with Dead Letter enabled
@@ -80,7 +85,7 @@ docker run -e TRANSPORT_TYPE=AzureServiceBus -e CONNECTION_STRING=Endpoint=sb://
 Using the `--filter` option.
 
 ```shell
-docker run -e TRANSPORT_TYPE=AzureServiceBusDeadLetter -e CONNECTION_STRING=Endpoint=sb://[NAMESPACE].servicebus.windows.net/;SharedAccessKeyName=[KEYNAME];SharedAccessKey=[KEY] -v $(pwd)/queues.txt:/app/queues.txt:ro --rm particular/servicecontrol-connector-masstransit:latest run
+docker run -e TRANSPORT_TYPE=AzureServiceBusDeadLetter -e CONNECTION_STRING=Endpoint=sb://[NAMESPACE].servicebus.windows.net/;SharedAccessKeyName=[KEYNAME];SharedAccessKey=[KEY] -v $(pwd)/queues.txt:/app/queues.txt:ro --rm particular/servicecontrol-connector-masstransit:latest --run-mode run
 ```
 
 ## Refreshing the errors queue text file
