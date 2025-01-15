@@ -55,8 +55,7 @@ Save the list to a text file in your host OS, e.g. `queues.txt`.
 
 ### 3. Run the connector
 
-The last step is to map the queues text file to the docker container `-v [local_path_to_queues_file]:/app/queues.txt:ro`.
-And then run the connector to bridge MassTransit errors queues with the Particular Platform.
+The last step is to map the queues text file to the docker container `-v [local_path_to_queues_file]:/app/queues.txt:ro`, then run the connector to bridge MassTransit errors queues with the Particular Platform.
 
 ```shell
 docker run -e TRANSPORT_TYPE=<RabbitMQ|AzureServiceBus|AzureServiceBusDeadLetter> -e CONNECTION_STRING=<connection string> -v [local_path_to_queues_file]:/app/queues.txt:ro particular/servicecontrol-connector-masstransit:latest run
