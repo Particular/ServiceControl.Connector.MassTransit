@@ -19,7 +19,7 @@ To do this you need to run the `setup` command:
 docker run -e TRANSPORT_TYPE=<RabbitMQ|AzureServiceBus|AzureServiceBusDeadLetter> -e CONNECTION_STRING=<connection string> --rm particular/servicecontrol-connector-masstransit:latest setup
 ```
 
-The `setup` command will console out a list of queues that found in the broker.
+The `setup` command will output onto the console a list of applicable queues that have been found in the broker.
 By default, we only list the queues that end with `_error` (the default naming convention for MassTransit error queues), if you need to specify a different filter add `--filter <regular expression>`.
 
 #### Example of a RabbitMQ setup
