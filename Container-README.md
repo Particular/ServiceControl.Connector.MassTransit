@@ -24,7 +24,7 @@ By default, we only list the queues that end with `_error` (the default naming c
 
 #### Example of a RabbitMQ setup
 
-Assuming a RabbitMQ message broker also hosted in a Docker container using default `guest`/`guest` credentials
+Assuming a RabbitMQ message broker is also hosted in a Docker container. Replace the <port>, <username> and <password> sections with their respective values.
 
 ```shell
 docker run -e TRANSPORT_TYPE=RabbitMQ -e CONNECTION_STRING=host=host.docker.internal -e RABBITMQ_MANAGEMENT_API_URL=http://host.docker.internal:15672 -e RABBITMQ_MANAGEMENT_API_USERNAME=guest -e RABBITMQ_MANAGEMENT_API_PASSWORD=guest --rm particular/servicecontrol-connector-masstransit:latest setup
