@@ -63,7 +63,7 @@ docker run -e TRANSPORT_TYPE=<RabbitMQ|AzureServiceBus|AzureServiceBusDeadLetter
 
 #### Example of running with RabbitMQ
 
-Assuming a RabbitMQ message broker also hosted in a Docker container using default `guest`/`guest` credentials
+Assuming a RabbitMQ message broker is also hosted in a Docker container. Replace the <port>, <username> and <password> sections with their respective values.
 
 ```shell
 docker run -e TRANSPORT_TYPE=RabbitMQ -e CONNECTION_STRING=host=host.docker.internal -e RABBITMQ_MANAGEMENT_API_URL=http://host.docker.internal:15672 -e RABBITMQ_MANAGEMENT_API_USERNAME=guest -e RABBITMQ_MANAGEMENT_API_PASSWORD=guest -v $(pwd)/queues.txt:/app/queues.txt:ro particular/servicecontrol-connector-masstransit:latest run
