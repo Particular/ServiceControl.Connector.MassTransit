@@ -97,7 +97,7 @@ docker run -e TRANSPORT_TYPE=<RabbitMQ|AzureServiceBus|AzureServiceBusDeadLetter
 
 This will output the list of all queues that end with `_error` (you can specify a different filter by using `--filter <regular expression>`).
 
-**It is important to review the list of queues and ensure that the connector is only monitoring the error queues that you want.**  
+**It is important to review the list of queues and ensure that the connector is only monitoring the error queues that you want monitored.**  
 
 Copy that list to the queues text file that your running container is using.
 
