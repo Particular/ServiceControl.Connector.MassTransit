@@ -5,46 +5,11 @@ using NServiceBus.Transport;
 public class Heartbeat(
     ILogger<Heartbeat> logger,
     TransportDefinition transportDefinition,
-    IFileBasedQueueInformationProvider fileBasedQueueInformationProvider,
     TimeProvider timeProvider,
-    Configuration configuration
+    Configuration configuration,
+    DiagnosticsData diagnosticsData
     ) : BackgroundService
 {
-    List<string> massTransitErrorQueues = [];
-
-    async Task<List<string>> GetReceiveQueues(CancellationToken cancellationToken)
-    {
-        try
-        {
-            var queues = fileBasedQueueInformationProvider.GetQueues(cancellationToken);
-            var resultList = new List<string>();
-            var enumerator = queues.GetAsyncEnumerator(cancellationToken);
-            try
-            {
-                while (await enumerator.MoveNextAsync())
-                {
-                    resultList.Add(enumerator.Current);
-                }
-            }
-            finally
-            {
-                await enumerator.DisposeAsync();
-            }
-
-            return resultList;
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            logger.LogDebug("Cancelled queue query request");
-        }
-        catch (Exception e)
-        {
-            logger.LogWarning(e, "Failed to read the queue names from the file. Returning the previous list of queues.");
-        }
-
-        return massTransitErrorQueues;
-    }
-
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation($"Starting {nameof(Heartbeat)}.");
@@ -66,13 +31,17 @@ public class Heartbeat(
             {
                 try
                 {
-                    massTransitErrorQueues = await GetReceiveQueues(cancellationToken);
-
                     await endpointInstance.Send(
                         new MassTransitConnectorHeartbeat
                         {
+                            SentDateTimeOffset = DateTimeOffset.UtcNow,
                             Version = ConnectorVersion.Version,
-                            ErrorQueues = [.. massTransitErrorQueues]
+                            Logs = [.. diagnosticsData.RecentLogEntries],
+                            ErrorQueues = diagnosticsData.MassTransitErrorQueues.Select(name => new ErrorQueue
+                            {
+                                Name = name,
+                                Ingesting = !diagnosticsData.MassTransitNotFoundQueues.Contains(name)
+                            }).ToArray()
                         }, cancellationToken);
                     logger.LogInformation("Heartbeat sent");
                 }
@@ -95,6 +64,16 @@ public class Heartbeat(
     public class MassTransitConnectorHeartbeat : IMessage
     {
         public required string Version { get; init; }
-        public required string[] ErrorQueues { get; init; }
+        public required ErrorQueue[] ErrorQueues { get; init; }
+        public required string[] Logs { get; init; }
+        public required DateTimeOffset SentDateTimeOffset { get; init; }
+    }
+
+#pragma warning disable CA1711
+    public class ErrorQueue
+#pragma warning restore CA1711
+    {
+        public required string Name { get; init; }
+        public required bool Ingesting { get; init; }
     }
 }

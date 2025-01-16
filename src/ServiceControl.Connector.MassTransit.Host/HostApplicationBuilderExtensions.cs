@@ -2,6 +2,7 @@ using System.Data.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using ServiceControl.Connector.MassTransit;
 
 static class HostApplicationBuilderExtensions
@@ -54,6 +55,10 @@ static class HostApplicationBuilderExtensions
                 .AddHostedService<Service>()
                 .AddHostedService<Heartbeat>()
                 .AddHostedService<CustomCheckReporter>();
+
+            var diagnosticsData = new DiagnosticsData();
+            services.AddSingleton(diagnosticsData);
+            builder.Logging.AddProvider(new LastLogEntriesProvider(diagnosticsData));
         }
 
         var transportType = configuration.GetValue<string>("TRANSPORT_TYPE");
