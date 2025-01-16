@@ -1,6 +1,6 @@
 # Particular Software ServiceControl MassTransit connector
 
-An extension to [ServiceControl](https://docs.particular.net/servicecontrol) that adds support for processing [MassTransit](https://masstransit.io/) failures with the [Particular Platform](https://particular.net/service-platform). This extension makes all the recoverability feature for managing message processing failures; like (group) retrying, message editing and failed message inspection; available to the MassTransit community.  
+An extension to [ServiceControl](https://docs.particular.net/servicecontrol) that adds support for processing [MassTransit](https://masstransit.io/) failures with the [Particular Platform](https://particular.net/service-platform). This extension makes all the recoverability features for managing message processing failures; like (group) retrying, message editing and failed message inspection; available to the MassTransit community.  
 
 ## How to use this image
 
