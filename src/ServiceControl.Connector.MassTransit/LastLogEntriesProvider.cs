@@ -36,14 +36,14 @@ public class LastLogEntriesProvider(DiagnosticsData diagnosticsData) : ILoggerPr
                 return;
             }
 
-            message = $"[{name}]{logLevel}: {message}";
+            message = $"[{name}]: {message}";
 
             if (exception != null)
             {
-                message += Environment.NewLine + Environment.NewLine + exception;
+                message += string.Format("{0}{0}{1}", Environment.NewLine, exception);
             }
 
-            diagnosticsData.AddLog(message);
+            diagnosticsData.AddLog(DateTimeOffset.UtcNow, logLevel.ToString(), message);
         }
     }
 

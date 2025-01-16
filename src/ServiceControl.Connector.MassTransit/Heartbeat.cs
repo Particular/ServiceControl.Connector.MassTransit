@@ -65,7 +65,7 @@ public class Heartbeat(
     {
         public required string Version { get; init; }
         public required ErrorQueue[] ErrorQueues { get; init; }
-        public required string[] Logs { get; init; }
+        public required DiagnosticsData.LogEntry[] Logs { get; init; }
         public required DateTimeOffset SentDateTimeOffset { get; init; }
     }
 

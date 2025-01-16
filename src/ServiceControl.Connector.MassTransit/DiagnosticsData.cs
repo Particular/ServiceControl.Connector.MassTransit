@@ -11,7 +11,7 @@ public class DiagnosticsData
     readonly HashSet<string> errorQueues = [];
     readonly List<string> notFoundQueues = [];
 
-    public ConcurrentQueue<string> RecentLogEntries { get; } = new();
+    public ConcurrentQueue<LogEntry> RecentLogEntries { get; } = new();
 
     public string[] MassTransitErrorQueues
     {
@@ -60,9 +60,9 @@ public class DiagnosticsData
         }
     }
 
-    public void AddLog(string entry)
+    public void AddLog(DateTimeOffset date, string level, string message)
     {
-        RecentLogEntries.Enqueue(entry);
+        RecentLogEntries.Enqueue(new LogEntry(date, level, message));
 
         lock (CleanupLock)
         {
@@ -71,5 +71,12 @@ public class DiagnosticsData
                 RecentLogEntries.TryDequeue(out _);
             }
         }
+    }
+
+    public class LogEntry(DateTimeOffset dateTime, string level, string message)
+    {
+        public string Message { get; init; } = message;
+        public DateTimeOffset Date { get; init; } = dateTime;
+        public string Level { get; init; } = level;
     }
 }
