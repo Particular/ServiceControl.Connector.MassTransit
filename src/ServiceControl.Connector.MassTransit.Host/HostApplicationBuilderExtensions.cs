@@ -88,12 +88,12 @@ static class HostApplicationBuilderExtensions
                 var managementApiValue = configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_URL") ?? throw new Exception("RABBITMQ_MANAGEMENT_API_URL environment variable not set.");
                 if (!Uri.TryCreate(managementApiValue, UriKind.Absolute, out var managementApi))
                 {
-                    throw new Exception("RABBITMQ_MANAGEMENT_API_URL is invalid. Ensure the value is a valid url without any quotes i.e. http://localhost:15672.");
+                    throw new Exception("RABBITMQ_MANAGEMENT_API_URL is invalid. Ensure the value is a valid url without any quotes e.g. http://localhost:15672.");
                 }
                 services.UsingRabbitMQ(connectionString ?? throw new Exception("CONNECTION_STRING environment variable not set."), managementApi, configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_USERNAME"), configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_PASSWORD"));
                 break;
             default:
-                throw new NotSupportedException($"TRANSPORT_TYPE environment variable specified has an invalid value ({transportType}). Please use one of the following: AmazonSQS, AzureServiceBus, AzureServiceBusWithDeadLetter, RabbitMQ.");
+                throw new NotSupportedException($"TRANSPORT_TYPE environment variable specified has an invalid value ({transportType}). Please use one of the following: AzureServiceBus, AzureServiceBusWithDeadLetter, RabbitMQ.");
         }
 
         services.AddSingleton<IFileBasedQueueInformationProvider>(new FileBasedQueueInformationProvider(staticQueueList));
