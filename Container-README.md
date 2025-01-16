@@ -103,7 +103,7 @@ Copy that list to the queues text file that your running container is using.
 
 ## Installing the license
 
-By default the connector can run in "trial" mode for up to 14 days, and after that you need to contact Particular to get a free license.
+By default the connector will run in a "trial" mode for up to 14 days, and after that you need to contact Particular to get a free license.
 Once you have received a license from Particular, there are two options to install it to be used by the connector container.
 
 - Using a volume map
