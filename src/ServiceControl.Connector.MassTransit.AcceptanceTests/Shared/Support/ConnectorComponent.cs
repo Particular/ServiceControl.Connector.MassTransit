@@ -52,6 +52,7 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
                     services.AddSingleton<MassTransitConverter>();
                     services.AddSingleton<MassTransitFailureAdapter>();
                     services.AddSingleton<ReceiverFactory>();
+                    services.AddSingleton<DiagnosticsData>();
                     services.AddHostedService<Service>();
                     services.AddSingleton<IProvisionQueues, ProvisionQueues>();
                     services.AddSingleton(TimeProvider.System);

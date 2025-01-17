@@ -12,12 +12,11 @@ public class Service(
     ReceiverFactory receiverFactory,
     IHostApplicationLifetime hostApplicationLifetime,
     IFileBasedQueueInformationProvider fileBasedQueueInformationProvider,
+    DiagnosticsData diagnosticsData,
     TimeProvider timeProvider
 ) : BackgroundService
 {
     TransportInfrastructure? infrastructure;
-    HashSet<string> massTransitErrorQueues = [];
-    List<string> notFoundQueues = [];
 
     async Task<HashSet<string>> GetReceiveQueues(CancellationToken cancellationToken)
     {
@@ -52,7 +51,7 @@ public class Service(
             logger.LogWarning(e, "Failed to read the queue names from the file. Returning the previous list of queues.");
         }
 
-        return massTransitErrorQueues;
+        return [.. diagnosticsData.MassTransitErrorQueues];
     }
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -67,21 +66,21 @@ public class Service(
                 try
                 {
                     var newData = await GetReceiveQueues(cancellationToken);
-                    var errorQueuesAreTheSame = newData.SetEquals(massTransitErrorQueues);
+                    var errorQueuesAreTheSame = newData.SetEquals(diagnosticsData.MassTransitErrorQueues);
 
                     if (errorQueuesAreTheSame)
                     {
                         logger.LogInformation("No changes detected for MassTransit queues.");
 
-                        if (notFoundQueues.Count == 0)
+                        if (diagnosticsData.MassTransitNotFoundQueues.Length == 0)
                         {
                             continue;
                         }
 
-                        logger.LogInformation("The following queues were not found: {Queues}. We are going to try to connect to them again.", string.Join(", ", notFoundQueues));
+                        logger.LogWarning("The following queues were not found: {Queues}. We are going to try to connect to them again.", string.Join(", ", diagnosticsData.MassTransitNotFoundQueues));
 
                         var foundOne = false;
-                        foreach (var notFoundQueue in notFoundQueues)
+                        foreach (var notFoundQueue in diagnosticsData.MassTransitNotFoundQueues)
                         {
                             if (await queueInformationProvider.QueueExists(notFoundQueue, cancellationToken))
                             {
@@ -97,8 +96,8 @@ public class Service(
                         }
                     }
 
-                    massTransitErrorQueues = newData;
-                    notFoundQueues = [];
+                    diagnosticsData.AddErrorQueues(newData);
+                    diagnosticsData.ClearNotFound();
 
                     if (infrastructure is not null)
                     {
@@ -155,7 +154,7 @@ public class Service(
             )
         };
 
-        foreach (var massTransitErrorQueue in massTransitErrorQueues)
+        foreach (var massTransitErrorQueue in diagnosticsData.MassTransitErrorQueues)
         {
             if (await queueInformationProvider.QueueExists(massTransitErrorQueue, cancellationToken))
             {
@@ -164,7 +163,7 @@ public class Service(
             }
             else
             {
-                notFoundQueues.Add(massTransitErrorQueue);
+                diagnosticsData.AddNotFound(massTransitErrorQueue);
                 logger.LogWarning("Queue {InputQueue} does not exist. Remove it from the specified list if no longer required otherwise we are going to try to connect to it again.", massTransitErrorQueue);
             }
         }

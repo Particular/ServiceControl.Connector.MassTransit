@@ -1,3 +1,5 @@
+using System.Text;
+using System.Text.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.Transport;
@@ -5,46 +7,11 @@ using NServiceBus.Transport;
 public class Heartbeat(
     ILogger<Heartbeat> logger,
     TransportDefinition transportDefinition,
-    IFileBasedQueueInformationProvider fileBasedQueueInformationProvider,
     TimeProvider timeProvider,
-    Configuration configuration
+    Configuration configuration,
+    DiagnosticsData diagnosticsData
     ) : BackgroundService
 {
-    List<string> massTransitErrorQueues = [];
-
-    async Task<List<string>> GetReceiveQueues(CancellationToken cancellationToken)
-    {
-        try
-        {
-            var queues = fileBasedQueueInformationProvider.GetQueues(cancellationToken);
-            var resultList = new List<string>();
-            var enumerator = queues.GetAsyncEnumerator(cancellationToken);
-            try
-            {
-                while (await enumerator.MoveNextAsync())
-                {
-                    resultList.Add(enumerator.Current);
-                }
-            }
-            finally
-            {
-                await enumerator.DisposeAsync();
-            }
-
-            return resultList;
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            logger.LogDebug("Cancelled queue query request");
-        }
-        catch (Exception e)
-        {
-            logger.LogWarning(e, "Failed to read the queue names from the file. Returning the previous list of queues.");
-        }
-
-        return massTransitErrorQueues;
-    }
-
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation($"Starting {nameof(Heartbeat)}.");
@@ -66,14 +33,20 @@ public class Heartbeat(
             {
                 try
                 {
-                    massTransitErrorQueues = await GetReceiveQueues(cancellationToken);
+                    var massTransitConnectorHeartbeat = new MassTransitConnectorHeartbeat
+                    {
+                        SentDateTimeOffset = DateTimeOffset.UtcNow,
+                        Version = ConnectorVersion.Version,
+                        Logs = [.. diagnosticsData.RecentLogEntries],
+                        ErrorQueues = diagnosticsData.MassTransitErrorQueues.Select(name => new ErrorQueue
+                        {
+                            Name = name,
+                            Ingesting = !diagnosticsData.MassTransitNotFoundQueues.Contains(name)
+                        }).ToArray()
+                    };
 
                     await endpointInstance.Send(
-                        new MassTransitConnectorHeartbeat
-                        {
-                            Version = ConnectorVersion.Version,
-                            ErrorQueues = [.. massTransitErrorQueues]
-                        }, cancellationToken);
+                        new HeartbeatMessageSizeReducer(massTransitConnectorHeartbeat).Reduce(), cancellationToken);
                     logger.LogInformation("Heartbeat sent");
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
@@ -95,6 +68,74 @@ public class Heartbeat(
     public class MassTransitConnectorHeartbeat : IMessage
     {
         public required string Version { get; init; }
-        public required string[] ErrorQueues { get; init; }
+        public required ErrorQueue[] ErrorQueues { get; init; }
+        public required DiagnosticsData.LogEntry[] Logs { get; init; }
+        public required DateTimeOffset SentDateTimeOffset { get; init; }
+    }
+
+#pragma warning disable CA1711
+    public class ErrorQueue
+#pragma warning restore CA1711
+    {
+        public required string Name { get; init; }
+        public required bool Ingesting { get; init; }
+    }
+
+    public class HeartbeatMessageSizeReducer(MassTransitConnectorHeartbeat originalHeartbeat)
+    {
+        // Ensuring message is less than 256 KBytes. This is the default in AmazonSQS, and it seems Azure ServiceBus and Rabbit support higher values.
+        const long MaxMessageSizeInByte = 200 * 1000;
+
+        public MassTransitConnectorHeartbeat Reduce()
+        {
+            if (IsValid(originalHeartbeat))
+            {
+                return originalHeartbeat;
+            }
+
+            // First we reduce the logs
+            var heartbeat = originalHeartbeat;
+            do
+            {
+                heartbeat = new MassTransitConnectorHeartbeat
+                {
+                    SentDateTimeOffset = heartbeat.SentDateTimeOffset,
+                    Version = heartbeat.Version,
+                    ErrorQueues = heartbeat.ErrorQueues,
+                    Logs = heartbeat.Logs.Take(heartbeat.Logs.Length - 10).ToArray()
+                };
+
+                if (IsValid(heartbeat))
+                {
+                    return heartbeat;
+                }
+
+            } while (heartbeat.Logs.Length > 0);
+
+            // Second we reduce the error queues
+            do
+            {
+                heartbeat = new MassTransitConnectorHeartbeat
+                {
+                    SentDateTimeOffset = heartbeat.SentDateTimeOffset,
+                    Version = heartbeat.Version,
+                    ErrorQueues = heartbeat.ErrorQueues.Take(heartbeat.ErrorQueues.Length - 10).ToArray(),
+                    Logs = heartbeat.Logs
+                };
+
+                if (IsValid(heartbeat))
+                {
+                    return heartbeat;
+                }
+            } while (heartbeat.ErrorQueues.Length > 0);
+
+            return heartbeat;
+        }
+
+        static bool IsValid(MassTransitConnectorHeartbeat heartbeat)
+        {
+            var content = JsonSerializer.Serialize(heartbeat);
+            return Encoding.UTF8.GetBytes(content).LongLength <= MaxMessageSizeInByte;
+        }
     }
 }
