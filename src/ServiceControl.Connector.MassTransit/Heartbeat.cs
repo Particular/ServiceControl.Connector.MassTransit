@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.Transport;
+using ServiceControl.Connector.MassTransit;
 
 public class Heartbeat(
     ILogger<Heartbeat> logger,
@@ -63,22 +64,6 @@ public class Heartbeat(
         {
             await endpointInstance.Stop(CancellationToken.None);
         }
-    }
-
-    public class MassTransitConnectorHeartbeat : IMessage
-    {
-        public required string Version { get; init; }
-        public required ErrorQueue[] ErrorQueues { get; init; }
-        public required DiagnosticsData.LogEntry[] Logs { get; init; }
-        public required DateTimeOffset SentDateTimeOffset { get; init; }
-    }
-
-#pragma warning disable CA1711
-    public class ErrorQueue
-#pragma warning restore CA1711
-    {
-        public required string Name { get; init; }
-        public required bool Ingesting { get; init; }
     }
 
     public class HeartbeatMessageSizeReducer(MassTransitConnectorHeartbeat originalHeartbeat)

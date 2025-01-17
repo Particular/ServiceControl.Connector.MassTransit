@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using ServiceControl.Connector.MassTransit;
 
 public class DiagnosticsData
 {
@@ -76,10 +77,5 @@ public class DiagnosticsData
         }
     }
 
-    public class LogEntry(DateTimeOffset dateTime, string level, string message)
-    {
-        public string Message { get; init; } = message;
-        public DateTimeOffset Date { get; init; } = dateTime;
-        public string Level { get; init; } = level;
-    }
+
 }

@@ -5,6 +5,7 @@ using NServiceBus.Pipeline;
 using NServiceBus.Routing;
 using NServiceBus.Transport;
 using NUnit.Framework;
+using ServiceControl.Connector.MassTransit;
 using ServiceControl.Plugin.CustomChecks.Messages;
 using Conventions = NServiceBus.AcceptanceTesting.Customization.Conventions;
 
@@ -89,9 +90,9 @@ public class ForwardingFails
             }
         }
 
-        class MassTransitConnectorHeartbeatHandler : IHandleMessages<Heartbeat.MassTransitConnectorHeartbeat>
+        class MassTransitConnectorHeartbeatHandler : IHandleMessages<MassTransitConnectorHeartbeat>
         {
-            public Task Handle(Heartbeat.MassTransitConnectorHeartbeat message, IMessageHandlerContext context)
+            public Task Handle(MassTransitConnectorHeartbeat message, IMessageHandlerContext context)
             {
                 return Task.CompletedTask;
             }
