@@ -66,9 +66,12 @@ public class DiagnosticsData
 
         lock (CleanupLock)
         {
-            if (RecentLogEntries.Count > BufferLogEntriesSize)
+            while (RecentLogEntries.Count > BufferLogEntriesSize)
             {
-                RecentLogEntries.TryDequeue(out _);
+                if (!RecentLogEntries.TryDequeue(out _))
+                {
+                    break;
+                }
             }
         }
     }
