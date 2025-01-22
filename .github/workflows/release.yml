@@ -60,17 +60,8 @@ jobs:
           docker buildx build --push --tag ghcr.io/particular/servicecontrol-masstransit-connector:${{ env.TAG_NAME }} \
               --file src/ServiceControl.Connector.MassTransit.Host/Dockerfile \
               --build-arg VERSION=${{ env.MinVerVersion }} \
-              --annotation "index:org.opencontainers.image.title=ServiceControl.MassTransit.Connector" \
-              --annotation "index:org.opencontainers.image.description=MassTransit Connector for ServiceControl" \
-              --annotation "index:org.opencontainers.image.created=$(date '+%FT%TZ')" \
-              --annotation "index:org.opencontainers.image.revision=${{ github.sha }}" \
-              --annotation "index:org.opencontainers.image.authors=Particular Software" \
-              --annotation "index:org.opencontainers.image.vendor=Particular Software" \
-              --annotation "index:org.opencontainers.image.version=${{ env.MinVerVersion }}" \
-              --annotation "index:org.opencontainers.image.source=https://github.com/Particular/ServiceControl.Connector.MassTransit/tree/${{ github.sha }}" \
-              --annotation "index:org.opencontainers.image.url=https://hub.docker.com/r/particular/servicecontrol-masstransit-connector" \
-              --annotation "index:org.opencontainers.image.documentation=https://docs.particular.net/servicecontrol/" \
-              --annotation "index:org.opencontainers.image.base.name=mcr.microsoft.com/dotnet/runtime:8.0-noble-chiseled" \
+              --build-arg SHA=${{ github.sha }} \
+              --build-arg CREATED=$(date '+%FT%TZ') \
               --platform linux/arm64,linux/amd64 .
           docker buildx imagetools inspect ghcr.io/particular/servicecontrol-masstransit-connector:${{ env.TAG_NAME }}
       - name: Deploy
