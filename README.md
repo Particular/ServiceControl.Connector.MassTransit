@@ -4,7 +4,7 @@ A ServiceControl container image that adds support for processing [MassTransit](
 
 ## Installation
 
-The connector is container image which is **Linux Arm64** and **Linux Amd64** compatible. The image is available at https://hub.docker.com/r/particular/servicecontrol-connector-masstransit . Please read the docker hub README for more information on available tags and container usage.
+The connector is container image which is **Linux Arm64** and **Linux Amd64** compatible. The image is available at https://hub.docker.com/r/particular/servicecontrol-masstransit-connector . Please read the docker hub README for more information on available tags and container usage.
 
 ## Prerequisites
 
@@ -33,7 +33,7 @@ dotnet build src/ServiceControl.Connector.MassTransit.sln
 To locally build and test the container run the following in any shell:
 
 ```shell
-docker buildx build --file src/ServiceControl.Connector.MassTransit.Host/Dockerfile --platform linux/arm64,linux/amd64 --tag particular/servicecontrol-connector-masstransit:latest .
+docker buildx build --file src/ServiceControl.Connector.MassTransit.Host/Dockerfile --platform linux/arm64,linux/amd64 --tag particular/servicecontrol-masstransit-connector:latest .
 ```
 ### Troubleshooting
 

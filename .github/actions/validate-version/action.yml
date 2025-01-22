@@ -54,7 +54,7 @@ runs:
         echo "prerelease=$prereleaseLabel" | Out-File -FilePath $Env:GITHUB_OUTPUT -Encoding utf-8 -Append
 
         # Get highest-versioned releases
-        $releases = Invoke-WebRequest -Uri https://api.github.com/repos/particular/ServiceControl/releases -UseBasicParsing |
+        $releases = Invoke-WebRequest -Uri https://api.github.com/repos/particular/ServiceControl.Connector.MassTransit/releases -UseBasicParsing |
             ConvertFrom-Json -ErrorAction Stop
         $releasedVersions = $releases |
             where Draft -eq $false |

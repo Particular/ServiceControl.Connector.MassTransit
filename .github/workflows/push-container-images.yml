@@ -35,8 +35,8 @@ jobs:
 
           foreach ($tag in $tags)
           {
-            Write-Output "::group::Pushing servicecontrol-connector-masstransit:$($tag)"
-            $cmd = "docker buildx imagetools create --tag particular/servicecontrol-connector-masstransit:$($tag) ghcr.io/particular/servicecontrol-connector-masstransit:$($sourceTag)"
+            Write-Output "::group::Pushing servicecontrol-masstransit-connector:$($tag)"
+            $cmd = "docker buildx imagetools create --tag particular/servicecontrol-masstransit-connector:$($tag) ghcr.io/particular/servicecontrol-masstransit-connector:$($sourceTag)"
             Write-Output "Command: $cmd"
             Invoke-Expression $cmd
             Write-Output "::endgroup::"
@@ -47,5 +47,5 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-          repository: particular/servicecontrol-connector-masstransit
+          repository: particular/servicecontrol-masstransit-connector
           readme-filepath: ./Container-README.md
