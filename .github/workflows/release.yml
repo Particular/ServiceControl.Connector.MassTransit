@@ -57,22 +57,22 @@ jobs:
         env:
           TAG_NAME: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || env.MinVerVersion }}
         run: |
-          docker buildx build --push --tag ghcr.io/particular/servicecontrol-connector-masstransit:${{ env.TAG_NAME }} \
+          docker buildx build --push --tag ghcr.io/particular/servicecontrol-masstransit-connector:${{ env.TAG_NAME }} \
               --file src/ServiceControl.Connector.MassTransit.Host/Dockerfile \
               --build-arg VERSION=${{ env.MinVerVersion }} \
-              --annotation "index:org.opencontainers.image.title=ServiceControl.Connector.MassTransit" \
-              --annotation "index:org.opencontainers.image.description=ServiceControl MassTransit connector" \
+              --annotation "index:org.opencontainers.image.title=ServiceControl.MassTransit.Connector" \
+              --annotation "index:org.opencontainers.image.description=MassTransit Connector for ServiceControl" \
               --annotation "index:org.opencontainers.image.created=$(date '+%FT%TZ')" \
               --annotation "index:org.opencontainers.image.revision=${{ github.sha }}" \
               --annotation "index:org.opencontainers.image.authors=Particular Software" \
               --annotation "index:org.opencontainers.image.vendor=Particular Software" \
               --annotation "index:org.opencontainers.image.version=${{ env.MinVerVersion }}" \
               --annotation "index:org.opencontainers.image.source=https://github.com/Particular/ServiceControl.Connector.MassTransit/tree/${{ github.sha }}" \
-              --annotation "index:org.opencontainers.image.url=https://hub.docker.com/r/particular/servicecontrol-connector-masstransit" \
+              --annotation "index:org.opencontainers.image.url=https://hub.docker.com/r/particular/servicecontrol-masstransit-connector" \
               --annotation "index:org.opencontainers.image.documentation=https://docs.particular.net/servicecontrol/" \
               --annotation "index:org.opencontainers.image.base.name=mcr.microsoft.com/dotnet/runtime:8.0-noble-chiseled" \
               --platform linux/arm64,linux/amd64 .
-          docker buildx imagetools inspect ghcr.io/particular/servicecontrol-connector-masstransit:${{ env.TAG_NAME }}
+          docker buildx imagetools inspect ghcr.io/particular/servicecontrol-masstransit-connector:${{ env.TAG_NAME }}
       - name: Deploy
         if: ${{ github.event_name == 'push' && github.ref_type == 'tag' }}
         # Does not follow standard practice of targeting explicit versions because configuration is tightly coupled to Octopus Deploy configuration

@@ -47,7 +47,7 @@ services:
     depends_on:
       - service-control
     container_name: "masstransit-connector"
-    image: "particular/servicecontrol-connector-masstransit:latest"
+    image: "particular/servicecontrol-masstransit-connector:latest"
     << : [*transport-env]
   service-pulse:
     depends_on:
