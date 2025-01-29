@@ -1,4 +1,4 @@
-# Particular Software ServiceControl MassTransit connector
+# MassTransit Connector for ServiceControl
 
 An extension to [ServiceControl](https://docs.particular.net/servicecontrol) that adds support for processing [MassTransit](https://masstransit.io/) failures with the [Particular Platform](https://particular.net/service-platform). This extension makes all the recoverability features for managing message processing failures; like (group) retrying, message editing and failed message inspection; available to the MassTransit community.  
 
@@ -174,7 +174,7 @@ ServiceControl primary queue by default listens to `Particular.ServiceControl` q
 
 Default: None
 
-Required when using RabbitMQ and error queues need to be dynamically resolved as queue information is queried on the broker to determine which error queues to listen to.
+RabbitMQ management API url when RabbitMQ is selected as transport.
 
 Example:
 
