@@ -29,6 +29,7 @@ LABEL org.opencontainers.image.base.name=mcr.microsoft.com/dotnet/runtime:8.0-no
 COPY --from=build ./build /app
 
 ENV QUEUES_FILE="/app/queues.txt"
+ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
 
 USER $APP_UID
 ENTRYPOINT ["/app/ServiceControl.Connector.MassTransit.Host"]
