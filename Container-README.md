@@ -174,7 +174,7 @@ ServiceControl primary queue by default listens to `Particular.ServiceControl` q
 
 Default: None
 
-RabbitMQ management API url when RabbitMQ is selected as transport.
+RabbitMQ management API URL when RabbitMQ is the selected transport.
 
 Example:
 
