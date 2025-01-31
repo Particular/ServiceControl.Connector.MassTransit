@@ -201,11 +201,11 @@ Alternatively, a license file can also be volume-mounted to the container `-v li
 
 ## Support
 
-The MassTransit connector is currently in early access. If you have any queries or feedback, please let us know at <https://discuss.particular.net/>.
+The MassTransit connector is currently in early access. If you have any queries or feedback, please let us know at <https://discuss.particular.net/tag/masstransit>.
 
 ## Feedback
 
-If you miss certain features or have any type of feedback then you can do this at:
+If you miss certain features or have any feedback, then you can do this at:
 
 - <https://github.com/Particular/ServiceControl.Connector.MassTransit>
 - <https://discuss.particular.net/>
