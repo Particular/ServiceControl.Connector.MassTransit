@@ -9,7 +9,8 @@
   <ItemGroup>
     <ProjectReference Include="..\ServiceControl.Connector.MassTransit.AcceptanceTesting\ServiceControl.Connector.MassTransit.AcceptanceTesting.csproj" />
     <ProjectReference Include="..\ServiceControl.Connector.MassTransit.AzureServiceBus\ServiceControl.Connector.MassTransit.AzureServiceBus.csproj" />
-    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.3.2" />
+    <PackageReference Include="MassTransit.Azure.ServiceBus.Core" Version="8.3.6" />
+    <PackageReference Update="Particular.Analyzers" Version="2.1.3" />
   </ItemGroup>
 
   <ItemGroup>
