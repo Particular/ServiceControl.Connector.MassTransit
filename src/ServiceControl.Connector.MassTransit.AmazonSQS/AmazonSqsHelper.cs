@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using Amazon.SQS;
 using Amazon.SQS.Model;
 
-sealed class AmazonSqsHelper(IAmazonSQS client, SqsTransport transportDefinition, string? queueNamePrefix = null) : IQueueInformationProvider, IQueueLengthProvider
+sealed class AmazonSqsHelper(IAmazonSQS client, SqsTransport transportDefinition, string? queueNamePrefix = null) : IQueueInformationProvider, IQueueLengthProvider, IHealthCheckerProvider
 {
     readonly ConcurrentDictionary<string, Task<string>> queueUrlCache = new();
 
@@ -61,5 +61,20 @@ sealed class AmazonSqsHelper(IAmazonSQS client, SqsTransport transportDefinition
         var value = attResponse.ApproximateNumberOfMessages;
 
         return value;
+    }
+
+    public async Task<(bool Success, string ErrorMessage)> TryCheck(CancellationToken cancellationToken)
+    {
+        try
+        {
+            await GetQueues(cancellationToken).GetAsyncEnumerator(cancellationToken).MoveNextAsync();
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
+        catch (AmazonSQSException e)
+        {
+            return (false, e.Message);
+        }
+
+        return (true, string.Empty);
     }
 }

@@ -105,4 +105,24 @@ class RabbitMQHelper(string vhost, Uri apiBaseUrl, ICredentials credentials) : I
             throw new Exception($"Failed to check the length of the queue {queueName} via URL {url}.", e);
         }
     }
+
+    public async Task<(bool Success, string ErrorMessage)> TryCheck(CancellationToken cancellationToken)
+    {
+        var url = $"/api/queues/{HttpUtility.UrlEncode(vhost)}";
+
+        try
+        {
+            using var response = await httpClient.GetAsync(url, cancellationToken);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return (true, string.Empty);
+            }
+            return (false, response.ReasonPhrase ?? "Connection failed");
+        }
+        catch (HttpRequestException e)
+        {
+            return (false, e.Message);
+        }
+    }
 }
