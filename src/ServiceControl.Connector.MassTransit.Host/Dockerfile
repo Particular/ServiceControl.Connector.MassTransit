@@ -30,6 +30,7 @@ COPY --from=build ./build /app
 
 ENV QUEUES_FILE="/app/queues.txt"
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+HEALTHCHECK --start-period=20s CMD ["/app/ServiceControl.Connector.MassTransit.Host", "health-check"]
 
 USER $APP_UID
 ENTRYPOINT ["/app/ServiceControl.Connector.MassTransit.Host"]

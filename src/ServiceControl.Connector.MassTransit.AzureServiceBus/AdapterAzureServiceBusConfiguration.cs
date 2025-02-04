@@ -10,8 +10,10 @@ public static class AdapterAzureServiceBusConfiguration
     {
         var receiveMode = useDeadLetterQueue ? SubQueue.DeadLetter : SubQueue.None;
 
-        services.AddSingleton<IQueueInformationProvider>(b => new AzureServiceBusHelper(b.GetRequiredService<ILogger<AzureServiceBusHelper>>(), connectionString));
-        services.AddSingleton<IQueueLengthProvider>(b => new AzureServiceBusHelper(b.GetRequiredService<ILogger<AzureServiceBusHelper>>(), connectionString));
+        services.AddSingleton(b => new AzureServiceBusHelper(b.GetRequiredService<ILogger<AzureServiceBusHelper>>(), connectionString));
+        services.AddSingleton<IQueueInformationProvider>(b => b.GetRequiredService<AzureServiceBusHelper>());
+        services.AddSingleton<IQueueLengthProvider>(b => b.GetRequiredService<AzureServiceBusHelper>());
+        services.AddSingleton<IHealthCheckerProvider>(b => b.GetRequiredService<AzureServiceBusHelper>());
         services.AddTransient<TransportDefinition>(_ => new AzureServiceBusTransport(connectionString)
         {
             TransportTransactionMode = TransportTransactionMode.ReceiveOnly,

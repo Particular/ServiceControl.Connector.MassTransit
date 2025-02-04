@@ -5,6 +5,7 @@ using ServiceControl.Connector.MassTransit.Host.Commands;
 var startupCommand = new StartupCommand(args);
 
 startupCommand.AddCommand(new QueuesCommand());
+startupCommand.AddCommand(new HealthCheckCommand());
 
 var commandLineBuilder = new CommandLineBuilder(startupCommand);
 

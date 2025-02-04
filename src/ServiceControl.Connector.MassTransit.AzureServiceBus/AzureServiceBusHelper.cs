@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 using Azure.Messaging.ServiceBus.Administration;
 using Microsoft.Extensions.Logging;
 
-class AzureServiceBusHelper(ILogger<AzureServiceBusHelper> logger, string connectionstring) : IQueueInformationProvider, IQueueLengthProvider
+class AzureServiceBusHelper(ILogger<AzureServiceBusHelper> logger, string connectionstring) : IQueueInformationProvider, IQueueLengthProvider, IHealthCheckerProvider
 {
     readonly ServiceBusAdministrationClient client = new(connectionstring);
 
@@ -29,5 +29,30 @@ class AzureServiceBusHelper(ILogger<AzureServiceBusHelper> logger, string connec
     {
         var queuesRuntimeProperties = await client.GetQueueRuntimePropertiesAsync(name, cancellationToken);
         return queuesRuntimeProperties.Value.ActiveMessageCount;
+    }
+
+    public async Task<(bool Success, string ErrorMessage)> TryCheck(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var clientNoRetries = new ServiceBusAdministrationClient(connectionstring, new ServiceBusAdministrationClientOptions { Retry = { MaxRetries = 0 } });
+            var result = clientNoRetries.GetQueuesAsync(cancellationToken);
+
+            await foreach (var queueProperties in result)
+            {
+                break;
+            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
+        catch (UnauthorizedAccessException)
+        {
+            return (false, "The token has an invalid signature.");
+        }
+        catch (Azure.RequestFailedException e)
+        {
+            return (false, e.Message);
+        }
+
+        return (true, string.Empty);
     }
 }

@@ -14,8 +14,10 @@ public static class AdapterRabbitMqConfiguration
         var defaultCredential = new NetworkCredential(username ?? connectionConfiguration.UserName, password ?? connectionConfiguration.Password);
 
         var rabbitMqHelper = new RabbitMQHelper(connectionConfiguration.VirtualHost, managementApi, defaultCredential);
+        services.AddSingleton(rabbitMqHelper);
         services.AddSingleton<IQueueLengthProvider>(rabbitMqHelper);
         services.AddSingleton<IQueueInformationProvider>(rabbitMqHelper);
+        services.AddSingleton<IHealthCheckerProvider, RabbitMQHealthChecker>();
         services.AddTransient<TransportDefinition>(_ => new RabbitMQTransport(
         RoutingTopology.Conventional(QueueType.Quorum),
             connectionString,
