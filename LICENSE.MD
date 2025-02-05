@@ -7,4 +7,4 @@ https://opensource.org/license/rpl-1-5/
 
 If you do not wish to release the source of software you build using Particular Software source code and/or binaries under the terms above, you may use Particular Software source code and/or binaries under the License Agreement described here:
 
-https://particular.net/LicenseAgreement
+https://particular.net/eula/early_access
