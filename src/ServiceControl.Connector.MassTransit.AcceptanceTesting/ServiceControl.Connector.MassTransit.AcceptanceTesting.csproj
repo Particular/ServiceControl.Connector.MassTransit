@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NServiceBus.AcceptanceTesting" Version="9.2.4" />
+    <PackageReference Include="NServiceBus.AcceptanceTesting" Version="9.2.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
     <PackageReference Include="MassTransit" Version="8.3.6" />
     <PackageReference Update="Particular.Analyzers" Version="2.1.3" />
