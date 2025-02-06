@@ -1,1 +1,5 @@
-
+exclusions:
+  - LICENSE.md
+  - Package-README.md
+  - .github/ISSUE_TEMPLATE/config.yml
+  - .github/SUPPORT.md
