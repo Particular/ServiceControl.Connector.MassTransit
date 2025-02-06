@@ -10,6 +10,7 @@ public static class AdapterAmazonSqsConfiguration
         services.AddSingleton(provider => new AmazonSqsHelper(provider.GetRequiredService<IAmazonSQS>(), provider.GetRequiredService<SqsTransport>(), string.Empty));
         services.AddSingleton<IQueueInformationProvider>(provider => provider.GetRequiredService<AmazonSqsHelper>());
         services.AddSingleton<IQueueLengthProvider>(provider => provider.GetRequiredService<AmazonSqsHelper>());
+        services.AddSingleton<IHealthCheckerProvider>(provider => provider.GetRequiredService<AmazonSqsHelper>());
         services.AddSingleton<IAmazonSQS, AmazonSQSClient>();
         services.AddSingleton<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
         services.AddTransient<SqsTransport>(sp =>
