@@ -49,3 +49,4 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
           repository: particular/servicecontrol-masstransit-connector
           readme-filepath: ./Container-README.md
+          short-description: An extension to ServiceControl that adds support for processing MassTransit failures.
