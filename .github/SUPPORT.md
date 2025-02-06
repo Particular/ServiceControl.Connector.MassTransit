@@ -1,3 +1,3 @@
 # Looking for Support
 
-Check out our [support options](https://particular.net/support).
+Ask questions on our [forum](https://discuss.particular.net/tag/masstransit).
