@@ -43,6 +43,7 @@ jobs:
 
           $cmd = "docker buildx imagetools create $tagsCLI ghcr.io/particular/servicecontrol-masstransit-connector:$sourceTag"
           Write-Output "Command: $cmd"
+          Invoke-Expression $cmd
       - name: Update Docker Hub Description
         if: ${{ steps.validate.outputs.latest == 'true' }}
         uses: peter-evans/dockerhub-description@v4.0.0
