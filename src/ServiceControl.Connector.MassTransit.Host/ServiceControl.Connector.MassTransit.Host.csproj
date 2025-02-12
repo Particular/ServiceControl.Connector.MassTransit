@@ -16,7 +16,7 @@
       <ProjectReference Include="..\ServiceControl.Connector.MassTransit.AzureServiceBus\ServiceControl.Connector.MassTransit.AzureServiceBus.csproj" />
       <ProjectReference Include="..\ServiceControl.Connector.MassTransit.RabbitMQ\ServiceControl.Connector.MassTransit.RabbitMQ.csproj" />
       <ProjectReference Include="..\ServiceControl.Connector.MassTransit\ServiceControl.Connector.MassTransit.csproj" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.2" />
       <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="None" />
       <PackageReference Update="Particular.Analyzers" Version="2.1.3" />
     </ItemGroup>
