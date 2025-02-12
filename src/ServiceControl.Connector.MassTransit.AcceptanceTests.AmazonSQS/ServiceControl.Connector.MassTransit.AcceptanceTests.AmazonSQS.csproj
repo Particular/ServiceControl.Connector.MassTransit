@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <PackageReference Include="MassTransit.AmazonSQS" Version="8.3.6" />
-    <PackageReference Update="Particular.Analyzers" Version="2.1.3" />
   </ItemGroup>
 
   <ItemGroup>
