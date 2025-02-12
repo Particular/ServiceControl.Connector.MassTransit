@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="None" />
     <PackageReference Include="NServiceBus.RabbitMQ" Version="9.2.0" />
   </ItemGroup>
 
