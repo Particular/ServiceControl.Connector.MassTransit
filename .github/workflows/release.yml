@@ -50,20 +50,28 @@ jobs:
         with:
           version: ${{ env.MinVerVersion }}
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3.9.0
+        uses: docker/setup-buildx-action@v3
       - name: Log in to GitHub container registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      - name: Build & inspect image
-        env:
-          TAG_NAME: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || env.MinVerVersion }}
-        run: |
-          docker buildx build --push --tag ghcr.io/particular/servicecontrol-masstransit-connector:${{ env.TAG_NAME }} \
-              --file src/ServiceControl.Connector.MassTransit.Host/Dockerfile \
-              --build-arg VERSION=${{ env.MinVerVersion }} \
-              --build-arg SHA=${{ github.sha }} \
-              --build-arg CREATED=$(date '+%FT%TZ') \
-              --platform linux/arm64,linux/amd64 .
-          docker buildx imagetools inspect ghcr.io/particular/servicecontrol-masstransit-connector:${{ env.TAG_NAME }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Get current date
+        id: date
+        run: echo "date=$(date '+%FT%TZ')" >> $GITHUB_OUTPUT
+      - name: Build and push image to GitHub container registry
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          platforms: linux/amd64,linux/arm64
+          sbom: true
+          build-args: |
+            VERSION=${{ env.MinVerVersion }}
+            SHA=${{ github.sha }}
+            CREATED=${{ steps.date.outputs.date }}
+          file: src/ServiceControl.Connector.MassTransit.Host/Dockerfile
+          tags: ghcr.io/particular/servicecontrol-masstransit-connector:${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || env.MinVerVersion }}
       - name: Deploy
         if: ${{ github.event_name == 'push' && github.ref_type == 'tag' }}
         # Does not follow standard practice of targeting explicit versions because configuration is tightly coupled to Octopus Deploy configuration
