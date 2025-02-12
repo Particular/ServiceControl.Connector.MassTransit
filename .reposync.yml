@@ -3,3 +3,5 @@ exclusions:
   - Package-README.md
   - .github/ISSUE_TEMPLATE/config.yml
   - .github/SUPPORT.md
+  - src/NServiceBus.snk
+  - src/NServiceBusTests.snk
