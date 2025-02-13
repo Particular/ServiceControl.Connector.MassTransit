@@ -10,21 +10,20 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="NServiceBus.Extensions.Logging" Version="3.0.1" />
-      <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
       <ProjectReference Include="..\ServiceControl.Connector.MassTransit.AmazonSQS\ServiceControl.Connector.MassTransit.AmazonSQS.csproj" />
       <ProjectReference Include="..\ServiceControl.Connector.MassTransit.AzureServiceBus\ServiceControl.Connector.MassTransit.AzureServiceBus.csproj" />
       <ProjectReference Include="..\ServiceControl.Connector.MassTransit.RabbitMQ\ServiceControl.Connector.MassTransit.RabbitMQ.csproj" />
       <ProjectReference Include="..\ServiceControl.Connector.MassTransit\ServiceControl.Connector.MassTransit.csproj" />
-      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
-      <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="None" />
-      <PackageReference Update="Particular.Analyzers" Version="2.1.3" />
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="queues.txt">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+      <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.1" />
+      <PackageReference Include="NServiceBus.Extensions.Logging" Version="3.0.1" />
+      <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     </ItemGroup>
-  
+
+    <ItemGroup>
+      <None Update="queues.txt" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
 </Project>
