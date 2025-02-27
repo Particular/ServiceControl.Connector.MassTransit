@@ -14,7 +14,7 @@
   <ItemGroup>
     <PackageReference Include="MassTransit" Version="8.3.6" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.2" />
-    <PackageReference Include="NServiceBus.Transport.AzureServiceBus" Version="4.3.0-alpha.1" />
+    <PackageReference Include="NServiceBus.Transport.AzureServiceBus" Version="5.0.0" />
   </ItemGroup>
 
 </Project>
