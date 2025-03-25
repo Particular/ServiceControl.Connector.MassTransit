@@ -72,6 +72,6 @@ jobs:
       - name: Run tests
         uses: Particular/run-tests-action@v1.7.0
       - name: Test publish arm64
-        run: dotnet publish --arch arm64 src/ServiceControl.Connector.MassTransit.Host/ServiceControl.Connector.MassTransit.Host.csproj --configuration Release
+        run: dotnet publish src/ServiceControl.Connector.MassTransit.Host/ServiceControl.Connector.MassTransit.Host.csproj --arch arm64
       - name: Test publish amd64
-        run: dotnet publish --arch amd64 src/ServiceControl.Connector.MassTransit.Host/ServiceControl.Connector.MassTransit.Host.csproj --configuration Release
+        run: dotnet publish src/ServiceControl.Connector.MassTransit.Host/ServiceControl.Connector.MassTransit.Host.csproj --arch amd64
