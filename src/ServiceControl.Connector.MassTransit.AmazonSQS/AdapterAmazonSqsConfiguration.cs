@@ -17,9 +17,7 @@ public static class AdapterAmazonSqsConfiguration
         {
             var sqs = sp.GetRequiredService<IAmazonSQS>();
             var sns = sp.GetRequiredService<IAmazonSimpleNotificationService>();
-#pragma warning disable NSBSQSEXP0001
             var transport = new SqsTransport(sqs, sns, disableUnrestrictedDelayedDelivery: true)
-#pragma warning restore NSBSQSEXP0001
             {
                 DoNotWrapOutgoingMessages = true // When forwarding and returning the message we do not want to alter the payload
             };
