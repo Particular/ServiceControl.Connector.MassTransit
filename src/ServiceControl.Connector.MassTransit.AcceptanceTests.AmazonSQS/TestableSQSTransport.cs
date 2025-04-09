@@ -7,7 +7,7 @@ public class TestableSQSTransport : SqsTransport
 {
     public TestableSQSTransport(string namePrefix)
 #pragma warning disable NSBSQSEXP0001
-        : base(CreateSqsClient(), CreateSnsClient(), enableDelayedDelivery: false)
+        : base(CreateSqsClient(), CreateSnsClient(), disableUnrestrictedDelayedDelivery: true)
 #pragma warning restore NSBSQSEXP0001
     {
         QueueNamePrefix = namePrefix;
