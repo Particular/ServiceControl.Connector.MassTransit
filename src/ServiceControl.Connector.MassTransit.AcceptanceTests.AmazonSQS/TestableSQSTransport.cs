@@ -6,9 +6,7 @@ using NServiceBus.AcceptanceTests;
 public class TestableSQSTransport : SqsTransport
 {
     public TestableSQSTransport(string namePrefix)
-#pragma warning disable NSBSQSEXP0001
-        : base(CreateSqsClient(), CreateSnsClient(), enableDelayedDelivery: false)
-#pragma warning restore NSBSQSEXP0001
+        : base(CreateSqsClient(), CreateSnsClient(), disableUnrestrictedDelayedDelivery: true)
     {
         QueueNamePrefix = namePrefix;
         TopicNamePrefix = namePrefix;
