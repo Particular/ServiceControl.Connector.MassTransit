@@ -15,7 +15,7 @@ public class Heartbeat(
 {
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation($"Starting {nameof(Heartbeat)}.");
+        logger.LogInformation("Starting {HeartbeatName}", nameof(Heartbeat));
 
         var endpointConfiguration = new EndpointConfiguration(nameof(Heartbeat));
         endpointConfiguration.UseSerialization<SystemJsonSerializer>();
@@ -58,7 +58,7 @@ public class Heartbeat(
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            logger.LogInformation($"Stopping {nameof(Heartbeat)}");
+            logger.LogInformation("Stopping {HeartbeatName}", nameof(Heartbeat));
         }
         finally
         {

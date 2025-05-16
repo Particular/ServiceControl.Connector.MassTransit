@@ -55,7 +55,7 @@ class RabbitMQHelper(string vhost, Uri apiBaseUrl, ICredentials credentials) : I
                     return (MaterializeQueueDetails(arr), false);
                 }
             default:
-                throw new Exception("Was not able to get list of queues from RabbitMQ broker.");
+                throw new Exception("Was not able to get list of queues from RabbitMQ broker");
         }
     }
 
@@ -102,7 +102,7 @@ class RabbitMQHelper(string vhost, Uri apiBaseUrl, ICredentials credentials) : I
         }
         catch (Exception e)
         {
-            throw new Exception($"Failed to check the length of the queue {queueName} via URL {url}.", e);
+            throw new Exception($"Failed to check the length of the queue {queueName} via URL {url}", e);
         }
     }
 

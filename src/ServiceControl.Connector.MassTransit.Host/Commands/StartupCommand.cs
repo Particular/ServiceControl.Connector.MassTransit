@@ -84,14 +84,14 @@ public class StartupCommand : RootCommand
     {
         var logger = loggerFactory.CreateLogger("Diagnostics");
         logger.LogInformation("-------------------------------------------------------------------------------------------");
-        logger.LogInformation($"Connector Version:                  {ConnectorVersion.Version}");
-        logger.LogInformation($"Error Queue:                        {settings.ErrorQueue}");
-        logger.LogInformation($"Service Control Queue:              {settings.ServiceControlQueue}");
-        logger.LogInformation($"Poison Queue:                       {settings.PoisonQueue}");
-        logger.LogInformation($"Return Queue:                       {settings.ReturnQueue}");
-        logger.LogInformation($"Queue Scan Interval:                {settings.QueueScanInterval}");
-        logger.LogInformation($"Custom Checks Interval:             {settings.CustomChecksInterval}");
-        logger.LogInformation($"Heartbeat Interval:                 {settings.HeartbeatInterval}");
+        logger.LogInformation("Connector Version:                  {Version}", ConnectorVersion.Version);
+        logger.LogInformation("Error Queue:                        {ErrorQueue}", settings.ErrorQueue});
+        logger.LogInformation("Service Control Queue:              {ServiceControlQueue}", settings.ServiceControlQueue);
+        logger.LogInformation("Poison Queue:                       {PoisonQueue}", settings.PoisonQueue);
+        logger.LogInformation("Return Queue:                       {ReturnQueue}", settings.ReturnQueue);
+        logger.LogInformation("Queue Scan Interval:                {QueueScanInterval}", settings.QueueScanInterval);
+        logger.LogInformation("Custom Checks Interval:             {CustomChecksInterval}", settings.CustomChecksInterval);
+        logger.LogInformation("Heartbeat Interval:                 {HeartbeatInterval}", settings.HeartbeatInterval);
         logger.LogInformation("-------------------------------------------------------------------------------------------");
     }
 }
