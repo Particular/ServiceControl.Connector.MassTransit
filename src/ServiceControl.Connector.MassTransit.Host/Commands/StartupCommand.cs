@@ -85,7 +85,7 @@ public class StartupCommand : RootCommand
         var logger = loggerFactory.CreateLogger("Diagnostics");
         logger.LogInformation("-------------------------------------------------------------------------------------------");
         logger.LogInformation("Connector Version:                  {Version}", ConnectorVersion.Version);
-        logger.LogInformation("Error Queue:                        {ErrorQueue}", settings.ErrorQueue});
+        logger.LogInformation("Error Queue:                        {ErrorQueue}", settings.ErrorQueue);
         logger.LogInformation("Service Control Queue:              {ServiceControlQueue}", settings.ServiceControlQueue);
         logger.LogInformation("Poison Queue:                       {PoisonQueue}", settings.PoisonQueue);
         logger.LogInformation("Return Queue:                       {ReturnQueue}", settings.ReturnQueue);
