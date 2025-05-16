@@ -220,7 +220,7 @@ public static class AdapterRabbitMqConfiguration
 
             if (dictionary.TryGetValue("port", out var portValue) && !int.TryParse(portValue, out var port))
             {
-                invalidOptionsMessage.AppendLine($"'{portValue}' is not a valid Int32 value for the 'port' connection string option.");
+                invalidOptionsMessage.AppendLine($"'{portValue}' is not a valid Int32 value for the 'port' connection string option");
             }
 
             if (dictionary.TryGetValue("host", out var value))
@@ -231,7 +231,7 @@ public static class AdapterRabbitMqConfiguration
 
                 if (host.Length == 0)
                 {
-                    invalidOptionsMessage.AppendLine("Empty host name in 'host' connection string option.");
+                    invalidOptionsMessage.AppendLine("Empty host name in 'host' connection string option");
                 }
 
                 dictionary["host"] = host;
@@ -240,7 +240,7 @@ public static class AdapterRabbitMqConfiguration
                 {
                     if (!int.TryParse(parts[1], out port))
                     {
-                        invalidOptionsMessage.AppendLine($"'{parts[1]}' is not a valid Int32 value for the port in the 'host' connection string option.");
+                        invalidOptionsMessage.AppendLine($"'{parts[1]}' is not a valid Int32 value for the port in the 'host' connection string option");
                     }
                     else
                     {

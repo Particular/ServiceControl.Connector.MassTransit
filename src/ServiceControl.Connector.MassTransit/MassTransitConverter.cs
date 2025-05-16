@@ -92,7 +92,7 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
             }
             else
             {
-                logger.LogWarning($"Using {MessageHeaders.FaultTimestamp} as fallback for missing {MessageHeaders.TransportSentTime}");
+                logger.LogWarning("Using {FaultTimestamp} as fallback for missing header {HeaderKey}", MessageHeaders.FaultTimestamp, MessageHeaders.TransportSentTime);
                 // Using time of failure as fallback
                 var faultTimestampFallback = headers[MessageHeaders.FaultTimestamp];
                 headers[NsbHeaders.TimeSent] = DateTimeOffsetHelper.ToWireFormattedString(DateTime.Parse(faultTimestampFallback));
@@ -135,9 +135,17 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
             // TODO: Getting the fault address this way should NOT be an alternate flow but be a the primary based on some setting
             // If this is a DLQ the input address is inferred from the queue it self
             faultInputAddress = messageContext.ReceiveAddress;
-            logger.LogWarning($"Using `messageContext.ReceiveAddress` for {NsbHeaders.ProcessingEndpoint} as fallback for missing {MessageHeaders.FaultInputAddress}");
+            logger.LogWarning("Using `{ReceiveAddress}` for {HeaderKey} as fallback for missing header {FaultInputAddress}",
+                messageContext.ReceiveAddress,
+                NsbHeaders.ProcessingEndpoint,
+                MessageHeaders.FaultInputAddress
+            );
             headers[NsbHeaders.ProcessingEndpoint] = faultInputAddress;
-            logger.LogWarning($"Using `messageContext.ReceiveAddress` for {FaultsHeaderKeys.FailedQ} as fallback for missing {MessageHeaders.FaultInputAddress}");
+            logger.LogWarning("Using `{ReceiveAddress}` for {HeaderKey} as fallback for missing header {FaultInputAddress}",
+                messageContext.ReceiveAddress,
+                FaultsHeaderKeys.FailedQ,
+                MessageHeaders.FaultInputAddress
+            );
             headers[MessageHeaders.FaultInputAddress] = "queue:" + faultInputAddress;
             headers[FaultsHeaderKeys.FailedQ] = faultInputAddress;
         }
@@ -169,7 +177,7 @@ public class MassTransitConverter(ILogger<MassTransitConverter> logger)
         else
         {
             // TODO: Not sure on this, maybe there is a better source
-            logger.LogWarning($"Using current time for {FaultsHeaderKeys.TimeOfFailure} as fallback for missing {MessageHeaders.FaultTimestamp}");
+            logger.LogWarning($"Using current time for {FaultsHeaderKeys.TimeOfFailure} as fallback for missing {MessageHeaders.FaultTimestamp}"); // Fixed values
             headers[FaultsHeaderKeys.TimeOfFailure] = DateTimeOffsetHelper.ToWireFormattedString(DateTimeOffset.UtcNow);
         }
 

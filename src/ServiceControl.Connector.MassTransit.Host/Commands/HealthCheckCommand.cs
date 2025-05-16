@@ -7,7 +7,7 @@ using Microsoft.Extensions.Hosting;
 
 public class HealthCheckCommand : Command
 {
-    public HealthCheckCommand() : base("health-check", "Performs a validation that the connector is able to connect to the broker.")
+    public HealthCheckCommand() : base("health-check", "Performs a validation that the connector is able to connect to the broker")
     {
         this.SetHandler(async context =>
         {

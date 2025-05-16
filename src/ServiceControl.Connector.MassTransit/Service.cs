@@ -48,7 +48,7 @@ public class Service(
         }
         catch (Exception e)
         {
-            logger.LogWarning(e, "Failed to read the queue names from the file. Returning the previous list of queues.");
+            logger.LogWarning(e, "Failed to read the queue names from the file. Returning the previous list of queues");
         }
 
         return [.. diagnosticsData.MassTransitErrorQueues];
@@ -56,7 +56,7 @@ public class Service(
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation($"Starting {nameof(Service)}.");
+        logger.LogInformation("Starting {ServiceName}", nameof(Service));
 
         try
         {
@@ -70,14 +70,14 @@ public class Service(
 
                     if (errorQueuesAreTheSame)
                     {
-                        logger.LogInformation("No changes detected for MassTransit queues.");
+                        logger.LogInformation("No changes detected for MassTransit queues");
 
                         if (diagnosticsData.MassTransitNotFoundQueues.Length == 0)
                         {
                             continue;
                         }
 
-                        logger.LogWarning("The following queues were not found: {Queues}. We are going to try to connect to them again.", string.Join(", ", diagnosticsData.MassTransitNotFoundQueues));
+                        logger.LogWarning("The following queues were not found: {Queues}. We are going to try to connect to them again", string.Join(", ", diagnosticsData.MassTransitNotFoundQueues));
 
                         var foundOne = false;
                         foreach (var notFoundQueue in diagnosticsData.MassTransitNotFoundQueues)
@@ -101,7 +101,7 @@ public class Service(
 
                     if (infrastructure is not null)
                     {
-                        logger.LogInformation("Changes detected, restarting.");
+                        logger.LogInformation("Changes detected, restarting");
 
                         await StopReceiving(CancellationToken.None);
                     }
@@ -110,13 +110,13 @@ public class Service(
                 }
                 catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
                 {
-                    logger.LogError(ex, "Failed shoveling MassTransit messages.");
+                    logger.LogError(ex, "Failed shoveling MassTransit messages");
                 }
             } while (await timer.WaitForNextTickAsync(cancellationToken));
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            logger.LogInformation($"Stopping {nameof(Service)}.");
+            logger.LogInformation("Stopping {ServiceName}", nameof(Service));
 
             try
             {
@@ -124,7 +124,7 @@ public class Service(
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to stop all the receivers.");
+                logger.LogError(ex, "Failed to stop all the receivers");
             }
         }
     }
@@ -158,19 +158,19 @@ public class Service(
         {
             if (await queueInformationProvider.QueueExists(massTransitErrorQueue, cancellationToken))
             {
-                logger.LogInformation("Ingesting messages from {InputQueue}.", massTransitErrorQueue);
+                logger.LogInformation("Ingesting messages from {InputQueue}", massTransitErrorQueue);
                 receiveSettings.Add(receiverFactory.Create(massTransitErrorQueue, configuration.ErrorQueue));
             }
             else
             {
                 diagnosticsData.AddNotFound(massTransitErrorQueue);
-                logger.LogWarning("Queue {InputQueue} does not exist. Remove it from the specified list if no longer required otherwise we are going to try to connect to it again.", massTransitErrorQueue);
+                logger.LogWarning("Queue {InputQueue} does not exist. Remove it from the specified list if no longer required otherwise we are going to try to connect to it again", massTransitErrorQueue);
             }
         }
 
         if (!receiveSettings.Any())
         {
-            throw new InvalidOperationException("No input queues specified.");
+            throw new InvalidOperationException("No input queues specified");
         }
 
         var receiverSettings = receiveSettings.ToArray();
@@ -194,7 +194,7 @@ public class Service(
             }
             catch (Exception e)
             {
-                throw new ConversionException("Conversion to ServiceControl failed.", e);
+                throw new ConversionException("Conversion to ServiceControl failed", e);
             }
             await messageDispatcher.Dispatch(new TransportOperations(operation), messageContext.TransportTransaction, token);
         };
@@ -209,7 +209,7 @@ public class Service(
             }
             catch (Exception e)
             {
-                throw new ConversionException("Conversion from ServiceControl failed.", e);
+                throw new ConversionException("Conversion from ServiceControl failed", e);
             }
             await messageDispatcher.Dispatch(new TransportOperations(operation), messageContext.TransportTransaction, token);
         };
@@ -245,7 +245,7 @@ public class Service(
 
                         await messageDispatcher.Dispatch(operations, context.TransportTransaction, token);
 
-                        logger.LogError(context.Exception, "Moved message to {QueueName}.", configuration.PoisonQueue);
+                        logger.LogError(context.Exception, "Moved message to {QueueName}", configuration.PoisonQueue);
 
                         return ErrorHandleResult.Handled;
                     }

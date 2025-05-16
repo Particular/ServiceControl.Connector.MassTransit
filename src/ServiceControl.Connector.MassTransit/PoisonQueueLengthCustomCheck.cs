@@ -30,6 +30,6 @@ class PoisonQueueLengthCustomCheck : CustomCheck
 
         return isEmpty
             ? CheckResult.Pass
-            : CheckResult.Failed($"Queue `{poisonQueue}` has {length} messages that could not be forwarded to ServiceControl.");
+            : CheckResult.Failed($"Queue `{poisonQueue}` has {length} messages that could not be forwarded to ServiceControl");
     }
 }

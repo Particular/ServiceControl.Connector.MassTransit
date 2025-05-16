@@ -46,7 +46,7 @@ class AzureServiceBusHelper(ILogger<AzureServiceBusHelper> logger, string connec
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { }
         catch (UnauthorizedAccessException)
         {
-            return (false, "The token has an invalid signature.");
+            return (false, "The token has an invalid signature");
         }
         catch (Azure.RequestFailedException e)
         {
