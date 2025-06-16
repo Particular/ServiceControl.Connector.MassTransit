@@ -20,7 +20,7 @@ public class ProvisionQueues(Configuration configuration, TransportInfrastructur
             new StartupDiagnosticEntries(),
             (_, exception, ___) =>
             {
-                logger.LogCritical(exception, "Critical error, creating queues.");
+                logger.LogCritical(exception, "Critical error, creating queues");
                 result = false;
             },
             true);
@@ -33,7 +33,7 @@ public class ProvisionQueues(Configuration configuration, TransportInfrastructur
                 purgeOnStartup: false,
                 errorQueue: configuration.PoisonQueue)};
 
-        logger.LogInformation("Creating queues if they don't already exist.");
+        logger.LogInformation("Creating queues if they don't already exist");
 
         var infrastructure = await transportInfrastructureFactory.CreateTransportInfrastructure(hostSettings,
             receiverSettings, [configuration.PoisonQueue, configuration.ServiceControlQueue], cancellationToken);

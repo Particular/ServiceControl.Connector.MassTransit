@@ -52,7 +52,7 @@ public class MassTransitFailureAdapter(
 
         if (!headers.TryGetValue(TargetEndpointAddress, out var targetEndpointAddress))
         {
-            throw new InvalidOperationException($"Header '{TargetEndpointAddress}' is not set.");
+            throw new InvalidOperationException($"Header '{TargetEndpointAddress}' is not set");
         }
 
         string originalQueue;
@@ -69,7 +69,7 @@ public class MassTransitFailureAdapter(
             originalQueue = targetEndpointAddress;
         }
 
-        logger.LogInformation("Forwarding failure with {NativeMessageId} native message id from {FaultInputAddress} back to original MassTransit queue {MassTransitQueue}.", messageContext.NativeMessageId, targetEndpointAddress, originalQueue);
+        logger.LogInformation("Forwarding failure with {NativeMessageId} native message id from {FaultInputAddress} back to original MassTransit queue {MassTransitQueue}", messageContext.NativeMessageId, targetEndpointAddress, originalQueue);
 
         messageContext.Headers.TryGetValue(Headers.ContentType, out var contentType);
 
@@ -98,7 +98,7 @@ public class MassTransitFailureAdapter(
         var h = operation.Message.Headers;
         if (!h.TryGetValue(RetryConfirmationQueueHeaderKey, out var ackQueue))
         {
-            throw new InvalidOperationException($"Messages is expected to have '{RetryConfirmationQueueHeaderKey}' header.");
+            throw new InvalidOperationException($"Message is expected to have '{RetryConfirmationQueueHeaderKey}' header");
         }
 
         ackQueue = QueuePrefix + ackQueue;
