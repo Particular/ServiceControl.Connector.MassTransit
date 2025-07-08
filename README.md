@@ -33,7 +33,10 @@ dotnet build src/ServiceControl.Connector.MassTransit.sln
 To locally build and test the container run the following in any shell:
 
 ```shell
-docker buildx build --file src/ServiceControl.Connector.MassTransit.Host/Dockerfile --platform linux/arm64,linux/amd64 --tag particular/servicecontrol-masstransit-connector:latest .
+docker buildx build \
+  --file src/ServiceControl.Connector.MassTransit.Host/Dockerfile \
+  --platform linux/arm64,linux/amd64 \
+  --tag particular/servicecontrol-masstransit-connector:latest .
 ```
 ### Troubleshooting
 
