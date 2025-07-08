@@ -39,7 +39,7 @@ public class ConvertToVersionRange : Task
 
             if (match.Value.Equals(string.Empty, StringComparison.Ordinal))
             {
-                Log.LogError("Reference '{0}' with version '{1}' is not valid for automatic version range conversion. Fix the version or exclude the reference from conversion by setting 'AutomaticVersionRange=\"false\"' on the reference", reference.ItemSpec, version);
+                Log.LogError("Reference '{0}' with version '{1}' is not valid for automatic version range conversion. Fix the version or exclude the reference from conversion by setting 'AutomaticVersionRange=\"false\"' on the reference.", reference.ItemSpec, version);
                 success = false;
                 continue;
             }
