@@ -5,7 +5,7 @@ An extension to [ServiceControl](https://docs.particular.net/servicecontrol) tha
 ## How to use this image
 
 This extension currently supports both RabbitMQ and Azure Service Bus brokers.  
-In order to successfully run this extension, you need to first run the ServiceControl container. Read more about the ServiceControl [image](https://hub.docker.com/r/particular/servicecontrol). 
+In order to successfully run this extension, you need to first run the ServiceControl container. Read more about the [ServiceControl image](https://hub.docker.com/r/particular/servicecontrol). 
 
 ### 1. Setup the connector
 
@@ -216,11 +216,13 @@ Once you have received a license from Particular, there are two options to insta
 
 Currently supported are the most used MassTransit transports: RabbitMQ and Azure Service Bus.
 
-| Description       | Key                                  | Notes |
-|-------------------|--------------------------------------| --- |
-| Azure Service Bus | `AzureServiceBus`         | |
-| Azure Service Bus with Dead Letter | `AzureServiceBusWithDeadLetter`         | Azure Service Bus configured to ingest from [dead-letter queues](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dead-letter-queues). | 
-| RabbitMQ          | `RabbitMQ` | |
+| Description                        | Key                             | Notes                                                                                                                                                           |
+|------------------------------------|---------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Azure Service Bus                  | `AzureServiceBus`               |                                                                                                                                                                 |
+| Azure Service Bus with Dead Letter | `AzureServiceBusWithDeadLetter` | Azure Service Bus configured to ingest from [dead-letter queues](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-dead-letter-queues). |
+| RabbitMQ                           | `RabbitMQ`                      |                                                                                                                                                                 |
+
+
 
 
 ### CONNECTION_STRING
