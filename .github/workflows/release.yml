@@ -13,7 +13,6 @@ env:
   DOTNET_NOLOGO: true
 jobs:
   container:
-    if: ${{ github.actor != 'dependabot[bot]' }}
     runs-on: ubuntu-latest
     defaults:
       run:
