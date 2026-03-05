@@ -163,7 +163,7 @@ docker run \
 ## Refreshing the errors queue text file
 
 The `queues-list` command can be run when you need to update the list of error queues.  
-The text file containing queue names can be updated without bringing down the container.  
+The text file containing queue names (one queue name per line) can be updated without bringing down the container.  
 
 ```shell
 docker run \
