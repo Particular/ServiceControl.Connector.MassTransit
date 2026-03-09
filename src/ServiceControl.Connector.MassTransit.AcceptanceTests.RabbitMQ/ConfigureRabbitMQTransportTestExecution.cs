@@ -43,7 +43,7 @@ class ConfigureRabbitMQTransportTestExecution(QueueType queueType = QueueType.Qu
         });
     }
 
-    public void ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration) => services.UsingRabbitMQ("host=localhost", new Uri("http://localhost:15672/"), "guest", "guest");
+    public void ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration) => services.UsingRabbitMQ("host=localhost", new Uri("http://localhost:15672/"), "guest", "guest", queueType);
 
     Task Cleanup(CancellationToken cancellationToken)
     {
