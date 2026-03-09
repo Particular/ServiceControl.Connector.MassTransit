@@ -11,7 +11,7 @@ public class RabbitMQTestAttribute : Attribute, IApplyToContext
         var connectionString = Environment.GetEnvironmentVariable("RabbitMQTransport_ConnectionString");
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            Assert.Ignore("Ignoring because environment variable RabbitMQConnectionString is not available");
+            Assert.Ignore("Ignoring because environment variable RabbitMQTransport_ConnectionString is not available");
         }
     }
 }
