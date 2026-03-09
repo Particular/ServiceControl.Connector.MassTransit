@@ -14,4 +14,9 @@
     <PackageReference Include="NServiceBus.RabbitMQ" Version="9.2.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="ServiceControl.Connector.MassTransit.AcceptanceTests.RabbitMQ" />
+    <InternalsVisibleTo Include="ServiceControl.Connector.MassTransit.AcceptanceTests.RabbitMQ.Classic" />
+  </ItemGroup>
+
 </Project>

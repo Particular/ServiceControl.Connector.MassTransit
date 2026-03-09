@@ -41,6 +41,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBusDeadLetter", "ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBusDeadLetter\ServiceControl.Connector.MassTransit.AcceptanceTests.AzureServiceBusDeadLetter.csproj", "{B76A74EB-2FA7-4052-8CB9-96AAFDAD5AC9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceControl.Connector.MassTransit.AcceptanceTests.RabbitMQ.Classic", "ServiceControl.Connector.MassTransit.AcceptanceTests.RabbitMQ.Classic\ServiceControl.Connector.MassTransit.AcceptanceTests.RabbitMQ.Classic.csproj", "{00F20BD2-3EB9-4D8F-9B76-EE335F5B9F93}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -95,6 +97,10 @@ Global
 		{B76A74EB-2FA7-4052-8CB9-96AAFDAD5AC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B76A74EB-2FA7-4052-8CB9-96AAFDAD5AC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B76A74EB-2FA7-4052-8CB9-96AAFDAD5AC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00F20BD2-3EB9-4D8F-9B76-EE335F5B9F93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00F20BD2-3EB9-4D8F-9B76-EE335F5B9F93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00F20BD2-3EB9-4D8F-9B76-EE335F5B9F93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00F20BD2-3EB9-4D8F-9B76-EE335F5B9F93}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -110,6 +116,7 @@ Global
 		{93E5D84C-5CC7-4628-804C-A29B62C0C7E1} = {F5A3D35F-95A6-41F6-857F-866CA96E06FD}
 		{D1335BCA-C2A5-415D-8877-61FA146391AC} = {F5A3D35F-95A6-41F6-857F-866CA96E06FD}
 		{B76A74EB-2FA7-4052-8CB9-96AAFDAD5AC9} = {F5A3D35F-95A6-41F6-857F-866CA96E06FD}
+		{00F20BD2-3EB9-4D8F-9B76-EE335F5B9F93} = {F5A3D35F-95A6-41F6-857F-866CA96E06FD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E5F2F88-CFD8-439C-98E9-52803B9F4641}

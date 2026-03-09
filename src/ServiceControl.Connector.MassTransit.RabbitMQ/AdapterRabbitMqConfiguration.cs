@@ -41,7 +41,7 @@ public static class AdapterRabbitMqConfiguration
     }
 
     // Copied from the NServiceBus.Rabbit repository - https://github.com/Particular/NServiceBus.RabbitMQ/blob/master/src/NServiceBus.Transport.RabbitMQ/Configuration/ConnectionConfiguration.cs
-    class ConnectionConfiguration
+    internal class ConnectionConfiguration
     {
         const bool defaultUseTls = false;
         const int defaultPort = 5672;
