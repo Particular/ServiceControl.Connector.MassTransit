@@ -8,7 +8,7 @@ using NServiceBus.Transport;
 
 public static class AdapterRabbitMqConfiguration
 {
-    public static void UsingRabbitMQ(this IServiceCollection services, string connectionString, Uri managementApi, string? username, string? password)
+    public static void UsingRabbitMQ(this IServiceCollection services, string connectionString, Uri managementApi, string? username, string? password, QueueType queueType = QueueType.Quorum)
     {
         var connectionConfiguration = ConnectionConfiguration.Create(connectionString, string.Empty);
         var defaultCredential = new NetworkCredential(username ?? connectionConfiguration.UserName, password ?? connectionConfiguration.Password);
@@ -19,7 +19,7 @@ public static class AdapterRabbitMqConfiguration
         services.AddSingleton<IQueueInformationProvider>(rabbitMqHelper);
         services.AddSingleton<IHealthCheckerProvider, RabbitMQHealthChecker>();
         services.AddTransient<TransportDefinition>(_ => new RabbitMQTransport(
-        RoutingTopology.Conventional(QueueType.Quorum),
+        RoutingTopology.Conventional(queueType),
             connectionString,
             enableDelayedDelivery: false
         )

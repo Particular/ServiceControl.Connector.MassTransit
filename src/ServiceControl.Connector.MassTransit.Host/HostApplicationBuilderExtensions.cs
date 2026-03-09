@@ -95,7 +95,8 @@ static class HostApplicationBuilderExtensions
                 {
                     throw new Exception("RABBITMQ_MANAGEMENT_API_URL is invalid. Ensure the value is a valid url without any quotes e.g. http://localhost:15672");
                 }
-                services.UsingRabbitMQ(connectionString ?? throw new Exception("CONNECTION_STRING environment variable not set"), managementApi, configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_USERNAME"), configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_PASSWORD"));
+                QueueType queueType = Enum.TryParse(typeof(QueueType), configuration.GetValue<string>("RABBITMQ_QUEUE_TYPE") ?? "Quorum", true, out var queueTypeOut) ? (QueueType)queueTypeOut : QueueType.Quorum;
+                services.UsingRabbitMQ(connectionString ?? throw new Exception("CONNECTION_STRING environment variable not set"), managementApi, configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_USERNAME"), configuration.GetValue<string>("RABBITMQ_MANAGEMENT_API_PASSWORD"), queueType);
                 break;
             default:
                 throw new NotSupportedException($"TRANSPORT_TYPE environment variable specified has an invalid value ({transportType}). Please use one of the following: AzureServiceBus, AzureServiceBusWithDeadLetter, RabbitMQ");
