@@ -9,16 +9,21 @@ public class HealthCheckCommand : Command
 {
     public HealthCheckCommand() : base("health-check", "Performs a validation that the connector is able to connect to the broker")
     {
+        this.AddConnectorOptions();
+
         this.SetHandler(async context =>
         {
-            context.ExitCode = await InternalHandler(context.GetCancellationToken());
+            var connectorArgs = ConnectorCommandOptions.BuildArgs(context.ParseResult);
+
+            context.ExitCode = await InternalHandler(connectorArgs, context.GetCancellationToken());
         });
     }
 
-    async Task<int> InternalHandler(CancellationToken cancellationToken)
+    async Task<int> InternalHandler(string[] connectorArgs, CancellationToken cancellationToken)
     {
         var builder = Host.CreateEmptyApplicationBuilder(null);
         builder.Configuration.AddEnvironmentVariables();
+        builder.Configuration.AddCommandLine(connectorArgs);
         builder.UseMassTransitConnector(true);
 
         var host = builder.Build();

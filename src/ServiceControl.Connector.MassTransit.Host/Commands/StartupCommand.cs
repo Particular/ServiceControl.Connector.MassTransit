@@ -24,19 +24,21 @@ public class StartupCommand : RootCommand
 
         AddOption(consoleOption);
         AddOption(runModeOption);
+        this.AddConnectorOptions();
 
         this.SetHandler(async context =>
         {
             var isConsole = context.ParseResult.GetValueForOption(consoleOption);
             var runMode = context.ParseResult.GetValueForOption(runModeOption);
+            var connectorArgs = ConnectorCommandOptions.BuildArgs(context.ParseResult);
 
-            context.ExitCode = await InternalHandler(runMode, isConsole, args, context.GetCancellationToken());
+            context.ExitCode = await InternalHandler(runMode, isConsole, connectorArgs, context.GetCancellationToken());
         });
     }
 
-    async Task<int> InternalHandler(RunMode runMode, bool isConsole, string[] args, CancellationToken cancellationToken)
+    async Task<int> InternalHandler(RunMode runMode, bool isConsole, string[] connectorArgs, CancellationToken cancellationToken)
     {
-        var builder = Host.CreateApplicationBuilder(args);
+        var builder = Host.CreateApplicationBuilder(connectorArgs);
         builder.UseMassTransitConnector(runMode == RunMode.Setup);
 
         if (isConsole)
