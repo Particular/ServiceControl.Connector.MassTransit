@@ -54,9 +54,8 @@ public class MassTransitComponent<TContext>(string name, Action<IBusRegistration
                 var consumerRegistrations = host.Services.GetServices<IConsumerRegistration>();
                 foreach (var registration in consumerRegistrations)
                 {
-                    var consumerDefinition = registration.GetDefinition(null);
                     // we assume the endpoint name is already set and formatted
-                    queuesToDelete.Add(consumerDefinition.GetEndpointName(null));
+                    queuesToDelete.Add(registration.GetDefinition(null!).GetEndpointName(null!));
                 }
                 await host.StopAsync(cancellationToken).ConfigureAwait(false);
             }
