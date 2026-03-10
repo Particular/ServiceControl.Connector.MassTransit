@@ -39,8 +39,7 @@ public class ConnectorOptionsValidator : IValidateOptions<ConnectorOptions>
     static bool IsValidQueueType(string? queueType) =>
         queueType?.ToLowerInvariant() switch
         {
-            "classic" => true,
-            "quorum" => true,
+            "classic" or "quorum" or
             null => true, // Default will be used
             _ => false
         };
