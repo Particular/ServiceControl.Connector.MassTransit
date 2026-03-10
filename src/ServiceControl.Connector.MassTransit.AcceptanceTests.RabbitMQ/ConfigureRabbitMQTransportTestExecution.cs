@@ -16,7 +16,7 @@ class ConfigureRabbitMQTransportTestExecution(QueueType queueType = QueueType.Qu
         return Cleanup;
     }
 
-    public void ConfigureTransportForMassTransitEndpoint(IBusRegistrationConfigurator configurator)
+    public Func<IReadOnlyCollection<string>, CancellationToken, Task> ConfigureTransportForMassTransitEndpoint(IBusRegistrationConfigurator configurator)
     {
         configurator.UsingRabbitMq((context, cfg) =>
         {
@@ -41,6 +41,12 @@ class ConfigureRabbitMQTransportTestExecution(QueueType queueType = QueueType.Qu
                 }
             }
         });
+
+        return (queuesToDelete, _) =>
+        {
+            DeleteQueues(queuesToDelete);
+            return Task.CompletedTask;
+        };
     }
 
     public Func<IReadOnlyCollection<string>, CancellationToken, Task> ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration)

@@ -14,13 +14,14 @@ class ConfigureAzureServiceBusTransportTestExecution : IConfigureTransportTestEx
         return Cleanup;
     }
 
-    public void ConfigureTransportForMassTransitEndpoint(IBusRegistrationConfigurator configurator)
+    public Func<IReadOnlyCollection<string>, CancellationToken, Task> ConfigureTransportForMassTransitEndpoint(IBusRegistrationConfigurator configurator)
     {
         configurator.UsingAzureServiceBus((context, cfg) =>
         {
             cfg.Host(connectionString);
             cfg.ConfigureEndpoints(context);
         });
+        return (_, _) => Task.CompletedTask;
     }
 
     public Func<IReadOnlyCollection<string>, CancellationToken, Task> ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration)

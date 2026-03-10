@@ -1,4 +1,5 @@
 ﻿using MassTransit;
+using MassTransit.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -30,7 +31,7 @@ public class MassTransitComponent<TContext>(string name, Action<IBusRegistration
                     services.AddMassTransit(x =>
                     {
                         busConfig(x);
-                        transportConfig.ConfigureTransportForMassTransitEndpoint(x);
+                        cleanup = transportConfig.ConfigureTransportForMassTransitEndpoint(x);
                     });
                     hostConfig(hostContext, services);
                     services.AddSingleton((TContext)scenarioContext);
@@ -47,16 +48,29 @@ public class MassTransitComponent<TContext>(string name, Action<IBusRegistration
                 return;
             }
 
+            var queuesToDelete = new List<string>();
             try
             {
+                var consumerRegistrations = host.Services.GetServices<IConsumerRegistration>();
+                foreach (var registration in consumerRegistrations)
+                {
+                    var consumerDefinition = registration.GetDefinition(null);
+                    // we assume the endpoint name is already set and formatted
+                    queuesToDelete.Add(consumerDefinition.GetEndpointName(null));
+                }
                 await host.StopAsync(cancellationToken).ConfigureAwait(false);
             }
             finally
             {
                 host.Dispose();
+                if (cleanup != null)
+                {
+                    await cleanup(queuesToDelete, cancellationToken).ConfigureAwait(false);
+                }
             }
         }
 
         IHost? host;
+        Func<IReadOnlyCollection<string>, CancellationToken, Task>? cleanup;
     }
 }

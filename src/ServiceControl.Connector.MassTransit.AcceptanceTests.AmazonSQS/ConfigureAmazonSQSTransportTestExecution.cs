@@ -14,7 +14,7 @@ class ConfigureAmazonSQSTransportTestExecution : IConfigureTransportTestExecutio
         return _ => Task.CompletedTask;
     }
 
-    public void ConfigureTransportForMassTransitEndpoint(IBusRegistrationConfigurator configurator)
+    public Func<IReadOnlyCollection<string>, CancellationToken, Task> ConfigureTransportForMassTransitEndpoint(IBusRegistrationConfigurator configurator)
     {
         var region = FallbackRegionFactory.GetRegionEndpoint().SystemName;
 
@@ -29,6 +29,7 @@ class ConfigureAmazonSQSTransportTestExecution : IConfigureTransportTestExecutio
 
             cfg.ConfigureEndpoints(context, new DefaultEndpointNameFormatter(NamePrefixGenerator.GetNamePrefix(), false));
         });
+        return (_, _) => Task.CompletedTask;
     }
 
     public Func<IReadOnlyCollection<string>, CancellationToken, Task> ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration)
