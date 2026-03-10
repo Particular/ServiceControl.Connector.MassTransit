@@ -67,7 +67,7 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
                                 configuration,
                                 provider.GetRequiredService<IHostApplicationLifetime>()));
                     }
-                    transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
+                    cleanup = transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
                 });
 
             host = builder.Build();
@@ -92,9 +92,14 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
             finally
             {
                 host.Dispose();
+                if (cleanup != null)
+                {
+                    await cleanup([errorQueue, serviceControlQueue ?? "Particular.ServiceControl", returnQueue, $"{returnQueue}.poison", .. queueNamesToMonitor], cancellationToken);
+                }
             }
         }
 
         IHost? host;
+        Func<string[], CancellationToken, Task>? cleanup;
     }
 }

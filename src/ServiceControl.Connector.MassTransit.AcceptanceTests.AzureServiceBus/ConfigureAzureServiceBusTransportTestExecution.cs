@@ -23,9 +23,10 @@ class ConfigureAzureServiceBusTransportTestExecution : IConfigureTransportTestEx
         });
     }
 
-    public void ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration)
+    public Func<IReadOnlyCollection<string>, CancellationToken, Task> ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration)
     {
         services.UsingAzureServiceBus(configuration, connectionString);
+        return (_, _) => Task.CompletedTask;
     }
 
     Task Cleanup(CancellationToken cancellationToken)

@@ -31,7 +31,7 @@ class ConfigureAmazonSQSTransportTestExecution : IConfigureTransportTestExecutio
         });
     }
 
-    public void ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration)
+    public Func<IReadOnlyCollection<string>, CancellationToken, Task> ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration)
     {
         services.UsingAmazonSqs(transport =>
         {
@@ -39,5 +39,6 @@ class ConfigureAmazonSQSTransportTestExecution : IConfigureTransportTestExecutio
             transport.TopicNamePrefix = NamePrefixGenerator.GetNamePrefix();
             transport.QueueNameGenerator = TestNameHelper.GetSqsQueueName;
         });
+        return (_, _) => Task.CompletedTask;
     }
 }

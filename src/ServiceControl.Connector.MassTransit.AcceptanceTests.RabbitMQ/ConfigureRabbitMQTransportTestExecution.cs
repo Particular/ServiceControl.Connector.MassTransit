@@ -43,7 +43,15 @@ class ConfigureRabbitMQTransportTestExecution(QueueType queueType = QueueType.Qu
         });
     }
 
-    public void ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration) => services.UsingRabbitMQ("host=localhost", new Uri("http://localhost:15672/"), "guest", "guest", queueType);
+    public Func<IReadOnlyCollection<string>, CancellationToken, Task> ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration)
+    {
+        services.UsingRabbitMQ("host=localhost", new Uri("http://localhost:15672/"), "guest", "guest", queueType);
+        return (queuesToDelete, _) =>
+        {
+            DeleteQueues(queuesToDelete);
+            return Task.CompletedTask;
+        };
+    }
 
     Task Cleanup(CancellationToken cancellationToken)
     {
@@ -58,15 +66,18 @@ class ConfigureRabbitMQTransportTestExecution(QueueType queueType = QueueType.Qu
             return;
         }
 
-        var queues = transport.QueuesToCleanup.ToHashSet();
+        DeleteQueues(transport.QueuesToCleanup.ToHashSet());
+    }
 
+    static void DeleteQueues(IReadOnlyCollection<string> queues)
+    {
         using var connection = ConnectionHelper.ConnectionFactory.CreateConnection("Test Queue Purger");
         using var channel = connection.CreateModel();
         foreach (var queue in queues)
         {
             try
             {
-                channel.QueuePurge(queue);
+                channel.QueueDelete(queue, false, false);
             }
             catch (Exception ex)
             {
