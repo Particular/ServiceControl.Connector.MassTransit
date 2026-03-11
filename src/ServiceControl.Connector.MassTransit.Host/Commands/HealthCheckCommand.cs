@@ -1,7 +1,6 @@
 namespace ServiceControl.Connector.MassTransit.Host.Commands;
 
 using System.CommandLine;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -11,22 +10,20 @@ public class HealthCheckCommand : Command
     {
         this.AddConnectorOptions();
 
-        this.SetHandler(async context =>
+        SetAction(async (parseResult, cancellationToken) =>
         {
-            var connectorArgs = ConnectorCommandOptions.BuildArgs(context.ParseResult);
+            var connectorArgs = ConnectorCommandOptions.BuildArgs(parseResult);
 
-            context.ExitCode = await InternalHandler(connectorArgs, context.GetCancellationToken());
+            return await InternalHandler(connectorArgs, cancellationToken);
         });
     }
 
     async Task<int> InternalHandler(string[] connectorArgs, CancellationToken cancellationToken)
     {
-        var builder = Host.CreateEmptyApplicationBuilder(null);
-        builder.Configuration.AddEnvironmentVariables();
-        builder.Configuration.AddCommandLine(connectorArgs);
+        var builder = Host.CreateApplicationBuilder(connectorArgs);
         builder.UseMassTransitConnector(true);
 
-        var host = builder.Build();
+        using var host = builder.Build();
 
         var queueInformationProvider = host.Services.GetRequiredService<IHealthCheckerProvider>();
         var (success, errorMessage) = await queueInformationProvider.TryCheck(cancellationToken);
