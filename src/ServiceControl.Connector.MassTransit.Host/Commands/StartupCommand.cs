@@ -11,28 +11,30 @@ public class StartupCommand : RootCommand
 {
     public StartupCommand(string[] args) : base("Particular Software ServiceControl Masstransit Connector")
     {
-        var consoleOption = new Option<bool>(
-            "--console",
-            "Run in console mode.");
-        consoleOption.AddAlias("-c");
-
-        var runModeOption = new Option<RunMode>(
-            "--run-mode",
-            () => RunMode.SetupAndRun,
-            "Mode to run in.")
-        { Arity = ArgumentArity.ExactlyOne };
-
-        AddOption(consoleOption);
-        AddOption(runModeOption);
-        this.AddConnectorOptions();
-
-        this.SetHandler(async context =>
+        var consoleOption = new Option<bool>("--console")
         {
-            var isConsole = context.ParseResult.GetValueForOption(consoleOption);
-            var runMode = context.ParseResult.GetValueForOption(runModeOption);
-            var connectorArgs = ConnectorCommandOptions.BuildArgs(context.ParseResult);
+            Aliases = { "-c" },
+            Description = "Run in console mode."
+        };
 
-            context.ExitCode = await InternalHandler(runMode, isConsole, connectorArgs, context.GetCancellationToken());
+        var runModeOption = new Option<RunMode>("--run-mode")
+        {
+            Description = "Mode to run in.",
+            Arity = ArgumentArity.ExactlyOne,
+            DefaultValueFactory = _ => RunMode.SetupAndRun,
+        };
+
+        Add(consoleOption);
+        Add(runModeOption);
+
+        this.AddConnectorOptions();
+        SetAction(async (parseResult, cancellationToken) =>
+        {
+            var isConsole = parseResult.GetValue(consoleOption);
+            var runMode = parseResult.GetValue(runModeOption);
+            var connectorArgs = ConnectorCommandOptions.BuildArgs(parseResult);
+
+            return await InternalHandler(runMode, isConsole, connectorArgs, cancellationToken);
         });
     }
 
