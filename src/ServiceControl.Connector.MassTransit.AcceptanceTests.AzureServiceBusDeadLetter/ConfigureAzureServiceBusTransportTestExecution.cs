@@ -14,7 +14,7 @@ class ConfigureAzureServiceBusTransportTestExecution : IConfigureTransportTestEx
         return Cleanup;
     }
 
-    public void ConfigureTransportForMassTransitEndpoint(IBusRegistrationConfigurator configurator)
+    public Func<IReadOnlyCollection<string>, CancellationToken, Task> ConfigureTransportForMassTransitEndpoint(IBusRegistrationConfigurator configurator)
     {
         configurator.UsingAzureServiceBus((context, cfg) =>
         {
@@ -29,11 +29,13 @@ class ConfigureAzureServiceBusTransportTestExecution : IConfigureTransportTestEx
                 sb.ConfigureDeadLetterQueueErrorTransport();
             }
         });
+        return (_, _) => Task.CompletedTask;
     }
 
-    public void ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration)
+    public Func<IReadOnlyCollection<string>, CancellationToken, Task> ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration)
     {
         services.UsingAzureServiceBus(configuration, connectionString, true);
+        return (_, _) => Task.CompletedTask;
     }
 
     Task Cleanup(CancellationToken cancellationToken)

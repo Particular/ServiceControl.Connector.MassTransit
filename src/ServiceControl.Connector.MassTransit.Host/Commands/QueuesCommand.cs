@@ -13,18 +13,22 @@ public class QueuesCommand : Command
         var filterOption = new Option<string>("--filter", () => ".*_error$", "Use a regex to filter queues by name.");
         AddOption(filterOption);
 
+        this.AddConnectorOptions();
+
         this.SetHandler(async context =>
         {
             var filter = context.ParseResult.GetValueForOption(filterOption);
+            var connectorArgs = ConnectorCommandOptions.BuildArgs(context.ParseResult);
 
-            context.ExitCode = await InternalHandler(filter!, context.GetCancellationToken());
+            context.ExitCode = await InternalHandler(filter!, connectorArgs, context.GetCancellationToken());
         });
     }
 
-    async Task<int> InternalHandler(string filter, CancellationToken cancellationToken)
+    async Task<int> InternalHandler(string filter, string[] connectorArgs, CancellationToken cancellationToken)
     {
         var builder = Host.CreateEmptyApplicationBuilder(null);
         builder.Configuration.AddEnvironmentVariables();
+        builder.Configuration.AddCommandLine(connectorArgs);
         builder.UseMassTransitConnector(true);
 
         var host = builder.Build();

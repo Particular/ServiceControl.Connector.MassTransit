@@ -11,10 +11,6 @@ public static class MassTransitComponentExtensions
         string name,
         Action<IBusRegistrationConfigurator> busConfig,
         Action<HostBuilderContext, IServiceCollection>? hostConfig = null)
-        where TContext : ScenarioContext
-    {
-        return scenario.WithComponent(new MassTransitComponent<TContext>(name, busConfig, hostConfig ?? ((_, _) =>
-        {
-        })));
-    }
+        where TContext : ScenarioContext =>
+        scenario.WithComponent(new MassTransitComponent<TContext>(name, busConfig, hostConfig ?? ((_, _) => { })));
 }
