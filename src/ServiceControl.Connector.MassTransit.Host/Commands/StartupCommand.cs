@@ -3,6 +3,7 @@ namespace ServiceControl.Connector.MassTransit.Host.Commands;
 using System.CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using Microsoft.Extensions.Logging;
 using NServiceBus.Extensions.Logging;
 using ServiceControl.Connector.MassTransit;
@@ -43,6 +44,9 @@ public class StartupCommand : RootCommand
         var builder = Host.CreateApplicationBuilder(connectorArgs);
         builder.UseMassTransitConnector(runMode == RunMode.Setup);
 
+        // Registers WindowsServiceLifetime and EventLog logging when running as a Windows Service; no-op otherwise.
+        builder.Services.AddWindowsService();
+
         if (isConsole)
         {
             builder.Logging.AddSimpleConsole(o =>
@@ -51,7 +55,7 @@ public class StartupCommand : RootCommand
                 o.IncludeScopes = true;
             });
         }
-        else
+        else if (!WindowsServiceHelpers.IsWindowsService())
         {
             builder.Logging.AddSystemdConsole();
         }
