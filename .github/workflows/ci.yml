@@ -43,14 +43,14 @@ jobs:
           enable-AzPSSession: true
       - name: Setup Azure Service Bus
         if: matrix.transport == 'AzureServiceBus'
-        uses: Particular/setup-azureservicebus-action@v2.2.0
+        uses: Particular/setup-azureservicebus-action@v2.3.0
         with:
           connection-string-name: AzureServiceBus_ConnectionString
           azure-credentials: ${{ secrets.AZURE_ACI_CREDENTIALS }}
           tag: ASBMTConnector
       - name: Setup Azure Service Bus for DeadLetter
         if: matrix.transport == 'AzureServiceBusDeadLetter'
-        uses: Particular/setup-azureservicebus-action@v2.2.0
+        uses: Particular/setup-azureservicebus-action@v2.3.0
         with:
           connection-string-name: AzureServiceBusDeadLetter_ConnectionString
           azure-credentials: ${{ secrets.AZURE_ACI_CREDENTIALS }}
