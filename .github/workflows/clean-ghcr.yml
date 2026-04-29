@@ -7,15 +7,27 @@ jobs:
   clean:
     name: Delete unused containers
     runs-on: ubuntu-latest
+    permissions:
+      packages: write
     steps:
       - name: Clean up images
-        uses: snok/container-retention-policy@v3.0.1
-        with:
-          image-names: servicecontrol-masstransit-connector
-          image-tags: pr-*, *-alpha.*
-          tag-selection: both
-          cut-off: 2w
-          timestamp-to-use: updated_at
-          account: particular
-          token: ${{ secrets.GITHUB_TOKEN }}
-          dry-run: false
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Requires GNU date (available on ubuntu-latest runners)
+          CUTOFF=$(date -u -d '2 weeks ago' +%Y-%m-%dT%H:%M:%SZ)
+          echo "Cutoff date: $CUTOFF"
+
+          # Matches tags with pr-* prefix or *-alpha.* pattern (e.g. 1.0.0-alpha.1)
+          gh api --paginate "/orgs/particular/packages/container/servicecontrol-masstransit-connector/versions" \
+            | jq -r --arg cutoff "$CUTOFF" '
+                .[]
+                | select(
+                    (.metadata.container.tags | map(test("^pr-") or test("-alpha\\.")) | any) and
+                    (.updated_at < $cutoff)
+                  )
+                | .id' \
+            | while IFS= read -r version_id; do
+                echo "Deleting version: $version_id"
+                gh api --method DELETE "/orgs/particular/packages/container/servicecontrol-masstransit-connector/versions/$version_id"
+              done
