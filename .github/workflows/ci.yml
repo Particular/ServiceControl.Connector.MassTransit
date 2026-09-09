@@ -71,7 +71,7 @@ jobs:
           registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
           registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Run tests
-        uses: Particular/run-tests-action@v1.7.0
+        uses: Particular/run-tests-action@v1.9.0
       - name: Test publish arm64
         run: dotnet publish src/ServiceControl.Connector.MassTransit.Host/ServiceControl.Connector.MassTransit.Host.csproj --arch arm64
       - name: Test publish amd64
