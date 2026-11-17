@@ -1,0 +1,9 @@
+{{ if config.create.include_footer }}
+
+### Where to get it
+
+You can pull the container image from [Docker Hub](https://hub.docker.com/r/particular/servicecontrol-masstransit-connector).
+
+{{ end }}
+
+<!-- RELEASE NOTES GENERATED -->
