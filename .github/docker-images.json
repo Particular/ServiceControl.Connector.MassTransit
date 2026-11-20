@@ -1,0 +1,7 @@
+[
+  {
+    "name": "servicecontrol-masstransit-connector",
+    "readme_filepath": "./Container-README.md",
+    "short_description": "An extension to ServiceControl that adds support for processing MassTransit failures."
+  }
+]

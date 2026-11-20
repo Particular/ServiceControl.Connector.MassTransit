@@ -5,3 +5,4 @@ exclusions:
   - .github/SUPPORT.md
   - src/NServiceBus.snk
   - src/NServiceBusTests.snk
+  - .release/.templates/default/create/footer.sbn
