@@ -8,7 +8,7 @@ The connector is container image which is **Linux Arm64** and **Linux Amd64** co
 
 ## Prerequisites
 
-- [.NET 8 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) -- Build connector solution
+- [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet/10.0) -- Build connector solution
 - [Docker](https://www.docker.com/) -- Build docker image
 
 ## Building

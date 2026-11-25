@@ -1,5 +1,5 @@
 # Build image
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG TARGETARCH
 COPY . /import
 WORKDIR /import
@@ -8,7 +8,7 @@ ENV CI=true
 RUN dotnet publish src/ServiceControl.Connector.MassTransit.Host/ServiceControl.Connector.MassTransit.Host.csproj --arch $TARGETARCH --output /build
 
 # Runtime image
-FROM mcr.microsoft.com/dotnet/runtime:8.0-noble-chiseled
+FROM mcr.microsoft.com/dotnet/runtime:10.0-noble-chiseled
 WORKDIR /app
 
 COPY --from=build ./build /app
