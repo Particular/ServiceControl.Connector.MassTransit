@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.WindowsServices;
 using Microsoft.Extensions.Logging;
-using NServiceBus.Extensions.Logging;
 using ServiceControl.Connector.MassTransit;
 
 public class StartupCommand : RootCommand
@@ -63,7 +62,6 @@ public class StartupCommand : RootCommand
         using var host = builder.Build();
 
         var loggerFactory = host.Services.GetRequiredService<ILoggerFactory>();
-        NServiceBus.Logging.LogManager.UseFactory(new ExtensionsLoggerFactory(loggerFactory));
 
         RecordStartup(host.Services.GetRequiredService<Configuration>(), loggerFactory);
 

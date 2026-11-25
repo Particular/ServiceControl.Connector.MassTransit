@@ -16,7 +16,7 @@ sealed class AmazonSqsHelper(IAmazonSQS client, SqsTransport transportDefinition
         {
             response = await client.ListQueuesAsync(request, cancellationToken);
 
-            foreach (var queue in response.QueueUrls.Select(GetQueueNameFromUrl))
+            foreach (var queue in (response.QueueUrls ?? []).Select(GetQueueNameFromUrl))
             {
                 yield return queue;
             }
@@ -54,8 +54,7 @@ sealed class AmazonSqsHelper(IAmazonSQS client, SqsTransport transportDefinition
             return getQueueUrlResponse.QueueUrl;
         });
 
-        var attReq = new GetQueueAttributesRequest { QueueUrl = queueUrl };
-        attReq.AttributeNames.Add("ApproximateNumberOfMessages");
+        var attReq = new GetQueueAttributesRequest { QueueUrl = queueUrl, AttributeNames = ["ApproximateNumberOfMessages"] };
 
         var attResponse = await client.GetQueueAttributesAsync(attReq, cancellationToken);
         var value = attResponse.ApproximateNumberOfMessages;

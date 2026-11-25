@@ -18,7 +18,7 @@ public static class AdapterRabbitMqConfiguration
         services.AddSingleton<IQueueLengthProvider>(rabbitMqHelper);
         services.AddSingleton<IQueueInformationProvider>(rabbitMqHelper);
         services.AddSingleton<IHealthCheckerProvider, RabbitMQHealthChecker>();
-        services.AddTransient<TransportDefinition>(_ => new RabbitMQTransport(
+        services.AddTransportDefinition(() => new RabbitMQTransport(
         RoutingTopology.Conventional(queueType),
             connectionString,
             enableDelayedDelivery: false
@@ -135,7 +135,7 @@ public static class AdapterRabbitMqConfiguration
                 throw new NotSupportedException(invalidOptionsMessage.ToString().TrimEnd('\r', '\n'));
             }
 
-            var nsbVersion = FileVersionInfo.GetVersionInfo(typeof(Endpoint).Assembly.Location);
+            var nsbVersion = FileVersionInfo.GetVersionInfo(typeof(EndpointConfiguration).Assembly.Location);
             var nsbFileVersion = $"{nsbVersion.FileMajorPart}.{nsbVersion.FileMinorPart}.{nsbVersion.FileBuildPart}";
 
             var rabbitMQVersion =

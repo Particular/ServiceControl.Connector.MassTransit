@@ -77,8 +77,6 @@ static class HostApplicationBuilderExtensions
             }
 
             services.AddHostedService<Service>();
-            services.AddHostedService<Heartbeat>();
-            services.AddHostedService<CustomCheckReporter>();
 
             var diagnosticsData = new DiagnosticsData();
             services.AddSingleton(diagnosticsData);
@@ -86,6 +84,11 @@ static class HostApplicationBuilderExtensions
         }
 
         ConfigureTransport(services, builder.Configuration, options);
+
+        if (!isSetupOnly)
+        {
+            services.AddServiceControlEndpoints(options.ServiceControlQueue);
+        }
     }
 
     static void ConfigureTransport(IServiceCollection services, IConfiguration configuration, ConnectorOptions options)

@@ -42,50 +42,31 @@ class ConfigureRabbitMQTransportTestExecution(QueueType queueType = QueueType.Qu
             }
         });
 
-        return (queuesToDelete, _) =>
-        {
-            DeleteQueues(queuesToDelete);
-            return Task.CompletedTask;
-        };
+        return DeleteQueues;
     }
 
     public Func<IReadOnlyCollection<string>, CancellationToken, Task> ConfigureTransportForConnector(IServiceCollection services, IConfiguration configuration)
     {
         services.UsingRabbitMQ("host=localhost", new Uri("http://localhost:15672/"), "guest", "guest", queueType);
-        return (queuesToDelete, _) =>
-        {
-            DeleteQueues(queuesToDelete);
-            return Task.CompletedTask;
-        };
+        return DeleteQueues;
     }
 
-    Task Cleanup(CancellationToken cancellationToken)
-    {
-        PurgeQueues();
-        return Task.CompletedTask;
-    }
+    Task Cleanup(CancellationToken cancellationToken) =>
+        transport == null
+            ? Task.CompletedTask
+            : DeleteQueues(transport.QueuesToCleanup.ToHashSet(), cancellationToken);
 
-    void PurgeQueues()
+    static async Task DeleteQueues(IReadOnlyCollection<string> queues, CancellationToken cancellationToken)
     {
-        if (transport == null)
-        {
-            return;
-        }
-
-        DeleteQueues(transport.QueuesToCleanup.ToHashSet());
-    }
-
-    static void DeleteQueues(IReadOnlyCollection<string> queues)
-    {
-        using var connection = ConnectionHelper.ConnectionFactory.CreateConnection("Test Queue Purger");
-        using var channel = connection.CreateModel();
+        await using var connection = await ConnectionHelper.ConnectionFactory.CreateConnectionAsync("Test Queue Purger", cancellationToken);
+        await using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
         foreach (var queue in queues)
         {
             try
             {
-                channel.QueueDelete(queue, false, false);
+                await channel.QueueDeleteAsync(queue, false, false, cancellationToken: cancellationToken);
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
             {
                 Console.WriteLine("Unable to clear queue {0}: {1}", queue, ex);
             }

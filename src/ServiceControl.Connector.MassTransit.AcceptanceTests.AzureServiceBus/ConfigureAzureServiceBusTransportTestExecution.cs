@@ -9,7 +9,7 @@ class ConfigureAzureServiceBusTransportTestExecution : IConfigureTransportTestEx
 
     public Func<CancellationToken, Task> ConfigureTransportForEndpoint(EndpointConfiguration endpointConfiguration, PublisherMetadata publisherMetadata)
     {
-        var transport = new AzureServiceBusTransport(connectionString);
+        var transport = new AzureServiceBusTransport(connectionString, TopicTopology.Default);
         endpointConfiguration.UseTransport(transport);
         return Cleanup;
     }

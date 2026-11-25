@@ -1,13 +1,13 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using NServiceBus.Transport;
 using ServiceControl.Connector.MassTransit;
 
 public class Heartbeat(
     ILogger<Heartbeat> logger,
-    TransportDefinition transportDefinition,
+    [FromKeyedServices(ServiceControlEndpoints.HeartbeatEndpointName)] IMessageSession messageSession,
     TimeProvider timeProvider,
     Configuration configuration,
     DiagnosticsData diagnosticsData
@@ -16,16 +16,6 @@ public class Heartbeat(
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Starting {HeartbeatName}", nameof(Heartbeat));
-
-        var endpointConfiguration = new EndpointConfiguration(nameof(Heartbeat));
-        endpointConfiguration.UseSerialization<SystemJsonSerializer>();
-        endpointConfiguration.Recoverability().Delayed(settings => settings.NumberOfRetries(0));
-        endpointConfiguration.SendOnly();
-
-        var routing = endpointConfiguration.UseTransport(transportDefinition);
-        routing.RouteToEndpoint(typeof(MassTransitConnectorHeartbeat), configuration.ServiceControlQueue);
-
-        var endpointInstance = await Endpoint.Start(endpointConfiguration, cancellationToken);
 
         try
         {
@@ -46,7 +36,7 @@ public class Heartbeat(
                         }).ToArray()
                     };
 
-                    await endpointInstance.Send(
+                    await messageSession.Send(
                         new HeartbeatMessageSizeReducer(massTransitConnectorHeartbeat).Reduce(), cancellationToken);
                     logger.LogInformation("Heartbeat sent");
                 }
@@ -59,10 +49,6 @@ public class Heartbeat(
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             logger.LogInformation("Stopping {HeartbeatName}", nameof(Heartbeat));
-        }
-        finally
-        {
-            await endpointInstance.Stop(CancellationToken.None);
         }
     }
 

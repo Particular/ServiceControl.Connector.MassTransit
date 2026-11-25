@@ -20,7 +20,7 @@ class CustomSqsReceiver(IMessageReceiver receiver) : IMessageReceiver
         var nativeMessage = messageContext.Extensions.Get<Message>();
         var headers = messageContext.Headers;
 
-        foreach (var attribute in nativeMessage.MessageAttributes)
+        foreach (var attribute in nativeMessage.MessageAttributes ?? [])
         {
             if (attribute.Key == Headers.MessageId)
             {
