@@ -1,7 +1,6 @@
 using Amazon.SimpleNotificationService;
 using Amazon.SQS;
 using Microsoft.Extensions.DependencyInjection;
-using NServiceBus.Transport;
 
 public static class AdapterAmazonSqsConfiguration
 {
@@ -13,18 +12,12 @@ public static class AdapterAmazonSqsConfiguration
         services.AddSingleton<IHealthCheckerProvider>(provider => provider.GetRequiredService<AmazonSqsHelper>());
         services.AddSingleton<IAmazonSQS, AmazonSQSClient>();
         services.AddSingleton<IAmazonSimpleNotificationService, AmazonSimpleNotificationServiceClient>();
-        services.AddTransient<SqsTransport>(sp =>
-        {
-            var sqs = sp.GetRequiredService<IAmazonSQS>();
-            var sns = sp.GetRequiredService<IAmazonSimpleNotificationService>();
-            var transport = new SqsTransport(sqs, sns, disableUnrestrictedDelayedDelivery: true)
-            {
-                DoNotWrapOutgoingMessages = true // When forwarding and returning the message we do not want to alter the payload
-            };
-            transportConfig?.Invoke(transport);
-            return transport;
-        });
-        services.AddTransient<TransportDefinition>(sp => sp.GetRequiredService<SqsTransport>());
+        services.AddTransient(sp => CreateTransport(
+            sp.GetRequiredService<IAmazonSQS>(),
+            sp.GetRequiredService<IAmazonSimpleNotificationService>(),
+            transportConfig));
+        // Endpoints hosted by the connector are created before the service provider exists, so they get their own clients
+        services.AddTransportDefinition(() => CreateTransport(new AmazonSQSClient(), new AmazonSimpleNotificationServiceClient(), transportConfig));
         services.AddSingleton(sp => new TransportInfrastructureFactory(async (hostSettings, receivers, sendingAddresses, cancellationToken) =>
         {
             var transport = sp.GetRequiredService<SqsTransport>();
@@ -47,5 +40,15 @@ public static class AdapterAmazonSqsConfiguration
 
             return new CustomSqsTransportInfrastructure(infrastructure, dispatcher);
         }));
+    }
+
+    static SqsTransport CreateTransport(IAmazonSQS sqs, IAmazonSimpleNotificationService sns, Action<SqsTransport>? transportConfig)
+    {
+        var transport = new SqsTransport(sqs, sns, disableUnrestrictedDelayedDelivery: true)
+        {
+            DoNotWrapOutgoingMessages = true // When forwarding and returning the message we do not want to alter the payload
+        };
+        transportConfig?.Invoke(transport);
+        return transport;
     }
 }

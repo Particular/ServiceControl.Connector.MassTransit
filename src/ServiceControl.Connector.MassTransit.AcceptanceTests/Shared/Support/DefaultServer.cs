@@ -9,7 +9,6 @@ public class DefaultServer : IEndpointSetupTemplate
     {
         var configuration = new EndpointConfiguration(endpointConfiguration.EndpointName);
 
-        configuration.TypesToIncludeInScan(endpointConfiguration.GetTypesScopedByTestClass());
         configuration.EnableInstallers();
         configuration.UseSerialization<SystemJsonSerializer>();
 
@@ -18,8 +17,6 @@ public class DefaultServer : IEndpointSetupTemplate
         recoverability.Immediate(immediate => immediate.NumberOfRetries(0));
         configuration.SendFailedMessagesTo("error");
 
-        configuration.RegisterComponentsAndInheritanceHierarchy(runDescriptor);
-
         var transportConfig = TestSuiteConfiguration.Current.CreateTransportConfiguration();
 
         var transportCleanup = transportConfig.ConfigureTransportForEndpoint(configuration, endpointConfiguration.PublisherMetadata);
@@ -27,6 +24,8 @@ public class DefaultServer : IEndpointSetupTemplate
         runDescriptor.OnTestCompleted(_ => transportCleanup(CancellationToken.None));
 
         await configurationBuilderCustomization(configuration);
+
+        configuration.ScanTypesForTest(endpointConfiguration);
 
         return configuration;
     }

@@ -225,7 +225,7 @@ public class Service(
                 onMessage: (context, token) => onMessage(context, token),
                 onError: async (context, token) =>
                 {
-                    using var scope = logger.BeginScope("OnError {NativeMessageId}", context.Message.NativeMessageId);
+                    using var scope = logger.BeginScope("OnError {NativeMessageId}", context.NativeMessageId);
                     var isPoison = context.Exception is ConversionException;
 
                     var exceedsRetryThreshold = context.ImmediateProcessingFailures > configuration.MaxRetries;
@@ -235,9 +235,9 @@ public class Service(
                     if (isPoison || exceedsRetryThreshold)
                     {
                         var poisonMessage = new OutgoingMessage(
-                            context.Message.MessageId,
-                            context.Message.Headers,
-                            context.Message.Body
+                            context.MessageId,
+                            context.Headers,
+                            context.Body
                         );
                         var address = new UnicastAddressTag(configuration.PoisonQueue);
                         var operation = new TransportOperation(poisonMessage, address);

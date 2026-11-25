@@ -14,13 +14,10 @@ public static class AdapterAzureServiceBusConfiguration
         services.AddSingleton<IQueueInformationProvider>(b => b.GetRequiredService<AzureServiceBusHelper>());
         services.AddSingleton<IQueueLengthProvider>(b => b.GetRequiredService<AzureServiceBusHelper>());
         services.AddSingleton<IHealthCheckerProvider>(b => b.GetRequiredService<AzureServiceBusHelper>());
-        services.AddTransient<TransportDefinition>(_ => new AzureServiceBusTransport(connectionString)
+        services.AddTransportDefinition(() => new AzureServiceBusTransport(connectionString, TopicTopology.Default)
         {
             TransportTransactionMode = TransportTransactionMode.ReceiveOnly,
-            OutgoingNativeMessageCustomization = OutgoingNativeMessageCustomization,
-#pragma warning disable CS0618 // Type or member is obsolete
-            DoNotSendTransportEncodingHeader = true
-#pragma warning restore CS0618 // Type or member is obsolete
+            OutgoingNativeMessageCustomization = OutgoingNativeMessageCustomization
         });
         services.AddSingleton(sp => new TransportInfrastructureFactory(async (HostSettings hostSettings, ReceiveSettings[] receivers, string[] sendingAddresses, CancellationToken cancellationToken) =>
         {

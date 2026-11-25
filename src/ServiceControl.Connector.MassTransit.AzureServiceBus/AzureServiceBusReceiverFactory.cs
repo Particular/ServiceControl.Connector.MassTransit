@@ -1,5 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using NServiceBus.Transport;
+using NServiceBus.Transport.AzureServiceBus;
 
 class AzureServiceBusReceiverFactory(SubQueue subQueue) : ReceiverFactory
 {

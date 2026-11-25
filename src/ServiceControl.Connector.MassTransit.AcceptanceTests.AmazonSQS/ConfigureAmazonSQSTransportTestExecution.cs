@@ -1,4 +1,5 @@
 ﻿using Amazon.Runtime;
+using Amazon.Runtime.Credentials;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +23,7 @@ class ConfigureAmazonSQSTransportTestExecution : IConfigureTransportTestExecutio
         {
             cfg.Host(region, h =>
             {
-                h.Credentials(FallbackCredentialsFactory.GetCredentials());
+                h.Credentials(DefaultAWSCredentialsIdentityResolver.GetCredentials());
 
                 h.Scope(NamePrefixGenerator.GetNamePrefix(), true);
             });

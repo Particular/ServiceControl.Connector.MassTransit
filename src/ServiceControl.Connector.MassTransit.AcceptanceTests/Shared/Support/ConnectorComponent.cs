@@ -4,7 +4,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NServiceBus.AcceptanceTesting;
 using NServiceBus.AcceptanceTesting.Support;
-using NServiceBus.Transport;
 using ServiceControl.Connector.MassTransit;
 using ServiceControl.Connector.MassTransit.AcceptanceTesting;
 
@@ -57,17 +56,11 @@ public class ConnectorComponent<TContext>(string name, string errorQueue, string
                     services.AddSingleton<IProvisionQueues, ProvisionQueues>();
                     services.AddSingleton(TimeProvider.System);
                     services.AddSingleton<IFileBasedQueueInformationProvider>(new StaticQueueNames(queueNamesToMonitor));
+                    cleanup = transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
                     if (serviceControlQueue != null)
                     {
-                        services.AddHostedService<Heartbeat>();
-                        services.AddHostedService<CustomCheckReporter>(provider =>
-                            new CustomCheckReporter(
-                                provider.GetRequiredService<TransportDefinition>(),
-                                provider.GetRequiredService<IQueueLengthProvider>(),
-                                configuration,
-                                provider.GetRequiredService<IHostApplicationLifetime>()));
+                        services.AddServiceControlEndpoints(serviceControlQueue);
                     }
-                    cleanup = transportConfig.ConfigureTransportForConnector(services, hostContext.Configuration);
                 });
 
             host = builder.Build();
