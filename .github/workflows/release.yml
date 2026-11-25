@@ -81,7 +81,7 @@ jobs:
             org.opencontainers.image.created=${{ steps.date.outputs.date }}
             org.opencontainers.image.title=MassTransit Connector for ServiceControl
             org.opencontainers.image.description=An extension to ServiceControl that adds support for processing MassTransit failures with the Particular Platform.
-            org.opencontainers.image.base.name=mcr.microsoft.com/dotnet/runtime:8.0-noble-chiseled
+            org.opencontainers.image.base.name=mcr.microsoft.com/dotnet/runtime:10.0-noble-chiseled
           annotations: |
             index:org.opencontainers.image.source=https://github.com/Particular/ServiceControl.Connector.MassTransit/tree/${{ github.sha }}
             index:org.opencontainers.image.authors="Particular Software"
@@ -93,7 +93,7 @@ jobs:
             index:org.opencontainers.image.created=${{ steps.date.outputs.date }}
             index:org.opencontainers.image.title=MassTransit Connector for ServiceControl
             index:org.opencontainers.image.description=An extension to ServiceControl that adds support for processing MassTransit failures with the Particular Platform.
-            index:org.opencontainers.image.base.name=mcr.microsoft.com/dotnet/runtime:8.0-noble-chiseled
+            index:org.opencontainers.image.base.name=mcr.microsoft.com/dotnet/runtime:10.0-noble-chiseled
           file: src/ServiceControl.Connector.MassTransit.Host/Dockerfile
           tags: ghcr.io/particular/servicecontrol-masstransit-connector:${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.number) || env.MinVerVersion }}
       - name: Deploy
